@@ -331,28 +331,4 @@
     );
     boton.title = oculto ? "Mostrar panel" : "Ocultar panel";
   };
-  {
-    const cv2 = $("c");
-    let t0 = null;
-    cv2.addEventListener("pointerdown", (e) => {
-      if (e.pointerType === "touch")
-        t0 = { x: e.clientX, y: e.clientY, t: performance.now() };
-    });
-    cv2.addEventListener("pointerup", (e) => {
-      if (!t0 || !gal) return;
-      const ok =
-        Math.hypot(e.clientX - t0.x, e.clientY - t0.y) < 10 &&
-        performance.now() - t0.t < 500;
-      t0 = null;
-      if (ok)
-        cv2.dispatchEvent(
-          new PointerEvent("pointermove", {
-            clientX: e.clientX,
-            clientY: e.clientY,
-            buttons: 0,
-            bubbles: true,
-          }),
-        );
-    });
-  }
 })();

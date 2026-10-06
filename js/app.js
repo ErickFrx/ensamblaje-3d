@@ -2020,7 +2020,9 @@ addEventListener("keydown", (e) => {
 });
 const tip = document.getElementById("tip");
 let hovK = null,
-  hovT = 0;
+  hovT = 0,
+  toqueGaleria = null,
+  detalleTactil = false;
 function resaltar(k, on) {
   k.traverse((o) => {
     if (!(o.isMesh && o.material && o.material.emissive)) return;
@@ -2039,20 +2041,18 @@ function resaltar(k, on) {
 function limpiarHover() {
   if (hovK) resaltar(hovK, false);
   hovK = null;
+  detalleTactil = false;
   if (tip) tip.style.display = "none";
 }
-cv.addEventListener("pointermove", (e) => {
-  if (!gal || !gobj || gexp < 0.25 || e.buttons) {
-    if (hovK || (tip && tip.style.display === "block")) limpiarHover();
+function mostrarCapaGaleria(x, y, persistente = false) {
+  if (!gal || !gobj || gexp < 0.25) {
+    limpiarHover();
     return;
   }
-  const t = performance.now();
-  if (t - hovT < 50) return;
-  hovT = t;
   const r = cv.getBoundingClientRect();
   NDC.set(
-    ((e.clientX - r.left) / r.width) * 2 - 1,
-    -((e.clientY - r.top) / r.height) * 2 + 1,
+    ((x - r.left) / r.width) * 2 - 1,
+    -((y - r.top) / r.height) * 2 + 1,
   );
   RC.setFromCamera(NDC, gcam);
   const c = gobj.children[0],
@@ -2077,12 +2077,53 @@ cv.addEventListener("pointermove", (e) => {
   }
   tip.innerHTML = "<b>" + d[0] + "</b><br>" + d[1];
   tip.style.display = "block";
+  detalleTactil = persistente;
   tip.style.left =
-    Math.min(e.clientX + 16, innerWidth - tip.offsetWidth - 10) + "px";
+    Math.min(x + 16, innerWidth - tip.offsetWidth - 10) + "px";
   tip.style.top =
-    Math.min(e.clientY + 16, innerHeight - tip.offsetHeight - 10) + "px";
+    Math.min(y + 16, innerHeight - tip.offsetHeight - 10) + "px";
+}
+cv.addEventListener("pointermove", (e) => {
+  if (e.pointerType === "touch") return;
+  if (!gal || !gobj || gexp < 0.25 || e.buttons) {
+    if (hovK || (tip && tip.style.display === "block")) limpiarHover();
+    return;
+  }
+  const t = performance.now();
+  if (t - hovT < 50) return;
+  hovT = t;
+  mostrarCapaGaleria(e.clientX, e.clientY);
 });
-cv.addEventListener("pointerleave", limpiarHover);
+cv.addEventListener("pointerdown", (e) => {
+  if (e.pointerType === "touch") {
+    if (gal) limpiarHover();
+    toqueGaleria = {
+      id: e.pointerId,
+      x: e.clientX,
+      y: e.clientY,
+      t: performance.now(),
+    };
+  } else toqueGaleria = null;
+});
+window.addEventListener("pointerup", (e) => {
+  if (!toqueGaleria || toqueGaleria.id !== e.pointerId) return;
+  const inicio = toqueGaleria;
+  toqueGaleria = null;
+  if (
+    Math.hypot(e.clientX - inicio.x, e.clientY - inicio.y) >= 12 ||
+    performance.now() - inicio.t >= 600 ||
+    !gal
+  ) {
+    return;
+  }
+  mostrarCapaGaleria(e.clientX, e.clientY, true);
+});
+window.addEventListener("pointercancel", () => {
+  toqueGaleria = null;
+});
+cv.addEventListener("pointerleave", (e) => {
+  if (e.pointerType !== "touch" && !detalleTactil) limpiarHover();
+});
 function resize() {
   R.setSize(innerWidth, innerHeight);
   comp.setSize(innerWidth, innerHeight);
