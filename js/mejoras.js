@@ -1,21 +1,5 @@
 (() => {
   const $ = (id) => document.getElementById(id);
-  const TXT = {
-    psu: "Coloca la fuente en la parte inferior del case con su ventilador hacia la rejilla. Alinea sus 4 agujeros con los del chasis y fíjala con 4 tornillos.",
-    mobo: "Instala primero los separadores en el case, baja la placa alineando sus agujeros con ellos y atorníllala. Comprueba que el panel de puertos encaje en la abertura trasera.",
-    cpu: "Abre la palanca del zócalo, alinea el triángulo dorado del procesador con la marca del zócalo y déjalo caer sin presionar. Cierra la placa de carga y asegura la palanca.",
-    aio: "Aplica pasta térmica sobre el procesador, coloca la bomba y ajusta sus 4 tornillos en cruz. Fija el radiador con sus 2 ventiladores al frente del case y conecta los cables de la bomba y de los ventiladores.",
-    ram: "Abre las pestañas laterales de la ranura, alinea la muesca del módulo y presiona por ambos extremos hasta oír un clic. Repite con los 4 módulos.",
-    ssd: "Retira el disipador de la ranura M.2, inserta el SSD inclinado alineando la muesca, presiónalo hasta dejarlo plano y fíjalo con su tornillo. Vuelve a colocar el disipador.",
-    gpu: "Retira las tapas traseras del case, alinea la tarjeta con la ranura PCIe x16 y presiona hasta que la traba haga clic. Fíjala al case con tornillos y conecta el cable de energía de 8 pines.",
-    glass:
-      "Apoya el panel en las guías del case, deslízalo hasta cerrarlo y asegúralo con los tornillos de mariposa traseros. Va al final para no estorbar durante el montaje.",
-    kb: "Conecta el cable USB del teclado a un puerto USB del panel frontal o trasero de la torre.",
-    mouse:
-      "Conecta el cable USB del mouse a un puerto USB de la torre. El sistema instala el controlador automáticamente.",
-    mon: "Conecta el cable DisplayPort o HDMI a la tarjeta de video (no a la placa madre), enchufa el cable de alimentación del monitor y enciéndelo.",
-    spk: "Coloca un parlante a cada lado del monitor y conéctalos a la salida de audio del equipo para tener sonido.",
-  };
   const N1 =
     "En un ensamblaje real, el procesador, la RAM y el SSD M.2 se instalan sobre la placa madre <b>antes</b> de atornillarla al case: hay más espacio y es más seguro. Aquí se muestran después para ver cada pieza en su lugar final. Antes de tocar componentes, descarga la electricidad estática tocando una superficie metálica.";
   const NOTA = {
@@ -26,28 +10,58 @@
     glass:
       "Es lo último que se coloca, después de revisar y ordenar los cables.",
   };
-  PASOS.forEach((p) => {
-    const t = TXT[p.p[0]];
-    if (t) p.t = t;
-  });
-  PASOS[PASOS.length - 1].t =
-    "<b>¡Ensamblaje completo!</b> El equipo está encendido: el monitor muestra imagen y la iluminación RGB funciona. En la vida real, antes de encender conecta el cable de corriente a la fuente y a la pared.";
   let md = null;
+  let focoPrevio = null;
   function modal(h) {
     cerrar();
+    focoPrevio = document.activeElement;
     md = document.createElement("div");
     md.id = "mod";
-    md.innerHTML = '<div class="card">' + h + "</div>";
+    md.innerHTML = '<div class="card" tabindex="-1">' + h + "</div>";
     document.body.appendChild(md);
+    const tarjeta = md.firstElementChild;
+    tarjeta.setAttribute("role", "dialog");
+    tarjeta.setAttribute("aria-modal", "true");
+    const titulo = tarjeta.querySelector("h2, h3");
+    if (titulo) {
+      titulo.id = "titulo-modal";
+      tarjeta.setAttribute("aria-labelledby", titulo.id);
+    }
+    const primerControl = tarjeta.querySelector("button");
+    (primerControl || tarjeta).focus();
   }
   function cerrar() {
     if (md) {
       md.remove();
       md = null;
+      if (focoPrevio && focoPrevio.isConnected) focoPrevio.focus();
+      focoPrevio = null;
     }
   }
   addEventListener("keydown", (e) => {
-    if (e.key === "Escape") cerrar();
+    if (!md) return;
+    if (e.key === "Escape") {
+      cerrar();
+      return;
+    }
+    if (e.key !== "Tab") return;
+    const controles = md.querySelectorAll(
+      'a[href], button:not(:disabled), input:not(:disabled), [tabindex]:not([tabindex="-1"])',
+    );
+    if (!controles.length) {
+      e.preventDefault();
+      md.firstElementChild.focus();
+      return;
+    }
+    const primero = controles[0],
+      ultimo = controles[controles.length - 1];
+    if (e.shiftKey && document.activeElement === primero) {
+      e.preventDefault();
+      ultimo.focus();
+    } else if (!e.shiftKey && document.activeElement === ultimo) {
+      e.preventDefault();
+      primero.focus();
+    }
   });
   let EST = { t0: 0, t1: 0, ints: 0, ayudas: 0 },
     tF = 0;
@@ -141,8 +155,16 @@
   };
   function felicitar() {
     EST.t1 = EST.t1 || performance.now();
+    const indiceRevision = PASOS.findIndex((paso) => paso.checklist),
+      revisionCompleta =
+        indiceRevision >= 0 &&
+        PASOS[indiceRevision].checklist.every((_, i) => verificaciones.has(i));
     let h =
-      "<h2>🎉 ¡Ensamblaje completado!</h2><p>La torre, los periféricos y el monitor están listos y el equipo está encendido.</p>";
+      "<h2>🎉 ¡Vista final del ensamblaje!</h2><p>La torre, los periféricos y el monitor están listos. " +
+      (revisionCompleta
+        ? "La revisión previa también está completa."
+        : "Si solo querías ver el resultado, puedes saltarte la lista; para energizar un equipo real, completa primero la revisión.") +
+      "</p>";
     if (EST.t0)
       h +=
         '<div class="stats"><div><b>' +
@@ -169,7 +191,7 @@
   }
   function ayuda() {
     modal(
-      '<h2>Cómo usar el simulador</h2><ul><li><b>Ver:</b> arrastra para girar la vista y usa la rueda (o pellizca en el celular) para acercar.</li><li><b>Avanzar:</b> «Siguiente» arma la torre pieza por pieza, «Auto» lo hace solo y «Piezas» muestra cada componente.</li><li><b>Manual:</b> arrastra la pieza hasta su guía y gírala (Q/E, W/S, A/D). Cuando la guía se pone verde, encaja sola.</li><li><b>Quiz:</b> comprueba lo aprendido con 8 preguntas.</li></ul><div class="bt"><button id="ok1">Entendido</button></div>',
+      '<h2>Cómo usar el simulador</h2><ul><li><b>Ver:</b> arrastra para girar la vista y usa la rueda (o pellizca en el celular) para acercar.</li><li><b>Avanzar:</b> «Siguiente» recorre las piezas, las conexiones internas y periféricos. «Auto» avanza automáticamente y «Piezas» abre la galería.</li><li><b>Manual:</b> arrastra las piezas hasta su guía y gíralas (Q/E, W/S, A/D). Cuando la guía se pone verde, encajan solas.</li><li><b>Conexiones:</b> revisa los cables de alimentación y de la refrigeración antes de cerrar el case.</li><li><b>Revisión:</b> es obligatoria al avanzar paso a paso; selecciona «Encender el equipo» en la lista si solo quieres ver el resultado.</li><li><b>Modelos:</b> los productos son propuestas; el modelo 3D es una representación educativa.</li><li><b>Quiz:</b> comprueba lo aprendido con 8 preguntas.</li></ul><div class="bt"><button id="ok1">Entendido</button></div>',
     );
     $("ok1").onclick = cerrar;
   }

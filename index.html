@@ -243,6 +243,10 @@
         background: rgba(255, 255, 255, 0.045);
         border-color: rgba(255, 255, 255, 0.08);
       }
+      .paso:focus-visible {
+        outline: 2px solid rgba(230, 57, 70, 0.85);
+        outline-offset: 2px;
+      }
       .paso.ok {
         color: #858a95;
       }
@@ -273,9 +277,70 @@
         font-size: 13px;
         line-height: 1.5;
       }
+      #info.periferico {
+        top: 14px;
+        bottom: auto;
+      }
       #info b {
         color: #e63946;
         font-size: 15px;
+      }
+      .modelo-referencia {
+        margin-top: 4px;
+        font-size: 12px;
+      }
+      .modelo-nota {
+        margin-top: 3px;
+        color: #a4a8b2;
+        font-size: 11px;
+      }
+      #detalle-caracteristicas .modelo-nota {
+        list-style: none;
+        margin-left: 0;
+      }
+      .lista-revision {
+        display: grid;
+        gap: 8px;
+        margin: 10px 0 0;
+        padding: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 9px;
+      }
+      .lista-revision legend {
+        padding: 0 5px;
+        color: #f2f3f6;
+        font-weight: 600;
+      }
+      .lista-revision label {
+        display: grid;
+        grid-template-columns: 18px 1fr;
+        gap: 8px;
+        align-items: start;
+        margin: 0;
+        color: #e1e3e8;
+        font-size: 11px;
+        line-height: 1.4;
+        cursor: pointer;
+      }
+      .lista-revision input {
+        width: 16px;
+        height: 16px;
+        margin: 0;
+        accent-color: #e63946;
+      }
+      #revision-estado {
+        color: #ff9a9f;
+        font-size: 11px;
+      }
+      .modelo-referencia a,
+      #detalle-caracteristicas a {
+        color: #ff9a9f;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+      }
+      .modelo-referencia a:hover,
+      #detalle-caracteristicas a:hover {
+        color: #fff;
       }
       #detalle-pieza {
         position: fixed;
@@ -321,6 +386,11 @@
       #detalle-pieza ul {
         margin: 3px 0 0 18px;
         color: #cfe;
+      }
+      #detalle-caracteristicas a:focus-visible,
+      .modelo-referencia a:focus-visible {
+        outline: 2px solid #ff737b;
+        outline-offset: 2px;
       }
 
       #c {
@@ -531,6 +601,10 @@
           overflow: auto;
           font-size: 12.5px;
         }
+        #info.periferico {
+          top: auto;
+          bottom: 12px;
+        }
         #mano {
           left: 12px;
           right: 12px;
@@ -564,6 +638,7 @@
         #bar button {
           padding: 6px 8px;
           font-size: 10.5px;
+          min-height: 40px;
         }
         .toolbar-group {
           gap: 5px;
@@ -607,11 +682,24 @@
   <body>
     <div id="carga">
       <h2>SIMULADOR DE ENSAMBLAJE DE PC</h2>
-      <div class="bar"><i id="cb"></i></div>
-      <p id="ct">Preparando…</p>
+      <div
+        class="bar"
+        role="progressbar"
+        aria-label="Progreso de carga"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        aria-valuenow="0"
+      >
+        <i id="cb"></i>
+      </div>
+      <p id="ct" role="status" aria-live="polite">Preparando…</p>
     </div>
-    <canvas id="c"></canvas>
-    <div id="panel">
+    <canvas
+      id="c"
+      role="img"
+      aria-label="Escena 3D del simulador. Arrastra para girar y usa la rueda o pellizca para acercar."
+    ></canvas>
+    <div id="panel" role="region" aria-label="Controles y pasos del ensamblaje">
       <div class="panel-header">
         <h1>SIMULADOR DE ENSAMBLAJE DE PC</h1>
         <button
@@ -635,13 +723,13 @@
         <div class="toolbar-options">
           <div class="toolbar-settings">
             <button id="gbtn">Piezas</button>
-            <button id="modo">Manual: NO</button>
-            <button id="rgb">RGB: ENCENDIDO</button>
+            <button id="modo" aria-pressed="false">Manual: NO</button>
+            <button id="rgb" aria-pressed="true">RGB: ENCENDIDO</button>
           </div>
           <div class="toolbar-utilities"></div>
         </div>
       </div>
-      <div id="lista"></div>
+      <div id="lista" role="list" aria-label="Pasos del ensamblaje"></div>
     </div>
     <section
       id="detalle-pieza"
@@ -667,7 +755,7 @@
     </section>
     <div id="mano">
       <div class="mt">✋ Coloca: <b id="mnom"></b></div>
-      <div id="mst"></div>
+      <div id="mst" aria-live="polite"></div>
       <div class="mrow">
         <span>Girar</span><button id="mqi">⟲ Q</button
         ><button id="mqe">E ⟳</button><span style="min-width: 0">Inclinar</span
@@ -695,10 +783,10 @@
       </div>
     </div>
     <div id="tip"></div>
-    <div id="info">
+    <div id="info" role="status" aria-live="polite">
       <b>Bienvenido</b><br />Arrastra para girar la vista y usa la rueda para
       acercar. Pulsa «Siguiente» (o «Auto») para ensamblar la torre, conectar
-      teclado y mouse, y encender el monitor.
+      sus cables, revisar la lista previa al encendido y conectar los periféricos.
     </div>
     <script src="js/inicio.js"></script>
   </body>

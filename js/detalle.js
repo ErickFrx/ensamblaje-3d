@@ -58,7 +58,7 @@ clr(P.cpu);
     at(rb(0.64, 0.64, 0.07, 0.04, nick), 0, 0, 0.065),
     at(rb(0.84, 0.46, 0.07, 0.03, nick), 0, 0, 0.065),
     at(rb(0.46, 0.84, 0.07, 0.03, nick), 0, 0, 0.065),
-    at(lab("UNDC|CORE i9|14900K", 0.5, 0.38, 34, "#1b1f26"), 0, 0, 0.125),
+    at(lab("intel|CORE i9|14900K", 0.5, 0.38, 34, "#1b1f26"), 0, 0, 0.125),
   );
 }
 clr(P.ram);
@@ -85,7 +85,7 @@ clr(P.ram);
           range(16, (i) => [s * 0.068, -1.2 + i * 0.16, 0.08]),
         ),
       );
-      const l = lab("DDR5-6000  CL30", 2.3, 0.4, 40);
+      const l = lab("DDR5-4800", 2.3, 0.4, 40);
       l.rotation.set(0, (s * Math.PI) / 2, Math.PI / 2);
       l.position.set(s * 0.09, 0, 0.1);
       g.add(l);
@@ -149,7 +149,7 @@ clr(P.ssd);
       range(20, (i) => [-0.85 + i * 0.09, 0, 0.17]),
     ),
     cyl(0.06, 0.1, gold, -1.0, 0, 0.1, "z"),
-    at(lab("UNDC NVMe 2TB|PCIe Gen4", 1.5, 0.3, 38), 0.1, 0.12, 0.18),
+    at(lab("NVMe 2TB|PCIe Gen4", 1.5, 0.3, 38), 0.1, 0.12, 0.18),
     bx(1.5, 0.04, 0.03, rgb(0.7), 0.1, -0.2, 0.18),
   );
 }
@@ -264,74 +264,6 @@ P.mon.add(
   ),
 );
 P.kb.add(cyl(0.18, 0.12, rgb(0.4), 3.2, 0.3, -0.85, "z"));
-const INST = {
-  psu: "Coloque la fuente en la parte inferior del case con el ventilador hacia la rejilla. Alinee sus 4 agujeros con los del chasis y fíjela con 4 tornillos.",
-  mobo: "Instale primero los separadores en el case, baje la placa alineando sus agujeros con ellos y atorníllela. Compruebe que el panel de puertos encaje en la abertura trasera.",
-  cpu: "Abra la palanca del zócalo, alinee el triángulo dorado del procesador con la marca del zócalo y déjelo caer sin presionar. Cierre la placa de carga y asegure la palanca.",
-  aio: "Aplique pasta térmica sobre el procesador, coloque la bomba y ajuste sus 4 tornillos en cruz. Fije el radiador con sus ventiladores al frente del case y conecte los cables de la bomba y los ventiladores.",
-  ram: "Abra las pestañas laterales de la ranura, alinee la muesca del módulo y presione por ambos extremos hasta oír un clic. Repita con el segundo módulo.",
-  ssd: "Retire el disipador de la ranura M.2, inserte el SSD inclinado alineando la muesca, presiónelo hasta dejarlo plano y fíjelo con su tornillo. Vuelva a colocar el disipador.",
-  gpu: "Retire las tapas traseras del case, alinee la tarjeta con la ranura PCIe x16 y presione hasta que la traba haga clic. Fíjela al case con tornillos y conecte el cable de energía de 8 pines.",
-  glass:
-    "Apoye el panel en las guías del case, deslícelo hasta cerrarlo y asegúrelo con los tornillos de mariposa traseros.",
-  kb: "Conecte el cable USB del teclado a un puerto USB del panel frontal o trasero de la torre.",
-  mouse:
-    "Conecte el cable USB del mouse a un puerto USB de la torre. El sistema instala el controlador automáticamente.",
-  mon: "Conecte el cable DisplayPort o HDMI a la tarjeta de video (no a la placa madre), enchufe el cable de alimentación del monitor y enciéndalo.",
-};
-PASOS.forEach((p) => {
-  if (INST[p.p[0]]) p.t = INST[p.p[0]];
-});
-PASOS[PASOS.length - 1].t =
-  "<b>¡Ensamblaje completo!</b> Pulse el botón de encendido de la torre y verifique que el monitor muestre imagen y que la iluminación RGB funcione.";
-Object.assign(FICHA, {
-  glass: [
-    "Panel lateral de vidrio templado del case.",
-    [
-      "Vidrio templado de 4 mm",
-      "Bordes biselados",
-      "Permite ver los componentes y la iluminación RGB",
-      "Fijación con tornillos de mariposa",
-    ],
-  ],
-  kb: [
-    "Teclado mecánico con retroiluminación RGB.",
-    [
-      "Formato 75% (sin teclado numérico)",
-      "Iluminación RGB por tecla",
-      "Base de aluminio",
-      "USB-A con cable trenzado",
-    ],
-  ],
-  mouse: [
-    "Mouse gamer RGB del modelo reemplazado.",
-    [
-      "Cuerpo ergonómico con iluminación RGB",
-      "Botones principales y rueda de desplazamiento",
-      "Base inferior con sensor óptico",
-      "Conexión USB por cable",
-    ],
-  ],
-  mon: [
-    "Monitor de 27 pulgadas con luz ambiental trasera.",
-    [
-      "Resolución QHD 2560×1440 a 165 Hz",
-      "Panel IPS con bordes mínimos",
-      "Luz RGB trasera (ambilight)",
-      "Entradas DisplayPort y HDMI",
-    ],
-  ],
-  cpu: [
-    "Procesador: ejecuta las instrucciones de todos los programas.",
-    [
-      "Tapa metálica (IHS) que reparte el calor",
-      "Sustrato con condensadores SMD",
-      "Pads dorados LGA en la cara inferior",
-      "24 núcleos · hasta 6 GHz",
-    ],
-  ],
-});
-
 const detallePieza = document.getElementById("detalle-pieza");
 const detalleTitulo = document.getElementById("detalle-titulo");
 const detalleFuncion = document.getElementById("detalle-funcion");
@@ -395,7 +327,20 @@ addEventListener("pointerup", (e) => {
 
   detalleTitulo.textContent = pasoPieza ? pasoPieza.n : id;
   detalleFuncion.textContent = FUNCION[id] || ficha[0];
+  const producto = PRODUCTOS[id],
+    modelo = document.createElement("li"),
+    enlaceProducto = document.createElement("a");
+  enlaceProducto.href = producto.fuente;
+  enlaceProducto.target = "_blank";
+  enlaceProducto.rel = "noopener noreferrer";
+  enlaceProducto.textContent = producto.nombre;
+  modelo.append("Modelo propuesto: ", enlaceProducto);
+  const avisoModelo = document.createElement("li");
+  avisoModelo.className = "modelo-nota";
+  avisoModelo.textContent = AVISO_MODELO;
   detalleCaracteristicas.replaceChildren(
+    modelo,
+    avisoModelo,
     ...ficha[1].map((caracteristica) => {
       const li = document.createElement("li");
       li.textContent = caracteristica;

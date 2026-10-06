@@ -1,100 +1,4 @@
-const PASOS = [
-  {
-    f: "1 · Ensamblar la torre",
-    n: "Fuente de alimentación",
-    p: ["psu"],
-    t: "Entrega la tensión a todos los circuitos. Se fija al fondo del case con tornillos.",
-    c: [-2, 5, 15, -9, 3, 0],
-  },
-  {
-    f: "1 · Ensamblar la torre",
-    n: "Placa madre",
-    p: ["mobo"],
-    t: "Conecta todos los componentes. Se alinea con los separadores del case y se atornilla.",
-    c: [-5, 7, 13, -9, 5, 0],
-  },
-  {
-    f: "1 · Ensamblar la torre",
-    n: "Procesador",
-    p: ["cpu"],
-    t: "Alinee el indicador con el pin 1 del zócalo y cierre la palanca de carga.",
-    c: [-8, 6.5, 8, -10, 6.3, 0],
-  },
-  {
-    f: "1 · Ensamblar la torre",
-    n: "Refrigeración líquida RGB",
-    p: ["aio"],
-    t: "La bomba va sobre la CPU y el radiador con 3 ventiladores RGB al frente del case.",
-    c: [-3, 7, 12, -8, 5.5, 0],
-  },
-  {
-    f: "1 · Ensamblar la torre",
-    n: "Memoria RAM RGB (×4)",
-    p: ["ram"],
-    t: "Alinee la muesca y presione hasta que las pestañas hagan clic.",
-    c: [-6, 7, 9, -8.5, 6, 0],
-  },
-  {
-    f: "1 · Ensamblar la torre",
-    n: "Unidad SSD M.2",
-    p: ["ssd"],
-    t: "Almacenamiento rápido sin partes móviles. Se instala directo en la placa con su disipador.",
-    c: [-7, 5.5, 8, -10, 4.5, 0],
-  },
-  {
-    f: "1 · Ensamblar la torre",
-    n: "Tarjeta de video RGB",
-    p: ["gpu"],
-    t: "Se inserta en la ranura PCIe x16 y se asegura con tornillos al soporte.",
-    c: [-4, 4.5, 12, -9, 3.2, 0],
-  },
-  {
-    f: "1 · Ensamblar la torre",
-    n: "Panel de cristal",
-    p: ["glass"],
-    t: "Cierra el case. La torre queda lista.",
-    c: [-3, 6, 17, -9, 4.5, 0],
-  },
-  {
-    f: "2 · Periféricos",
-    n: "Teclado RGB",
-    p: ["kb"],
-    cab: "kb",
-    t: "Se conecta por USB al panel frontal de la torre.",
-    c: [-1, 8, 15, -2, 1, 3],
-  },
-  {
-    f: "2 · Periféricos",
-    n: "Mouse RGB",
-    p: ["mouse"],
-    cab: "mouse",
-    t: "Se conecta por USB al panel frontal de la torre.",
-    c: [2, 8, 15, 1, 1, 3],
-  },
-  {
-    f: "3 · Monitor",
-    n: "Monitor",
-    p: ["mon"],
-    cab: "mon",
-    t: "El cable de video une la tarjeta de video con el monitor.",
-    c: [2, 7, 17, 2, 4, -2],
-  },
-  {
-    f: "3 · Monitor",
-    n: "Parlantes",
-    p: ["spk"],
-    t: "Coloque un parlante a cada lado del monitor y conéctelos al equipo para tener sonido.",
-    c: [2, 7, 18, 2, 2, -4],
-  },
-  {
-    f: "4 · Finalizado",
-    n: "Encender el equipo",
-    p: [],
-    end: 1,
-    t: "<b>¡Ensamblaje completo!</b> Equipo encendido y funcionando.",
-    c: [5, 8, 26, -3, 4, 0],
-  },
-];
+const PASOS = window.COMPONENTES.PASOS;
 
 const cv = document.getElementById("c"),
   R = new THREE.WebGLRenderer({ canvas: cv, antialias: true });
@@ -103,11 +7,23 @@ const S = new THREE.Scene();
 S.background = new THREE.Color(0x04060b);
 S.fog = new THREE.Fog(0x04060b, 35, 80);
 const cam = new THREE.PerspectiveCamera(42, 1, 0.1, 200);
-cam.position.set(-2, 5, 15);
+const centroCamaraInicio = new THREE.Vector3(-9, 4.6, 0);
+const direccionCamaraInicio = new THREE.Vector3(7, 3, 21).normalize();
 const ctl = new THREE.OrbitControls(cam, cv);
-ctl.target.set(-9, 3, 0);
+ctl.target.copy(centroCamaraInicio);
 ctl.enableDamping = true;
 ctl.autoRotateSpeed = 1.2;
+function ajustarCamaraInicio() {
+  const fovVertical = THREE.MathUtils.degToRad(cam.fov);
+  const fovHorizontal =
+    2 * Math.atan(Math.tan(fovVertical / 2) * cam.aspect);
+  const medioFov = Math.min(fovVertical, fovHorizontal) / 2;
+  const distancia = (7.5 / Math.sin(medioFov)) * 1.08;
+  cam.position
+    .copy(centroCamaraInicio)
+    .addScaledVector(direccionCamaraInicio, distancia);
+  ctl.target.copy(centroCamaraInicio);
+}
 const bloom = configurarIluminacion(R, S);
 const comp = new THREE.EffectComposer(R);
 comp.addPass(new THREE.RenderPass(S, cam));
@@ -245,7 +161,7 @@ function fan(r, m = dark) {
 const T = new THREE.Group();
 T.position.set(-9, 0, 0);
 S.add(T);
-agregarLucesTorre(T);
+const lucesTorre = agregarLucesTorre(T);
 const P = {};
 const reg = (id, o, x, y, z, ex) => {
   o.position.set(x, y, z);
@@ -541,7 +457,7 @@ const pcbT = tex(512, 512, (c, w, h) => {
     c.fillRect(Math.random() * w, Math.random() * h, 5, 5);
   c.fillStyle = "#bff";
   c.font = "bold 30px monospace";
-  c.fillText("UNDC · Z790 GAMING", 30, 495);
+  c.fillText("MAG Z790 TOMAHAWK", 30, 495);
 });
 const tr = plane(6.3, 6.6, pcbT, 0.5);
 tr.position.z = 0.09;
@@ -616,7 +532,7 @@ P.gpu.add(
       tex(256, 40, (c) => {
         c.fillStyle = "#fff";
         c.font = "bold 26px Segoe UI";
-        c.fillText("UNDC GAMING", 6, 30);
+        c.fillText("GAMING", 6, 30);
       }),
     ),
     -2.1,
@@ -639,15 +555,19 @@ const lab = (t, w, h, fs, col = "#e8f4ff") =>
     }),
     1,
   );
-P.cpu.add(at(lab("UNDC|i9-14900K", 0.62, 0.62, 44, "#2a2210"), 0, 0, 0.11));
+P.cpu.add(
+  at(lab("intel|CORE i9|14900K", 0.62, 0.62, 44, "#2a2210"), 0, 0, 0.11),
+);
 P.ram.children.forEach((k) => {
-  const l = lab("DDR5-6000  CL30", 2.3, 0.4, 40);
+  const l = lab("DDR5-4800", 2.3, 0.4, 40);
   l.rotation.set(0, Math.PI / 2, Math.PI / 2);
   l.position.set(0.105, 0, 0.05);
   k.add(l);
 });
-P.ssd.add(at(lab("UNDC NVMe 2TB|PCIe Gen4", 1.7, 0.3, 38), 0, 0.12, 0.16));
-P.aio.children[0].add(at(lab("UNDC", 0.9, 0.35, 70), 0, 0, 0.33));
+P.ssd.add(
+  at(lab("Samsung 990 PRO|2TB PCIe 4.0", 1.7, 0.3, 38), 0, 0.12, 0.16),
+);
+P.aio.children[0].add(at(lab("CORSAIR", 0.9, 0.35, 52), 0, 0, 0.33));
 [0.35, 0.6, 0.85, 1.1].forEach((r) =>
   P.psu.add(
     at(
@@ -658,7 +578,7 @@ P.aio.children[0].add(at(lab("UNDC", 0.9, 0.35, 70), 0, 0, 0.33));
     ),
   ),
 );
-P.psu.add(at(lab("UNDC 850W|80 PLUS GOLD", 2.2, 0.8, 38), 1.5, 0, 1.93));
+P.psu.add(at(lab("1000W|80 PLUS GOLD", 2.2, 0.8, 38), 1.5, 0, 1.93));
 S.add(
   at(
     rbf(36, 14, 0.5, 0.3, M(0x0b0d12, { roughness: 0.2, metalness: 0.5 })),
@@ -841,6 +761,51 @@ const scrM = new THREE.MeshBasicMaterial({
   map: new THREE.CanvasTexture(sc),
   color: 0x000000,
 });
+const imagenFacultad = new Image();
+imagenFacultad.onload = () => {
+  const escala = Math.max(
+      sc.width / imagenFacultad.naturalWidth,
+      sc.height / imagenFacultad.naturalHeight,
+    ),
+    ancho = sc.width / escala,
+    alto = sc.height / escala;
+  x.drawImage(
+    imagenFacultad,
+    (imagenFacultad.naturalWidth - ancho) / 2,
+    (imagenFacultad.naturalHeight - alto) / 2,
+    ancho,
+    alto,
+    0,
+    0,
+    sc.width,
+    sc.height,
+  );
+  const sombra = x.createLinearGradient(0, 0, 0, sc.height);
+  sombra.addColorStop(0, "rgba(5, 7, 13, 0.2)");
+  sombra.addColorStop(1, "rgba(5, 7, 13, 0.58)");
+  x.fillStyle = sombra;
+  x.fillRect(0, 0, sc.width, sc.height);
+  x.fillStyle = "#fff";
+  x.textAlign = "center";
+  x.font = "bold 48px Segoe UI";
+  x.fillText("UNIVERSIDAD NACIONAL DE CAÑETE", 640, 320);
+  x.font = "26px Segoe UI";
+  x.fillStyle = "#f2f3f6";
+  x.fillText("Simulador Virtual de Ensamblaje · Equipo 02", 640, 375);
+  x.fillStyle = "rgba(8, 12, 24, 0.82)";
+  x.fillRect(0, 672, 1280, 48);
+  x.fillStyle = "#fff";
+  x.font = "20px Segoe UI";
+  x.textAlign = "left";
+  x.fillText("●  UNDC   |   Windows", 20, 704);
+  scrM.map.needsUpdate = true;
+};
+imagenFacultad.onerror = () => {
+  console.error(
+    "No se pudo decodificar la imagen de fondo embebida del monitor.",
+  );
+};
+imagenFacultad.src = window.FACULTAD_IMAGE_DATA;
 {
   const scr = new THREE.Mesh(new THREE.PlaneGeometry(10.6, 5.9), scrM);
   scr.position.z = 0.14;
@@ -870,60 +835,6 @@ const scrM = new THREE.MeshBasicMaterial({
     [0, 7, -3],
   );
 }
-const cabs = {},
-  cab = (id, pts, r, col) => {
-    const g = new THREE.TubeGeometry(
-      new THREE.CatmullRomCurve3(pts.map((p) => new THREE.Vector3(...p))),
-      90,
-      r,
-      8,
-    );
-    g.setDrawRange(0, 0);
-    const m = new THREE.Mesh(g, M(col, { roughness: 0.9, metalness: 0 }));
-    m.visible = false;
-    S.add(m);
-    cabs[id] = m;
-  };
-cab(
-  "kb",
-  [
-    [-3.1, 0.2, 3.3],
-    [-3.9, 0.1, 2.9],
-    [-4.6, 0.1, 2.2],
-    [-4.7, 3, 1.4],
-    [-4.5, 7.9, 0.7],
-    [-4.6, 8.35, 0.7],
-  ],
-  0.05,
-  0x15181f,
-);
-cab(
-  "mouse",
-  [
-    [6.7, 0.2, 3.4],
-    [4, 0.1, 2.2],
-    [-1, 0.1, 2.0],
-    [-4.2, 0.1, 1.9],
-    [-4.7, 4, 1.2],
-    [-4.5, 8.0, -0.7],
-    [-4.6, 8.35, -0.7],
-  ],
-  0.04,
-  0x15181f,
-);
-cab(
-  "mon",
-  [
-    [2, 2.8, -3.6],
-    [1, 0.1, -4.3],
-    [-8, 0.1, -4.4],
-    [-13.6, 0.2, -3],
-    [-13.7, 2.5, -1],
-    [-13.4, 3.1, -1],
-  ],
-  0.07,
-  0x050507,
-);
 const lista = document.getElementById("lista"),
   info = document.getElementById("info");
 let tw = [],
@@ -934,15 +845,26 @@ function ocultarInfoComponente() {
 }
 PASOS.forEach((p, i) => {
   if (p.f !== fPrev) {
-    lista.insertAdjacentHTML("beforeend", `<div class="fase">${p.f}</div>`);
+    lista.insertAdjacentHTML(
+      "beforeend",
+      `<div class="fase" role="heading" aria-level="2">${p.f}</div>`,
+    );
     fPrev = p.f;
   }
   const d = document.createElement("div");
   d.className = "paso";
   d.textContent = i + 1 + ". " + p.n;
+  d.setAttribute("role", "listitem");
+  d.tabIndex = 0;
   d.onclick = () => {
     stopAuto();
     goTo(i);
+  };
+  d.onkeydown = (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      d.click();
+    }
   };
   p.el = d;
   lista.appendChild(d);
@@ -957,27 +879,60 @@ const add = (dur, fn, delay = 0, tag) => {
   tw.push(o);
   return o;
 };
-function cables(p, inst, d0 = 0) {
-  if (!p.cab) return;
-  const c = cabs[p.cab];
-  c.visible = true;
-  const n = c.geometry.index.count;
-  if (inst) {
-    c.geometry.setDrawRange(0, n);
-    if (p.cab === "mon") scrM.color.setScalar(1);
-  } else {
-    add(
-      1.6,
-      (k) => {
-        c.geometry.setDrawRange(0, Math.floor((n * out(k)) / 3) * 3);
-      },
-      d0,
-    );
-    if (p.cab === "mon") add(0.8, (k) => scrM.color.setScalar(k), d0 + 1.7);
-  }
+const verificaciones = new Set();
+function actualizarEstadoRevision() {
+  const indiceRevision = PASOS.findIndex((p) => p.checklist);
+  if (cur !== indiceRevision) return;
+  const completo = PASOS[indiceRevision].checklist.every((_, i) =>
+    verificaciones.has(i),
+  );
+  btnNext.disabled = !completo;
+  const estado = document.getElementById("revision-estado");
+  if (estado)
+    estado.textContent = completo
+      ? "Revisión completa. Ya puedes avanzar al encendido."
+      : "Marca todas las comprobaciones para habilitar «Siguiente».";
+}
+function mostrarListaRevision(p) {
+  if (!p.checklist) return;
+  const lista = document.createElement("fieldset");
+  lista.className = "lista-revision";
+  const titulo = document.createElement("legend");
+  titulo.textContent = "Lista de comprobación";
+  lista.appendChild(titulo);
+  p.checklist.forEach((texto, i) => {
+    const etiqueta = document.createElement("label");
+    const casilla = document.createElement("input");
+    casilla.type = "checkbox";
+    casilla.checked = verificaciones.has(i);
+    casilla.addEventListener("change", () => {
+      if (casilla.checked) verificaciones.add(i);
+      else verificaciones.delete(i);
+      actualizarEstadoRevision();
+    });
+    etiqueta.append(casilla, document.createTextNode(texto));
+    lista.appendChild(etiqueta);
+  });
+  const estado = document.createElement("div");
+  estado.id = "revision-estado";
+  estado.setAttribute("role", "status");
+  estado.setAttribute("aria-live", "polite");
+  lista.appendChild(estado);
+  info.appendChild(lista);
+  actualizarEstadoRevision();
 }
 function paso(inst, forzarAuto) {
   if (cur >= PASOS.length - 1) return;
+  const pasoActual = PASOS[cur];
+  if (
+    !inst &&
+    pasoActual?.checklist &&
+    !pasoActual.checklist.every((_, i) => verificaciones.has(i))
+  ) {
+    stopAuto();
+    actualizarEstadoRevision();
+    return;
+  }
   ocultarInfoComponente();
   if (man) completarManual();
   const p = PASOS[++cur];
@@ -996,15 +951,29 @@ function paso(inst, forzarAuto) {
     else {
       o.position.copy(inst ? b : a);
       if (!inst)
-        add(1.2, (k) => o.position.lerpVectors(a, b, easeB(k)), j * 0.15);
+        add(
+          1.2,
+          (k) => {
+            o.position.lerpVectors(a, b, easeB(k));
+            if (k >= 1 && (id === "kb" || id === "mouse"))
+              window.actualizarCablePeriferico?.(id, true);
+          },
+          j * 0.15,
+        );
     }
+    if (inst && (id === "kb" || id === "mouse"))
+      window.actualizarCablePeriferico?.(id, true);
   });
   if (manual) iniciarManual(p, cb, tb);
-  else cables(p, inst, 1.1);
+  if (p.p.includes("mon")) {
+    if (inst) scrM.color.setScalar(1);
+    else add(0.8, (k) => scrM.color.setScalar(k), 2.8);
+  }
   if (p.end) {
     endOn = 1;
     ctl.autoRotate = true;
   }
+  actualizarLucesTorre();
   if (inst) {
     cam.position.copy(cb);
     ctl.target.copy(tb);
@@ -1026,37 +995,64 @@ function paso(inst, forzarAuto) {
     if (j === cur) q.el.setAttribute("aria-current", "step");
     else q.el.removeAttribute("aria-current");
   });
+  const producto = p.p.length ? PRODUCTOS[p.p[0]] : null;
+  const indiceRevision = PASOS.findIndex((paso) => paso.checklist);
+  const revisionCompleta =
+    indiceRevision >= 0 &&
+    PASOS[indiceRevision].checklist.every((_, i) => verificaciones.has(i));
+  const textoPaso =
+    p.end && !revisionCompleta
+      ? "<b>¡Vista final del equipo!</b> Puedes omitir la lista para ver el resultado. Para un ensamblaje real, completa la revisión antes de conectar la corriente."
+      : p.t;
+  info.classList.toggle(
+    "periferico",
+    p.p.includes("kb") || p.p.includes("mouse"),
+  );
   info.innerHTML =
-    `<b>${p.n}</b><br>${p.t}` +
+    `<b>${p.n}</b>` +
+    (producto
+      ? `<div class="modelo-referencia">Modelo propuesto: <a href="${producto.fuente}" target="_blank" rel="noopener noreferrer">${producto.nombre}</a></div><div class="modelo-nota">${AVISO_MODELO}</div>`
+      : "") +
+    `<br>${textoPaso}` +
     (manual
       ? '<div style="margin-top:8px;color:#ff737b">✋ Arrastra la pieza hasta la guía y gírala para que encaje.</div>'
       : "");
+  if (p.p.includes("kb") && window.cargarModeloTeclado)
+    window.cargarModeloTeclado();
+  btnNext.disabled = false;
+  mostrarListaRevision(p);
   btnPrev.disabled = false;
 }
 let endOn = 0,
   autoT = 0;
-function reset() {
+function actualizarLucesTorre() {
+  const encendidas = rgbOn && cur >= 3;
+  lucesTorre.forEach((luz) => {
+    luz.visible = encendidas;
+  });
+}
+function reset(limpiarRevision = true) {
   ocultarInfoComponente();
   cerrarManual();
   tw = [];
   cur = -1;
   endOn = 0;
+  if (limpiarRevision) verificaciones.clear();
+  btnNext.disabled = false;
+  actualizarLucesTorre();
   ctl.autoRotate = false;
   Object.values(P).forEach((o) => {
     o.visible = false;
     o.quaternion.identity();
   });
-  Object.values(cabs).forEach((c) => {
-    c.visible = false;
-    c.geometry.setDrawRange(0, 0);
-  });
+  window.ocultarCablesPerifericos?.();
+  info.classList.remove("periferico");
   scrM.color.setScalar(0);
   PASOS.forEach((q) => {
     q.el.className = "paso";
     q.el.removeAttribute("aria-current");
   });
-  cam.position.set(-2, 5, 15);
-  ctl.target.set(-9, 3, 0);
+  ajustarCamaraInicio();
   info.innerHTML =
     "<b>Listo para empezar</b><br>Pulsa «Siguiente» para ensamblar la torre.";
   btnPrev.disabled = true;
@@ -1069,7 +1065,7 @@ function stopAuto() {
 function irAtras(i) {
   const ca = cam.position.clone(),
     ta = ctl.target.clone();
-  reset();
+  reset(false);
   while (cur < i) paso(true);
   const cb = cam.position.clone(),
     tb = ctl.target.clone();
@@ -1095,6 +1091,21 @@ function goTo(i) {
     irAtras(i);
     return;
   }
+  const indiceRevision = PASOS.findIndex((p) => p.checklist);
+  const indiceFinal = PASOS.findIndex((p) => p.end);
+  if (i === indiceFinal && i > cur) {
+    while (cur < i - 1) paso(true);
+    paso(true);
+    return;
+  }
+  if (
+    indiceRevision > cur &&
+    indiceRevision <= i &&
+    !PASOS[indiceRevision].checklist.every((_, j) => verificaciones.has(j))
+  ) {
+    while (cur < indiceRevision) paso(true);
+    return;
+  }
   while (cur < i - 1) paso(true);
   paso();
 }
@@ -1110,8 +1121,9 @@ function anterior() {
   goTo(cur - 1);
 }
 const btnPrev = document.getElementById("prev");
+const btnNext = document.getElementById("sig");
 btnPrev.disabled = true;
-document.getElementById("sig").onclick = () => {
+btnNext.onclick = () => {
   stopAuto();
   siguiente();
 };
@@ -1125,9 +1137,11 @@ document.getElementById("rst").onclick = () => {
 };
 document.getElementById("rgb").onclick = (e) => {
   rgbOn = !rgbOn;
+  actualizarLucesTorre();
   bloom.strength = rgbOn ? 0.75 : 0;
   e.currentTarget.textContent = rgbOn ? "RGB: ENCENDIDO" : "RGB: APAGADO";
   e.currentTarget.classList.toggle("on", rgbOn);
+  e.currentTarget.setAttribute("aria-pressed", String(rgbOn));
 };
 document.getElementById("auto").onclick = () => {
   if (autoT) {
@@ -1151,6 +1165,7 @@ function actualizarModo() {
   const b = document.getElementById("modo");
   b.textContent = modoManual ? "Manual: SÍ" : "Manual: NO";
   b.classList.toggle("on", modoManual);
+  b.setAttribute("aria-pressed", String(modoManual));
 }
 let modoManual = false,
   man = null;
@@ -1350,7 +1365,8 @@ function encajar(forzado) {
     }
     m.hecho = true;
     mano.style.display = "none";
-    cables(m.p, false, 0.1);
+    if (id === "kb" || id === "mouse")
+      window.actualizarCablePeriferico?.(id, true);
     if (m.p.end) {
       endOn = 1;
     }
@@ -1367,8 +1383,9 @@ function completarManual() {
     o.position.copy(o.userData.to);
     o.quaternion.identity();
     if (ghosts[id]) ghosts[id].visible = false;
+    if (id === "kb" || id === "mouse")
+      window.actualizarCablePeriferico?.(id, true);
   });
-  if (!m.hecho) cables(m.p, false, 0.1);
   mano.style.display = "none";
   clearTimeout(m.mt);
   man = null;
@@ -1543,344 +1560,12 @@ bm("mauto", () => {
   encajar(true);
 });
 actualizarModo();
-const FICHA = {
-  psu: [
-    "Entrega energía estable a todo el equipo.",
-    [
-      "850 W · certificación 80 PLUS Gold",
-      "Ventilador de 140 mm con rejilla",
-      "Cables modulares",
-      "Protecciones contra sobrecarga y cortocircuito",
-    ],
-  ],
-  mobo: [
-    "Tarjeta principal que conecta todos los componentes.",
-    [
-      "Formato ATX · zócalo para CPU",
-      "4 ranuras DIMM para RAM DDR5",
-      "Ranuras PCIe x16 / x1 y M.2",
-      "Conector de 24 pines y disipadores de energía (VRM)",
-    ],
-  ],
-  cpu: [
-    "Procesador: el cerebro que ejecuta las instrucciones.",
-    [
-      "Zócalo LGA con pads dorados",
-      "Tapa metálica (IHS) que reparte el calor",
-      "24 núcleos · hasta 6 GHz",
-      "Requiere pasta térmica y disipador",
-    ],
-  ],
-  aio: [
-    "Refrigeración líquida todo en uno (AIO).",
-    [
-      "Bomba con tapa RGB sobre la CPU",
-      "Dos mangueras con líquido refrigerante",
-      "Radiador con aletas de aluminio",
-      "3 ventiladores de 120 mm con anillo RGB",
-    ],
-  ],
-  ram: [
-    "Memoria de acceso rápido para los programas abiertos.",
-    [
-      "2 módulos DDR5-6000 CL30",
-      "Disipador metálico",
-      "Barra de luz RGB direccionable",
-      "Se instala en ranuras con pestañas laterales",
-    ],
-  ],
-  ssd: [
-    "Disco de estado sólido: guarda datos sin partes móviles.",
-    [
-      "NVMe M.2 PCIe Gen4 · 2 TB",
-      "Lectura hasta 7000 MB/s",
-      "Disipador con etiqueta",
-      "Se atornilla directo a la placa madre",
-    ],
-  ],
-  gpu: [
-    "Tarjeta de video: procesa los gráficos y envía imagen al monitor.",
-    [
-      "Disipador de triple ventilador",
-      "Iluminación RGB en el borde",
-      "Conector de energía de 8 pines",
-      "Soporte metálico y ranura PCIe x16",
-    ],
-  ],
-  glass: [
-    "Panel lateral de vidrio templado.",
-    [
-      "Deja ver los componentes internos",
-      "Se fija con tornillos al case",
-      "Protege del polvo y ruido",
-    ],
-  ],
-  kb: [
-    "Teclado mecánico RGB.",
-    [
-      "Teclas con retroiluminación RGB",
-      "Conexión USB por cable",
-      "Base de aluminio",
-    ],
-  ],
-  mouse: [
-    "Mouse gamer ergonómico RGB.",
-    [
-      "Sensor óptico de alta precisión",
-      "Rueda con luz RGB y botones laterales",
-      "Conexión USB por cable",
-    ],
-  ],
-  spk: [
-    "Par de parlantes estéreo para el audio del equipo.",
-    [
-      "Parlante izquierdo y derecho",
-      "Se ubican a ambos lados del monitor",
-      "Conexión por audio de 3,5 mm o USB",
-      "Reproducen el sonido del sistema",
-    ],
-  ],
-  mon: [
-    "Monitor de pantalla plana con luz ambiental RGB.",
-    [
-      'Panel de 27" · bordes mínimos',
-      "Luz RGB trasera (ambilight)",
-      "Entrada de video DisplayPort / HDMI",
-      "Base metálica estable",
-    ],
-  ],
-};
+const FICHA = window.COMPONENTES.FICHA;
 
-const FUNCION = {
-  psu: "Convierte la corriente de la pared en la electricidad que necesita cada componente y la reparte por cables. Sin ella, la computadora no enciende.",
-  mobo: "Es la placa donde se conectan todas las piezas y la que permite que se comuniquen entre sí.",
-  cpu: "Es el cerebro de la computadora: ejecuta las instrucciones de los programas y hace todos los cálculos.",
-  aio: "Enfría el procesador: un líquido absorbe su calor y lo lleva al radiador, donde los ventiladores lo sacan del equipo.",
-  ram: "Es la memoria de trabajo: guarda temporalmente los datos de los programas abiertos para que el procesador los use rápido. Se borra al apagar.",
-  ssd: "Guarda de forma permanente el sistema operativo, los programas y tus archivos, y los entrega muy rápido.",
-  gpu: "Procesa las imágenes, los videos y los juegos, y envía la señal de imagen al monitor.",
-  glass:
-    "Cierra la torre, protege los componentes del polvo y deja ver el interior.",
-  kb: "Sirve para escribir y dar órdenes a la computadora.",
-  mouse:
-    "Mueve el cursor y permite señalar, seleccionar y abrir cosas en la pantalla.",
-  mon: "Muestra la imagen que genera la tarjeta de video: es la salida visual del equipo.",
-  spk: "Reproducen el sonido de la computadora: música, videos, juegos y avisos.",
-};
-const CAPAS = {
-  psu: [
-    [
-      "Cables modulares",
-      "Llevan la electricidad desde la fuente hasta la placa madre, la tarjeta de video y los demás componentes.",
-    ],
-    [
-      "Carcasa y circuitos",
-      "Protege los circuitos que convierten la corriente de la pared en corriente de bajo voltaje. Su ventilador la mantiene fría.",
-    ],
-    [
-      "Placa de identificación",
-      "Etiqueta con la potencia y las certificaciones de la fuente.",
-    ],
-    [
-      "Panel de conexión",
-      "Zona donde se enchufa el cable de corriente y se enciende o apaga la fuente.",
-    ],
-    ["Logotipo", "Detalle decorativo de la marca."],
-    ["Emblema", "Adorno estético; no cumple función eléctrica."],
-  ],
-  mobo: [
-    [
-      "Pines y conectores",
-      "Puntos donde se enchufan los cables del panel frontal y los ventiladores.",
-    ],
-    [
-      "Soportes y tornillos",
-      "Sujetan la placa al case y evitan que toque el metal.",
-    ],
-    ["Detalle pequeño", "Pieza menor de la placa (conector o soporte)."],
-    [
-      "Placa principal (PCB)",
-      "Circuito impreso con las ranuras de RAM y PCIe, el zócalo del procesador y el espacio M.2. Conecta y comunica todas las piezas.",
-    ],
-    [
-      "Panel de puertos traseros",
-      "Entradas de USB, red y audio hacia el exterior del equipo.",
-    ],
-    ["Detalle pequeño", "Pieza menor de la placa (terminal o soporte)."],
-  ],
-  aio: [
-    [
-      "Bomba y bloque frío",
-      "Se apoya sobre el procesador, absorbe su calor y hace circular el líquido hacia el radiador.",
-    ],
-    ["Soporte de montaje", "Sujeta la bomba al zócalo del procesador."],
-    [
-      "Conector de mangueras",
-      "Une la bomba con las mangueras por donde circula el líquido.",
-    ],
-    [
-      "Ventilador RGB",
-      "Empuja aire a través del radiador para enfriar el líquido. El anillo de luz es decorativo.",
-    ],
-    [
-      "Ventilador RGB",
-      "Segundo ventilador: ayuda a sacar el calor del radiador.",
-    ],
-    [
-      "Radiador",
-      "Cede al aire el calor del líquido; sus aletas aumentan la superficie de enfriamiento.",
-    ],
-  ],
-  ram: [
-    [
-      "Disipadores",
-      "Láminas metálicas que absorben el calor de los chips de memoria.",
-    ],
-    [
-      "Placas y chips de memoria",
-      "Circuitos donde se guardan temporalmente los datos de los programas abiertos.",
-    ],
-    [
-      "Cubierta del módulo",
-      "Tapa metálica que protege los chips y lleva la etiqueta del modelo.",
-    ],
-    ["Barra de luz RGB", "Iluminación decorativa de los módulos."],
-  ],
-  gpu: [
-    [
-      "Placa trasera (backplate)",
-      "Refuerza la tarjeta para que no se doble y ayuda a disipar calor.",
-    ],
-    [
-      "Carcasa y disipador",
-      "Cubre el chip gráfico y la memoria, y guía el aire de los ventiladores sobre los tubos de calor.",
-    ],
-    [
-      "Ventiladores",
-      "Mueven aire para enfriar el chip gráfico cuando trabaja fuerte.",
-    ],
-    ["Barra de iluminación RGB", "Luz decorativa en el borde de la tarjeta."],
-    ["Franja luminosa", "Detalle decorativo con luz."],
-    [
-      "Soporte metálico",
-      "Fija la tarjeta al case y deja a la vista sus puertos de video.",
-    ],
-  ],
-  kb: [
-    [
-      "Base y teclas",
-      "La base sostiene el circuito; cada tecla activa un interruptor que envía la letra u orden a la computadora.",
-    ],
-    [
-      "Teclas",
-      "Cada tecla presiona un interruptor que envía su letra o función a la computadora.",
-    ],
-    [
-      "Teclas",
-      "Cada tecla presiona un interruptor que envía su letra o función a la computadora.",
-    ],
-    [
-      "Teclas",
-      "Cada tecla presiona un interruptor que envía su letra o función a la computadora.",
-    ],
-  ],
-  mouse: [
-    [
-      "Cuerpo principal",
-      "Es la estructura superior del mouse y contiene la zona de apoyo de la mano.",
-    ],
-    [
-      "Detalles, botones y rueda",
-      "Incluye los botones, la rueda y los elementos decorativos RGB.",
-    ],
-    [
-      "Base inferior",
-      "Es la parte que se apoya sobre la mesa e integra el sensor óptico.",
-    ],
-  ],
-  mon: [
-    [
-      "Pedestal y soporte",
-      "Sostienen la pantalla a la altura adecuada y le dan estabilidad.",
-    ],
-    ["Pieza de unión", "Conecta la pantalla con el soporte."],
-    [
-      "Carcasa trasera",
-      "Protege la electrónica interna y aloja los conectores de video y energía.",
-    ],
-    ["Panel de pantalla", "Muestra la imagen que envía la tarjeta de video."],
-    ["Base de apoyo", "Apoya el monitor en la mesa."],
-  ],
-  spk: [
-    [
-      "Cajas de los parlantes",
-      "Contienen los altavoces que convierten la señal eléctrica en sonido.",
-    ],
-    [
-      "Perillas y detalles",
-      "Controles y adornos del parlante, como el volumen.",
-    ],
-  ],
-  glass: [
-    [
-      "Panel de vidrio templado",
-      "Cierra la torre, protege del polvo y deja ver los componentes.",
-    ],
-  ],
-  cpu: [
-    [
-      "Sustrato (placa verde)",
-      "Base sobre la que está el chip de silicio y sus conexiones eléctricas.",
-    ],
-    [
-      "Contactos dorados (LGA)",
-      "Tocan los pines del zócalo y llevan las señales hacia la placa madre.",
-    ],
-    [
-      "Condensadores SMD",
-      "Pequeños componentes que estabilizan la energía del procesador.",
-    ],
-    ["Triángulo guía", "Marca la orientación correcta para instalarlo."],
-    [
-      "Tapa metálica (IHS)",
-      "Protege el chip y reparte el calor hacia la bomba o el disipador.",
-    ],
-    [
-      "Tapa metálica (IHS)",
-      "Protege el chip y reparte el calor hacia la bomba o el disipador.",
-    ],
-    [
-      "Tapa metálica (IHS)",
-      "Protege el chip y reparte el calor hacia la bomba o el disipador.",
-    ],
-    ["Etiqueta", "Indica el modelo del procesador."],
-  ],
-  ssd: [
-    ["Placa del SSD", "Circuito donde se montan los chips de almacenamiento."],
-    [
-      "Contactos dorados",
-      "Se insertan en la ranura M.2 y transmiten los datos.",
-    ],
-    [
-      "Chip de memoria NAND",
-      "Guarda tus archivos de forma permanente, incluso sin electricidad.",
-    ],
-    [
-      "Chip de memoria NAND",
-      "Guarda tus archivos de forma permanente, incluso sin electricidad.",
-    ],
-    [
-      "Controlador",
-      "Organiza dónde se guarda cada dato y gestiona la lectura y escritura.",
-    ],
-    ["Almohadilla térmica", "Pasa el calor de los chips al disipador."],
-    ["Base del disipador", "Cubre los chips y los mantiene fríos."],
-    ["Aletas del disipador", "Aumentan la superficie para liberar el calor."],
-    ["Tornillo", "Fija el SSD a la placa madre."],
-    ["Etiqueta", "Indica el modelo y la capacidad."],
-    ["Luz RGB", "Detalle decorativo luminoso."],
-  ],
-};
+const FUNCION = window.COMPONENTES.FUNCION;
+const CAPAS = window.COMPONENTES.CAPAS;
+const PRODUCTOS = window.COMPONENTES.PRODUCTOS;
+const AVISO_MODELO = window.COMPONENTES.AVISO_MODELO;
 const GS = new THREE.Scene();
 GS.background = new THREE.Color(0x05070d);
 GS.environment = S.environment;
@@ -1928,11 +1613,22 @@ gp.innerHTML =
 document.body.appendChild(gp);
 const gl = gp.querySelector("#gl"),
   nom = (id) => PASOS.find((q) => q.p[0] === id).n;
+gl.setAttribute("role", "group");
+gl.setAttribute("aria-label", "Galería de componentes");
 Object.keys(FICHA).forEach((id) => {
   const d = document.createElement("div");
   d.className = "paso";
   d.textContent = nom(id);
+  d.setAttribute("role", "button");
+  d.setAttribute("aria-pressed", "false");
+  d.tabIndex = 0;
   d.onclick = () => showPart(id);
+  d.onkeydown = (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      d.click();
+    }
+  };
   d.dataset.id = id;
   gl.appendChild(d);
 });
@@ -1975,13 +1671,25 @@ function showPart(id) {
   gobj.rotation.x = src.userData.rx || 0;
   GS.add(gobj);
   gl.childNodes.forEach(
-    (d) => (d.className = "paso" + (d.dataset.id === id ? " act" : "")),
+    (d) => {
+      const activo = d.dataset.id === id;
+      d.className = "paso" + (activo ? " act" : "");
+      d.setAttribute("aria-pressed", String(activo));
+    },
   );
   const f = FICHA[id];
+  const producto = PRODUCTOS[id];
   info.innerHTML =
     "<b>" +
     nom(id) +
-    '</b><div style="margin:8px 0 2px;color:#ff737b;font-weight:700">¿Para qué sirve?</div>' +
+    '</b><div class="modelo-referencia">Modelo propuesto: <a href="' +
+    producto.fuente +
+    '" target="_blank" rel="noopener noreferrer">' +
+    producto.nombre +
+    "</a></div><div class=\"modelo-nota\">" +
+    AVISO_MODELO +
+    "</div>" +
+    '<div style="margin:8px 0 2px;color:#ff737b;font-weight:700">¿Para qué sirve?</div>' +
     FUNCION[id] +
     '<div style="margin-top:8px"><b style="font-size:13px">Cómo se instala</b><br>' +
     PASOS.find((q) => q.p[0] === id).t +
@@ -1992,7 +1700,12 @@ function showPart(id) {
     (id === "glass"
       ? ""
       : '<div style="margin-top:8px;color:#ff737b;font-size:12px">💡 Pulsa «Explotar» y pasa el cursor (o toca con el dedo) sobre cada parte para saber qué es.</div>');
+  if (id === "kb" && window.cargarModeloTeclado)
+    window.cargarModeloTeclado();
 }
+window.refrescarPiezaGaleria = (id) => {
+  if (gal && gobj && gobj.userData.id === id) showPart(id);
+};
 function galeria(on) {
   ocultarInfoComponente();
   limpiarHover();
@@ -2050,10 +1763,7 @@ function mostrarCapaGaleria(x, y, persistente = false) {
     return;
   }
   const r = cv.getBoundingClientRect();
-  NDC.set(
-    ((x - r.left) / r.width) * 2 - 1,
-    -((y - r.top) / r.height) * 2 + 1,
-  );
+  NDC.set(((x - r.left) / r.width) * 2 - 1, -((y - r.top) / r.height) * 2 + 1);
   RC.setFromCamera(NDC, gcam);
   const c = gobj.children[0],
     kk = c.children,
@@ -2078,10 +1788,8 @@ function mostrarCapaGaleria(x, y, persistente = false) {
   tip.innerHTML = "<b>" + d[0] + "</b><br>" + d[1];
   tip.style.display = "block";
   detalleTactil = persistente;
-  tip.style.left =
-    Math.min(x + 16, innerWidth - tip.offsetWidth - 10) + "px";
-  tip.style.top =
-    Math.min(y + 16, innerHeight - tip.offsetHeight - 10) + "px";
+  tip.style.left = Math.min(x + 16, innerWidth - tip.offsetWidth - 10) + "px";
+  tip.style.top = Math.min(y + 16, innerHeight - tip.offsetHeight - 10) + "px";
 }
 cv.addEventListener("pointermove", (e) => {
   if (e.pointerType === "touch") return;
@@ -2136,6 +1844,7 @@ function resize() {
         : 42;
   cam.updateProjectionMatrix();
   gcam.updateProjectionMatrix();
+  if (cur === -1) ajustarCamaraInicio();
 }
 addEventListener("resize", resize);
 resize();

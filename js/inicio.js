@@ -3,38 +3,71 @@
   const barraProgreso = document.getElementById("cb");
   const textoProgreso = document.getElementById("ct");
   const archivos = [
-    ["js/three.min.js", 607784],
-    ["js/OrbitControls.js", 29929],
-    ["js/CopyShader.js", 631],
-    ["js/LuminosityHighPassShader.js", 1281],
-    ["js/EffectComposer.js", 6832],
-    ["js/MaskPass.js", 2328],
-    ["js/ShaderPass.js", 1612],
-    ["js/RenderPass.js", 1869],
-    ["js/UnrealBloomPass.js", 13502],
-    ["js/luces.js", 1709],
-    ["js/animaciones.js", 1822],
-    ["js/app.js", 54705],
-    ["js/detalle.js", 13899],
-    ["models/meta.js", 491],
-    ["models/case.js", 1201075],
-    ["models/glass.js", 35644],
-    ["models/psu.js", 212446],
-    ["models/mobo.js", 437231],
-    ["models/aio.js", 473298],
-    ["models/ram.js", 129790],
-    ["models/gpu.js", 270810],
-    ["models/kb.js", 2681065],
-    ["models/mouse.js", 270340],
-    ["models/mon.js", 275514],
-    ["models/spk.js", 317354],
-    ["js/cargador.js", 10387],
-    ["js/mejoras.js", 13472],
+    "js/three.min.js",
+    "js/OrbitControls.js",
+    "js/CopyShader.js",
+    "js/LuminosityHighPassShader.js",
+    "js/EffectComposer.js",
+    "js/MaskPass.js",
+    "js/ShaderPass.js",
+    "js/RenderPass.js",
+    "js/UnrealBloomPass.js",
+    "js/luces.js",
+    "js/animaciones.js",
+    "images/facultad-data.js",
+    "js/componentes.js",
+    "js/app.js",
+    "js/detalle.js",
+    "models/meta.js",
+    "models/case.js",
+    "models/glass.js",
+    "models/psu.js",
+    "models/mobo.js",
+    "models/aio.js",
+    "models/ram.js",
+    "models/gpu.js",
+    "models/mouse.js",
+    "models/mon.js",
+    "models/spk.js",
+    "js/cargador.js",
+    "js/mejoras.js",
   ];
-  const bytesTotales = archivos.reduce((total, archivo) => total + archivo[1], 0);
-  let bytesCargados = 0;
+  let archivosCargados = 0,
+    errorCarga = false,
+    tecladoSolicitado = false;
+
+  window.cargarModeloTeclado = () => {
+    if (tecladoSolicitado || window.GLB?.kb) {
+      if (window.aplicarModeloTeclado) window.aplicarModeloTeclado();
+      return;
+    }
+    tecladoSolicitado = true;
+    const script = document.createElement("script");
+    script.src = "models/kb.js";
+    script.onload = () => {
+      if (window.aplicarModeloTeclado) {
+        window.aplicarModeloTeclado();
+        return;
+      }
+      console.error("No se pudo inicializar el modelo detallado del teclado.");
+      document.getElementById("info").insertAdjacentHTML(
+        "beforeend",
+        '<div class="modelo-nota">Se conserva el modelo simplificado del teclado.</div>',
+      );
+    };
+    script.onerror = () => {
+      console.error("No se pudo cargar models/kb.js.");
+      document.getElementById("info").insertAdjacentHTML(
+        "beforeend",
+        '<div class="modelo-nota">No se pudo cargar el modelo detallado del teclado; se conserva el modelo simplificado.</div>',
+      );
+    };
+    document.head.appendChild(script);
+  };
 
   function mostrarError(mensaje) {
+    if (errorCarga) return;
+    errorCarga = true;
     pantallaCarga.classList.add("err");
     textoProgreso.innerHTML = "⚠️ " + mensaje;
   }
@@ -60,42 +93,55 @@
     }
   });
 
-  function cargarSiguiente(indice) {
-    if (indice >= archivos.length) {
-      barraProgreso.style.width = "100%";
-      textoProgreso.textContent = "¡Listo!";
+  function finalizarCarga() {
+    barraProgreso.style.width = "100%";
+    barraProgreso.setAttribute("aria-valuenow", "100");
+    textoProgreso.textContent = "¡Listo!";
+    setTimeout(() => {
+      pantallaCarga.classList.add("listo");
       setTimeout(() => {
-        pantallaCarga.classList.add("listo");
-        setTimeout(() => {
-          pantallaCarga.remove();
-          if (window.mostrarAyuda) mostrarAyuda();
-        }, 400);
-      }, 200);
-      return;
-    }
-
-    const [ruta, tamano] = archivos[indice];
-    const porcentaje = Math.round((bytesCargados / bytesTotales) * 100);
-    textoProgreso.textContent =
-      "Cargando " + ruta.split("/").pop() + "… " + porcentaje + "%";
-
-    const script = document.createElement("script");
-    script.src = ruta;
-    script.onload = () => {
-      bytesCargados += tamano;
-      barraProgreso.style.width =
-        Math.round((bytesCargados / bytesTotales) * 100) + "%";
-      setTimeout(() => cargarSiguiente(indice + 1), 20);
-    };
-    script.onerror = () => {
-      mostrarError(
-        "No se pudo cargar " +
-          ruta +
-          ". Comprueba que las carpetas js/ y models/ estén junto a index.html (no abras index.html desde dentro del zip).",
-      );
-    };
-    document.head.appendChild(script);
+        pantallaCarga.remove();
+        if (window.mostrarAyuda) mostrarAyuda();
+      }, 400);
+    }, 200);
   }
 
-  requestAnimationFrame(() => cargarSiguiente(0));
+  function cargarScripts() {
+    archivos.forEach((ruta) => {
+      const script = document.createElement("script");
+      script.async = false;
+      script.src = ruta;
+      script.onload = () => {
+        if (errorCarga) return;
+        archivosCargados++;
+        const porcentaje = Math.round(
+          (archivosCargados / archivos.length) * 100,
+        );
+        barraProgreso.style.width = porcentaje + "%";
+        barraProgreso.setAttribute("aria-valuenow", String(porcentaje));
+        if (archivosCargados === archivos.length) {
+          finalizarCarga();
+          return;
+        }
+        const siguiente = archivos[archivosCargados];
+        textoProgreso.textContent =
+          "Cargando " +
+          (archivosCargados + 1) +
+          " de " +
+          archivos.length +
+          ": " +
+          siguiente.split("/").pop();
+      };
+      script.onerror = () => {
+        mostrarError(
+          "No se pudo cargar " +
+            ruta +
+            ". Comprueba que las carpetas js/, models/ e images/ estén junto a index.html (no abras index.html desde dentro del zip).",
+        );
+      };
+      document.head.appendChild(script);
+    });
+  }
+
+  requestAnimationFrame(cargarScripts);
 })();

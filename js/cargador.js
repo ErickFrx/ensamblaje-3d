@@ -100,23 +100,29 @@
   function pieza(id, ax, capas, rgbOn) {
     const r = cargarModeloGlb(id),
       root = new THREE.Group();
-    if (rgbOn)
-      r.mats.forEach((m) => {
-        if (m.emissive && m.emissive.r + m.emissive.g + m.emissive.b > 0)
-          rgbs.push({ color: m.emissive, userData: { o: Math.random() } });
-      });
+    const mallas = r.meshes.filter((m) =>
+      id === "case"
+        ? !/^Text(?:\.|_)/i.test(m.name)
+        : id === "gpu"
+          ? !/^BezierCurve\.\d+_/.test(m.name)
+          : true,
+    );
+    r.mats.forEach((m) => {
+      if (m.emissive && m.emissive.r + m.emissive.g + m.emissive.b > 0)
+        rgbs.push({ color: m.emissive, userData: { o: Math.random() } });
+    });
     if (capas <= 1) {
-      r.meshes.forEach((m) => root.add(m));
+      mallas.forEach((m) => root.add(m));
       return root;
     }
-    const c = r.meshes.map((m) =>
+    const c = mallas.map((m) =>
         m.geometry.boundingBox.getCenter(new THREE.Vector3()).getComponent(ax),
       ),
-      ord = r.meshes.map((_, i) => i).sort((a, b) => c[a] - c[b]),
+      ord = mallas.map((_, i) => i).sort((a, b) => c[a] - c[b]),
       nb = Math.min(capas, ord.length),
       gr = Array.from({ length: nb }, () => new THREE.Group());
     ord.forEach((mi, k) =>
-      gr[Math.floor((k * nb) / ord.length)].add(r.meshes[mi]),
+      gr[Math.floor((k * nb) / ord.length)].add(mallas[mi]),
     );
     gr.forEach((g) => root.add(g));
     return root;
@@ -180,7 +186,8 @@
     P.ssd.position.copy(s);
     P.ssd.userData.to.copy(s);
   }
-  poner("kb", pieza("kb", 1, 4, true), D, V(0.5, 0.08, 4.1), "y", 0.95);
+  if (GLB.kb)
+    poner("kb", pieza("kb", 1, 4, true), D, V(0.5, 0.08, 4.1), "y", 0.95);
   poner("mouse", pieza("mouse", 1, 3, true), D, V(7.05, 0.06, 4.05), "y", 0);
   P.mouse.scale.setScalar(1.8);
   {
@@ -208,67 +215,6 @@
   }
   P.spk = { userData: { ex: V(0, 7, 0) } };
   poner("spk", pieza("spk", 2, 2, true), D, V(2, 0, -3.4), "z");
-  {
-    const mk = (id, pts, r) => {
-      const m = cabs[id];
-      m.geometry.dispose();
-      m.geometry = new THREE.TubeGeometry(
-        new THREE.CatmullRomCurve3(pts.map((p) => V(...p))),
-        90,
-        r,
-        8,
-      );
-      m.geometry.setDrawRange(0, 0);
-    };
-    const fx = -9 + GLBMETA.front + 0.15,
-      u = GLBMETA.usb,
-      ux = (i) => -9 + u[i][0],
-      uy = (i) => u[i][1] + 0.04,
-      uz = (i) => u[i][2];
-    mk(
-      "kb",
-      [
-        [-3.1, 0.2, 3.3],
-        [-3.4, 0.1, 2.9],
-        [fx, 0.1, 2.4],
-        [fx, 3, 1.6],
-        [fx, 8, 1.1],
-        [fx - 0.1, 9.5, uz(1)],
-        [ux(1), uy(1) + 0.12, uz(1)],
-      ],
-      0.05,
-    );
-    mk(
-      "mouse",
-      [
-        [7.05, 0.075, 3.3],
-        [6.75, 0.09, 3.18],
-        [5.4, 0.1, 3.0],
-        [4.0, 0.1, 2.45],
-        [fx - 0.4, 0.1, 1.9],
-        [fx, 4, 0.9],
-        [fx, 8, 0.2],
-        [fx - 0.1, 9.5, uz(2)],
-        [ux(2), uy(2) + 0.12, uz(2)],
-      ],
-      0.04,
-    );
-    T.updateMatrixWorld(true);
-    D.updateMatrixWorld(true);
-    const bm = new THREE.Box3().setFromObject(P.mon);
-    mk(
-      "mon",
-      [
-        [2, 2.2, bm.min.z + 0.7],
-        [1.5, 0.1, bm.min.z - 0.2],
-        [-8, 0.1, -4.4],
-        [-13.6, 0.2, -3],
-        [-13.7, 2.5, -1],
-        [-13.4, 3.1, -1],
-      ],
-      0.07,
-    );
-  }
   T.updateMatrixWorld(true);
   ["psu", "mobo", "cpu", "aio", "ram", "ssd", "gpu", "glass"].forEach((id) => {
     const p = PASOS.find((q) => q.p[0] === id),
@@ -287,38 +233,87 @@
       d = Math.max(s.x, s.y) * 1.2 + 7;
     p.c = [c.x, c.y + d * 0.3, c.z + d, c.x, c.y, c.z];
   }
-  const paso = (id) => PASOS.find((q) => q.p[0] === id);
-  paso("aio").t =
-    "La bomba va sobre la CPU y el radiador con 2 ventiladores RGB al frente del case.";
-  paso("ram").t =
-    "Alinee la muesca de cada módulo y presione hasta que las pestañas hagan clic. Repita con los 4 módulos.";
-  Object.assign(FICHA, {
-    kb: [
-      "Teclado mecánico con retroiluminación RGB.",
+  window.aplicarModeloTeclado = () => {
+    if (!GLB.kb || P.kb.userData.modeloDetallado) return;
+    const teclado = pieza("kb", 1, 4, true);
+    teclado.position.y = -0.15;
+    P.kb.clear();
+    P.kb.add(teclado);
+    P.kb.userData.modeloDetallado = true;
+    if (window.refrescarPiezaGaleria)
+      window.refrescarPiezaGaleria("kb");
+  };
+  if (GLB.kb) window.aplicarModeloTeclado();
+  const crearCablePeriferico = (id, puntosMesa, puerto) => {
+    const radio = 0.03,
+      cable = new THREE.Group(),
+      material = new THREE.MeshStandardMaterial({
+        color: 0x030405,
+        roughness: 0.9,
+        metalness: 0.05,
+      }),
+      tramo = (curva, segmentos) =>
+        cable.add(
+          new THREE.Mesh(
+            new THREE.TubeGeometry(curva, segmentos, radio, 7, false),
+            material,
+          ),
+        );
+    tramo(
+      new THREE.CatmullRomCurve3(puntosMesa.map((p) => V(...p))),
+      70,
+    );
+    const puntosTorre = [
+      V(...puntosMesa[puntosMesa.length - 1]),
+      V(-4.3, 0.12, puerto[2]),
+      V(-4.3, 8.9, puerto[2]),
+      V(...puerto),
+    ];
+    puntosTorre.slice(1).forEach((punto, i) => {
+      const anterior = puntosTorre[i];
+      tramo(new THREE.LineCurve3(anterior, punto), 1);
+      if (i < puntosTorre.length - 2) {
+        const junta = new THREE.Mesh(
+          new THREE.SphereGeometry(radio, 8, 6),
+          material,
+        );
+        junta.position.copy(punto);
+        cable.add(junta);
+      }
+    });
+    cable.name = `Cable USB ${id}`;
+    cable.visible = false;
+    S.add(cable);
+    return cable;
+  };
+  const puertosUsb = GLBMETA.usb.map(([x, y, z]) => [-9 + x, y, z]);
+  const cablesPerifericos = {
+    kb: crearCablePeriferico(
+      "teclado",
       [
-        "Formato completo con teclado numérico",
-        "Iluminación RGB por tecla",
-        "Teclas con perfil bajo y base rígida",
-        "Conexión USB por cable",
+        [0.5, 0.12, 3.08],
+        [0.5, 0.12, 2.98],
+        [-3.65, 0.12, 2.98],
+        [-4.3, 0.12, 2.35],
       ],
-    ],
-    aio: [
-      "Refrigeración líquida todo en uno (AIO).",
+      puertosUsb[1],
+    ),
+    mouse: crearCablePeriferico(
+      "mouse",
       [
-        "Bloque sobre la CPU que absorbe el calor",
-        "Radiador frontal con aletas de aluminio",
-        "2 ventiladores de 120 mm con iluminación RGB",
-        "Se fija al zócalo y al frente del case con tornillos",
+        [6.8, 0.12, 3.35],
+        [6.8, 0.12, 2.77],
+        [-3.7, 0.12, 2.77],
+        [-4.3, 0.12, 2.35],
       ],
-    ],
-    ram: [
-      "Memoria de acceso rápido para los programas abiertos.",
-      [
-        "4 módulos DDR5 con disipador metálico",
-        "Barra de luz RGB direccionable",
-        "Se instalan en ranuras con pestañas laterales",
-        "En pares para activar el doble canal",
-      ],
-    ],
-  });
+      puertosUsb[2],
+    ),
+  };
+  window.actualizarCablePeriferico = (id, visible) => {
+    if (cablesPerifericos[id]) cablesPerifericos[id].visible = visible;
+  };
+  window.ocultarCablesPerifericos = () =>
+    Object.values(cablesPerifericos).forEach((cable) => {
+      cable.visible = false;
+    });
 })();
