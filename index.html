@@ -43,7 +43,7 @@ details summary{outline:none}
 .nota{margin-top:8px;font-size:12px;color:#8aa0c8;border-left:3px solid #7000ff;padding-left:8px}
 #mhud{font-size:11.5px;color:#8ff;margin-bottom:4px}#mnu{display:none}#panel.min #lista{display:none}
 @media(max-width:700px){#mnu{display:inline-block}#panel{width:calc(100% - 24px)}#info{width:auto;left:12px;right:12px;bottom:12px;max-height:30vh;overflow:auto;font-size:12.5px}
-#mano{left:12px;right:12px;top:auto;bottom:12px;transform:none;width:auto;max-width:none;max-height:46vh;overflow:auto}body:has(#mano[style*="block"]) #info{display:none}}
+#mano{left:12px;right:12px;top:auto;bottom:12px;transform:none;width:auto;max-width:none;max-height:46vh;overflow:auto}body:has(#mano[style*="block"]) #info{display:none}#gl{display:flex;overflow-x:auto;gap:6px;padding-bottom:4px}#gl .paso{white-space:nowrap;flex:none}#panel{max-height:34vh}#info{max-height:28vh}}
 </style></head><body>
 <div id="carga"><h2>SIMULADOR DE ENSAMBLAJE DE PC</h2><div class="bar"><i id="cb"></i></div><p id="ct">Preparando…</p></div><canvas id="c"></canvas>
 <div id="panel"><h1>SIMULADOR DE ENSAMBLAJE DE PC</h1>
@@ -2452,7 +2452,7 @@ function showPart(id){limpiarHover();if(gobj)GS.remove(gobj);gspin=[];gexp=gexpT
  const A=[],B=[];src.traverse(o=>A.push(o));c.traverse(o=>{B.push(o);o.visible=true;if(o.isMesh&&!o.material.isMeshBasicMaterial){o.material=o.material.clone();o.material.wireframe=gwire;o.userData.cl=1}});A.forEach((o,i)=>{if(spin.includes(o))gspin.push(B[i])});
  c.updateMatrixWorld(true);const bb=new THREE.Box3().setFromObject(c),ct=bb.getCenter(new THREE.Vector3()),sz=bb.getSize(new THREE.Vector3());c.position.sub(ct);c.children.forEach(k=>k.userData.p0=k.position.clone());
  gobj=new THREE.Group();gobj.add(c);gobj.scale.setScalar(6.4/Math.max(sz.x,sz.y,sz.z));gobj.userData.ax=src.userData.ax||'z';gobj.userData.id=id;gobj.rotation.y=-.45;gobj.rotation.x=src.userData.rx||0;GS.add(gobj);
- gl.childNodes.forEach(d=>d.className='paso'+(d.dataset.id===id?' act':''));const f=FICHA[id];info.innerHTML='<b>'+nom(id)+'</b><div style="margin:8px 0 2px;color:#8ff;font-weight:700">¿Para qué sirve?</div>'+FUNCION[id]+'<div style="margin-top:8px"><b style="font-size:13px">Cómo se instala</b><br>'+PASOS.find(q=>q.p[0]===id).t+'</div>'+'<details style="margin-top:8px;color:#8aa0c8"><summary style="cursor:pointer">Datos técnicos</summary><ul style="margin:4px 0 0 18px">'+f[1].map(t=>'<li>'+t+'</li>').join('')+'</ul></details>'+(id==='glass'?'':'<div style="margin-top:8px;color:#8ff;font-size:12px">💡 Pulsa «Explotar» y pasa el cursor sobre cada parte para saber qué es.</div>')}
+ gl.childNodes.forEach(d=>d.className='paso'+(d.dataset.id===id?' act':''));const f=FICHA[id];info.innerHTML='<b>'+nom(id)+'</b><div style="margin:8px 0 2px;color:#8ff;font-weight:700">¿Para qué sirve?</div>'+FUNCION[id]+'<div style="margin-top:8px"><b style="font-size:13px">Cómo se instala</b><br>'+PASOS.find(q=>q.p[0]===id).t+'</div>'+'<details style="margin-top:8px;color:#8aa0c8"><summary style="cursor:pointer">Datos técnicos</summary><ul style="margin:4px 0 0 18px">'+f[1].map(t=>'<li>'+t+'</li>').join('')+'</ul></details>'+(id==='glass'?'':'<div style="margin-top:8px;color:#8ff;font-size:12px">💡 Pulsa «Explotar» y pasa el cursor (o toca con el dedo) sobre cada parte para saber qué es.</div>')}
 function galeria(on){limpiarHover();gal=on;comp.passes[0].scene=on?GS:S;comp.passes[0].camera=on?gcam:cam;ctl.enabled=!on;gctl.enabled=on;document.getElementById('panel').style.display=on?'none':'';mano.style.display=on?'none':(man?'block':'none');gp.style.display=on?'':'none';
  if(on){stopAuto();showPart(Object.keys(FICHA)[0])}else info.innerHTML='<b>Simulador de ensamblaje</b><br>Pulsa «Siguiente» o «Auto» para continuar.'}
 gp.querySelector('#gv').onclick=()=>galeria(false);gp.querySelector('#gr').onclick=()=>gctl.autoRotate=!gctl.autoRotate;
@@ -2716,6 +2716,11 @@ function quiz(){let i=0,ok=0;
 $('bar').insertAdjacentHTML('beforeend','<button id="ayu">❓ Ayuda</button><button id="qzb">🎓 Quiz</button><button id="mnu">☰ Menú</button>');
 $('ayu').onclick=ayuda;$('qzb').onclick=quiz;$('mnu').onclick=()=>$('panel').classList.toggle('min');
 if(innerWidth<700)$('panel').classList.add('min');
+// ---- galería en celular: tocar una parte (el dedo no tiene «hover») ----
+{const cv2=$('c');let t0=null;
+cv2.addEventListener('pointerdown',e=>{if(e.pointerType==='touch')t0={x:e.clientX,y:e.clientY,t:performance.now()}});
+cv2.addEventListener('pointerup',e=>{if(!t0||!gal)return;const ok=Math.hypot(e.clientX-t0.x,e.clientY-t0.y)<10&&performance.now()-t0.t<500;t0=null;
+ if(ok)cv2.dispatchEvent(new PointerEvent('pointermove',{clientX:e.clientX,clientY:e.clientY,buttons:0,bubbles:true}))})}
 })();
 </script>
 <script>
