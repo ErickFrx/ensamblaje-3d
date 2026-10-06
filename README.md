@@ -1,4 +1,4 @@
-# Simulador de Ensamblaje de PC en 3D
+# Simulador de Ensamblaje en 3D
 
 Proyecto universitario de la Universidad Nacional de Cañete.
 
