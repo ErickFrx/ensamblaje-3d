@@ -59,6 +59,6 @@ PASOS.forEach(p=>{if(INST[p.p[0]])p.t=INST[p.p[0]]});PASOS[PASOS.length-1].t='<b
 Object.assign(FICHA,{
  glass:['Panel lateral de vidrio templado del case.',['Vidrio templado de 4 mm','Bordes biselados','Permite ver los componentes y la iluminación RGB','Fijación con tornillos de mariposa']],
  kb:['Teclado mecánico con retroiluminación RGB.',['Formato 75% (sin teclado numérico)','Iluminación RGB por tecla','Base de aluminio','USB-A con cable trenzado']],
- mouse:['Mouse gamer ergonómico.',['Sensor óptico de 26 000 DPI','Rueda con luz RGB y botones laterales','Peso aproximado: 85 g','USB-A con cable']],
+ mouse:['Mouse gamer RGB del modelo reemplazado.',['Cuerpo ergonómico con iluminación RGB','Botones principales y rueda de desplazamiento','Base inferior con sensor óptico','Conexión USB por cable']],
  mon:['Monitor de 27 pulgadas con luz ambiental trasera.',['Resolución QHD 2560×1440 a 165 Hz','Panel IPS con bordes mínimos','Luz RGB trasera (ambilight)','Entradas DisplayPort y HDMI']],
  cpu:['Procesador: ejecuta las instrucciones de todos los programas.',['Tapa metálica (IHS) que reparte el calor','Sustrato con condensadores SMD','Pads dorados LGA en la cara inferior','24 núcleos · hasta 6 GHz']]});

@@ -43,7 +43,7 @@ T.add(pieza('case',2,1,true));
 {const c=V(...GLBMETA.cpu);c.z+=.06;P.cpu.position.copy(c);P.cpu.userData.to.copy(c);const s=V(...GLBMETA.ssd);s.z+=.05;P.ssd.position.copy(s);P.ssd.userData.to.copy(s)}
 // ---- periféricos (sobre el escritorio) ----
 poner('kb',pieza('kb',1,4,true),D,V(.5,.08,4.1),'y',.95);
-poner('mouse',pieza('mouse',1,4,true),D,V(7.2,.08,4.1),'y',.8);
+poner('mouse',pieza('mouse',1,3,true),D,V(7.05,.06,4.05),'y',0); P.mouse.scale.setScalar(1.8);
 {const mo=poner('mon',pieza('mon',2,5,true),D,V(2,0,-3.4),'z'),ls=[];mo.traverse(o=>{if(o.isMesh&&o.name.startsWith('MY SCREEN'))ls.push(o)});
  ls.forEach(o=>{const g=o.geometry,b=g.boundingBox,p=g.attributes.position,uv=new Float32Array(p.count*2);
   for(let i=0;i<p.count;i++){uv[i*2]=(p.getX(i)-b.min.x)/(b.max.x-b.min.x);uv[i*2+1]=(p.getY(i)-b.min.y)/(b.max.y-b.min.y)}
@@ -54,7 +54,7 @@ P.spk={userData:{ex:V(0,7,0)}};poner('spk',pieza('spk',2,2,true),D,V(2,0,-3.4),'
 {const mk=(id,pts,r)=>{const m=cabs[id];m.geometry.dispose();m.geometry=new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts.map(p=>V(...p))),90,r,8);m.geometry.setDrawRange(0,0)};
  const fx=-9+GLBMETA.front+.15,u=GLBMETA.usb,ux=i=>-9+u[i][0],uy=i=>u[i][1]+.04,uz=i=>u[i][2];
  mk('kb',[[-3.1,.2,3.3],[-3.4,.1,2.9],[fx,.1,2.4],[fx,3,1.6],[fx,8,1.1],[fx-.1,9.5,uz(1)],[ux(1),uy(1)+.12,uz(1)]],.05);
- mk('mouse',[[6.7,.2,3.4],[4,.1,2.2],[-1,.1,2.0],[fx-.4,.1,1.9],[fx,4,.9],[fx,8,.2],[fx-.1,9.5,uz(2)],[ux(2),uy(2)+.12,uz(2)]],.04);
+ mk('mouse',[[7.05,.075,3.30],[6.75,.09,3.18],[5.4,.10,3.00],[4.0,.10,2.45],[fx-.4,.10,1.9],[fx,4,.9],[fx,8,.2],[fx-.1,9.5,uz(2)],[ux(2),uy(2)+.12,uz(2)]],.04);
  T.updateMatrixWorld(true);D.updateMatrixWorld(true);const bm=new THREE.Box3().setFromObject(P.mon);
  mk('mon',[[2,2.2,bm.min.z+.7],[1.5,.1,bm.min.z-.2],[-8,.1,-4.4],[-13.6,.2,-3],[-13.7,2.5,-1],[-13.4,3.1,-1]],.07)}
 // ---- cámara de cada paso, según el tamaño real de la pieza ----
