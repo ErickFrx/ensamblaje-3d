@@ -116,7 +116,7 @@ D.add(at(rbf(14.4,5.2,.04,.15,rgb(.2)),3.2,.02,4.2));D.add(at(rbf(14,4.8,.06,.12
 const sc=document.createElement('canvas');sc.width=1280;sc.height=720;const x=sc.getContext('2d');
 const gr=x.createLinearGradient(0,0,1280,720);gr.addColorStop(0,'#05122b');gr.addColorStop(.5,'#2b0b5e');gr.addColorStop(1,'#00a6c8');x.fillStyle=gr;x.fillRect(0,0,1280,720);
 x.fillStyle='rgba(255,255,255,.08)';for(let i=0;i<7;i++){x.beginPath();x.arc(200+i*180,500-i*40,90+i*14,0,7);x.fill()}
-x.fillStyle='#fff';x.textAlign='center';x.font='bold 54px Segoe UI';x.fillText('UNIVERSIDAD NACIONAL DE CAÑETE',640,320);x.font='28px Segoe UI';x.fillStyle='#8ff';x.fillText('Simulador Virtual de Ensamblaje  ·  Equipo listo',640,375);
+x.fillStyle='#fff';x.textAlign='center';x.font='bold 54px Segoe UI';x.fillText('UNIVERSIDAD NACIONAL DE CAÑETE',640,320);x.font='28px Segoe UI';x.fillStyle='#8ff';x.fillText('Simulador Virtual de Ensamblaje  ·  Equipo 02',640,375);
 x.fillStyle='rgba(8,12,24,.85)';x.fillRect(0,672,1280,48);x.fillStyle='#fff';x.font='20px Segoe UI';x.textAlign='left';x.fillText('●  UNDC   |   Windows',20,704);
 const scrM=new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(sc),color:0x000000});
 {const scr=new THREE.Mesh(new THREE.PlaneGeometry(10.6,5.9),scrM);scr.position.z=.14;

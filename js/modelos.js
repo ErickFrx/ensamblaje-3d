@@ -1,6 +1,6 @@
 // ===== modelos.js — piezas 3D reales (.glb embebidos en /models) =====
 // Se ejecuta después de app.js y detalle.js: reemplaza las piezas hechas con formas simples por los modelos reales.
-// Modelo base: «Gaming Desktop PC» por Yolala1232 (Sketchfab) · licencia CC-BY-4.0
+// Modelo base: «Gaming Desktop PC» · licencia CC-BY-4.0
 (()=>{
 if(typeof GLB==='undefined'){console.warn('Modelos GLB no encontrados: se mantienen las piezas simples');return}
 const bytes=s=>{const b=atob(s),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u};

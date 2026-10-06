@@ -55,7 +55,6 @@ function felicitar(){EST.t1=EST.t1||performance.now();
 // ---- cómo usar ----
 function ayuda(){modal('<h2>Cómo usar el simulador</h2><ul><li><b>Ver:</b> arrastra para girar la vista y usa la rueda (o pellizca en el celular) para acercar.</li><li><b>Avanzar:</b> «Siguiente ▶» arma la torre pieza por pieza, «Auto» lo hace solo y «🔍 Galería» muestra cada pieza por dentro.</li><li><b>✋ Manual:</b> arrastra la pieza hasta su guía y gírala (Q/E, W/S, A/D). Cuando la guía se pone verde, encaja sola.</li><li><b>🎓 Quiz:</b> comprueba lo aprendido con 8 preguntas.</li></ul><div class="bt"><button id="ok1">Entendido</button></div>');$('ok1').onclick=cerrar}
 window.mostrarAyuda=ayuda;
-function creditos(){modal('<h2>Créditos</h2><p>Modelo 3D «Gaming Desktop PC» de Yolala1232 (Sketchfab), licencia CC BY 4.0, adaptado para este proyecto.</p><p>Motor gráfico: three.js (licencia MIT).</p><div class="bt"><button id="ok2">Cerrar</button></div>');$('ok2').onclick=cerrar}
 
 // ---- quiz ----
 const QS=[
@@ -79,8 +78,8 @@ function quiz(){let i=0,ok=0;
  ver()}
 
 // ---- botones nuevos y menú móvil ----
-$('bar').insertAdjacentHTML('beforeend','<button id="ayu">❓ Ayuda</button><button id="qzb">🎓 Quiz</button><button id="mnu">☰ Menú</button><button id="crd">ⓘ Créditos</button>');
-$('ayu').onclick=ayuda;$('crd').onclick=creditos;$('qzb').onclick=quiz;$('mnu').onclick=()=>$('panel').classList.toggle('min');
+$('bar').insertAdjacentHTML('beforeend','<button id="ayu">❓ Ayuda</button><button id="qzb">🎓 Quiz</button><button id="mnu">☰ Menú</button>');
+$('ayu').onclick=ayuda;$('qzb').onclick=quiz;$('mnu').onclick=()=>$('panel').classList.toggle('min');
 if(innerWidth<700)$('panel').classList.add('min');
 // ---- galería en celular: tocar una parte (el dedo no tiene «hover») ----
 {const cv2=$('c');let t0=null;
