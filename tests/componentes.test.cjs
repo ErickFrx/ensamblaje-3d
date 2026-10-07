@@ -20,29 +20,26 @@ const gruposEsperados = {
   ssd: 11,
   gpu: 6,
   glass: 1,
-  kb: 4,
+  kb: 3,
   mouse: 3,
   mon: 5,
   spk: 2,
 };
 
 test("los pasos cubren una vez cada componente documentado", () => {
-  assert.equal(PASOS.length, 15);
-  assert.equal(PASOS.length, 15);
+  assert.equal(PASOS.length, 14);
   assert.equal(PASOS.at(-1).end, 1);
   assert.deepEqual([...new Set(idsDePiezas)].sort(), Object.keys(FICHA).sort());
   assert.equal(idsDePiezas.length, Object.keys(FICHA).length);
 });
 
-test("las conexiones y la revisión previa preceden al encendido", () => {
-  const indiceCables = PASOS.findIndex(
-    (paso) => paso.n === "Conectar los cables internos",
-  );
+test("la revisión previa precede al encendido sin un paso separado de cableado", () => {
   const indiceRevision = PASOS.findIndex((paso) => paso.checklist);
   const indiceEncendido = PASOS.findIndex((paso) => paso.end);
 
-  assert.ok(indiceCables >= 0);
-  assert.ok(indiceCables < indiceRevision);
+  assert.ok(
+    PASOS.every((paso) => paso.n !== "Conectar los cables internos"),
+  );
   assert.ok(indiceRevision < indiceEncendido);
   assert.equal(PASOS[indiceRevision].checklist.length, 6);
   assert.ok(PASOS[indiceRevision].checklist.every(Boolean));
@@ -102,7 +99,6 @@ test("las instrucciones y las cámaras existen en todos los pasos de pieza", () 
     assert.equal(paso.c.length, 6, `Cámara inválida: ${paso.n}`);
     assert.ok(
       paso.p.length > 0 ||
-        paso.n === "Conectar los cables internos" ||
         paso.checklist,
       `Paso sin pieza ni actividad: ${paso.n}`,
     );

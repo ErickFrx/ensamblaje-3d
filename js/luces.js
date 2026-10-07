@@ -39,7 +39,7 @@ function agregarLucesTorre(torre) {
     [0xff2bd6, 2, 2.6, 1.4],
     [0x7a3cff, 0, 8, 0.5],
   ].map(([color, x, y, z]) => {
-    const luz = new THREE.PointLight(color, 1.6, 13, 1.4);
+    const luz = new THREE.PointLight(color, 1.15, 13, 1.4);
     luz.position.set(x, y, z);
     luz.visible = false;
     torre.add(luz);

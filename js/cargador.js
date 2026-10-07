@@ -115,6 +115,20 @@
       mallas.forEach((m) => root.add(m));
       return root;
     }
+    if (id === "kb") {
+        const gr = [new THREE.Group(), new THREE.Group(), new THREE.Group()];
+        mallas.forEach((m) => {
+          const nombre = m.name || "";
+          const i = /_Tasten(?:_|$)/i.test(nombre)
+            ? 2
+            : /_Tastatur_(?:Seite|Unterseite)_/i.test(nombre)
+              ? 0
+              : 1;
+          gr[i].add(m);
+        });
+        gr.forEach((g) => root.add(g));
+        return root;
+    }
     const c = mallas.map((m) =>
         m.geometry.boundingBox.getCenter(new THREE.Vector3()).getComponent(ax),
       ),
@@ -298,7 +312,15 @@
     scrM.polygonOffsetUnits = -6;
   }
   P.spk = { userData: { ex: V(0, 7, 0) } };
-  poner("spk", pieza("spk", 2, 2, true), D, V(2, 0, -3.4), "z");
+  const parlantes = pieza("spk", 2, 2, true);
+  parlantes.traverse((malla) => {
+    if (
+      malla.isMesh &&
+      malla.geometry.boundingBox.getCenter(new THREE.Vector3()).x > 0
+    )
+      malla.position.x += 4.4;
+  });
+  poner("spk", parlantes, D, V(2, 0, -3.4), "z");
   T.updateMatrixWorld(true);
   ["psu", "mobo", "cpu", "aio", "ram", "ssd", "gpu", "glass"].forEach((id) => {
     const p = PASOS.find((q) => q.p[0] === id),

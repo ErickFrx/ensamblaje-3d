@@ -25,6 +25,7 @@ function ajustarCamaraInicio() {
   ctl.target.copy(centroCamaraInicio);
 }
 const bloom = configurarIluminacion(R, S);
+bloom.strength = 0.45;
 const comp = new THREE.EffectComposer(R);
 comp.addPass(new THREE.RenderPass(S, cam));
 comp.addPass(bloom);
@@ -590,23 +591,350 @@ P.aio.children[0].add(at(lab("CORSAIR", 0.9, 0.35, 52), 0, 0, 0.33));
 P.psu.add(at(lab("1000W|80 PLUS GOLD", 2.2, 0.8, 38), 1.5, 0, 1.93));
 S.add(
   at(
-    rbf(36, 14, 0.5, 0.3, M(0x0b0d12, { roughness: 0.2, metalness: 0.5 })),
+    rbf(36, 14, 0.42, 0.3, M(0x171b23, { roughness: 0.65, metalness: 0.18 })),
     0,
-    -0.28,
+    -0.24,
     0,
   ),
+);
+const tableroCanvas = document.createElement("canvas");
+tableroCanvas.width = 1024;
+tableroCanvas.height = 512;
+const tableroContext = tableroCanvas.getContext("2d");
+tableroContext.fillStyle = "#11151c";
+tableroContext.fillRect(0, 0, tableroCanvas.width, tableroCanvas.height);
+for (let i = 0; i < 180; i++) {
+  const y = (i / 180) * tableroCanvas.height;
+  tableroContext.strokeStyle = `rgba(180, 195, 215, ${0.018 + Math.random() * 0.022})`;
+  tableroContext.lineWidth = 1 + Math.random() * 2;
+  tableroContext.beginPath();
+  tableroContext.moveTo(0, y + Math.sin(i * 0.25) * 5);
+  tableroContext.bezierCurveTo(
+    280,
+    y + Math.cos(i * 0.31) * 7,
+    690,
+    y + Math.sin(i * 0.17) * 6,
+    tableroCanvas.width,
+    y + Math.cos(i * 0.22) * 5,
+  );
+  tableroContext.stroke();
+}
+const tableroTextura = new THREE.CanvasTexture(tableroCanvas);
+tableroTextura.colorSpace = THREE.SRGBColorSpace;
+tableroTextura.anisotropy = 8;
+const superficieTablero = new THREE.Mesh(
+  new THREE.PlaneGeometry(35.7, 13.7),
+  new THREE.MeshStandardMaterial({
+    map: tableroTextura,
+    roughness: 0.88,
+    metalness: 0.04,
+    envMapIntensity: 0.35,
+  }),
+);
+superficieTablero.rotation.x = -Math.PI / 2;
+superficieTablero.position.set(0, -0.026, 0);
+superficieTablero.renderOrder = 1;
+S.add(superficieTablero);
+const bordeTablero = M(0x343c49, { roughness: 0.42, metalness: 0.68 });
+const lineaTablero = M(0x1e92a7, { roughness: 0.3, metalness: 0.45 });
+S.add(
+  at(new THREE.Mesh(new THREE.BoxGeometry(35.5, 0.045, 0.055), bordeTablero), 0, -0.29, 6.97),
+  at(new THREE.Mesh(new THREE.BoxGeometry(35.2, 0.018, 0.025), lineaTablero), 0, -0.25, 7.01),
+);
+const pataTablero = M(0x202630, { roughness: 0.38, metalness: 0.72 });
+const pieTablero = M(0x11151c, { roughness: 0.55, metalness: 0.48 });
+[-16.2, 16.2].forEach((x) => {
+  [-5.7, 5.7].forEach((z) => {
+    S.add(
+      at(new THREE.Mesh(new THREE.BoxGeometry(0.3, 4.35, 0.3), pataTablero), x, -2.62, z),
+      at(new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.12, 0.48), pieTablero), x, -4.85, z),
+    );
+  });
+});
+S.add(
+  at(new THREE.Mesh(new THREE.BoxGeometry(32.5, 0.22, 0.22), pataTablero), 0, -0.68, -5.7),
+  at(new THREE.Mesh(new THREE.BoxGeometry(32.5, 0.22, 0.22), pataTablero), 0, -0.68, 5.7),
+  at(new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.22, 11.4), pataTablero), -16.2, -0.68, 0),
+  at(new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.22, 11.4), pataTablero), 16.2, -0.68, 0),
 );
 S.add(
   at(
     new THREE.Mesh(
-      new THREE.PlaneGeometry(36.4, 14.4).rotateX(-Math.PI / 2),
-      new THREE.MeshBasicMaterial({ color: 0x0b0d12 }),
+      new THREE.PlaneGeometry(200, 200).rotateX(-Math.PI / 2),
+      new THREE.MeshBasicMaterial({ color: 0x05070d }),
     ),
     0,
-    -0.5,
+    -4.92,
     0,
   ),
 );
+const sombraCanvas = document.createElement("canvas");
+sombraCanvas.width = sombraCanvas.height = 128;
+const sombraContext = sombraCanvas.getContext("2d");
+const gradienteSombra = sombraContext.createRadialGradient(64, 64, 8, 64, 64, 64);
+gradienteSombra.addColorStop(0, "rgba(0, 0, 0, 0.38)");
+gradienteSombra.addColorStop(0.55, "rgba(0, 0, 0, 0.2)");
+gradienteSombra.addColorStop(1, "rgba(0, 0, 0, 0)");
+sombraContext.fillStyle = gradienteSombra;
+sombraContext.fillRect(0, 0, 128, 128);
+const texturaSombra = new THREE.CanvasTexture(sombraCanvas);
+const agregarSombraContacto = (x, z, ancho, fondo, opacidad = 1) => {
+  const sombra = new THREE.Mesh(
+    new THREE.PlaneGeometry(ancho, fondo),
+    new THREE.MeshBasicMaterial({
+      map: texturaSombra,
+      transparent: true,
+      opacity: opacidad,
+      depthWrite: false,
+      toneMapped: false,
+    }),
+  );
+  sombra.rotation.x = -Math.PI / 2;
+  sombra.position.set(x, -0.022, z);
+  sombra.renderOrder = 1;
+  S.add(sombra);
+};
+agregarSombraContacto(-9, 0, 10, 6, 0.85);
+agregarSombraContacto(0.5, 4.1, 8, 3.4, 0.75);
+agregarSombraContacto(7.2, 4.1, 2.8, 2.5, 0.8);
+agregarSombraContacto(2, -3.4, 5.2, 2.8, 0.7);
+const barraRGB = new THREE.Group();
+const materialBarra = M(0x171c26, { roughness: 0.3, metalness: 0.75 });
+const baseBarra = new THREE.Mesh(
+  new THREE.CylinderGeometry(0.5, 0.58, 0.16, 40),
+  materialBarra,
+);
+baseBarra.position.y = 0.08;
+barraRGB.add(baseBarra);
+const anilloBarra = new THREE.Mesh(
+  new THREE.TorusGeometry(0.38, 0.025, 8, 40),
+  rgb(0.45),
+);
+anilloBarra.rotation.x = Math.PI / 2;
+anilloBarra.position.y = 0.17;
+barraRGB.add(anilloBarra);
+barraRGB.add(
+  at(
+    new THREE.Mesh(new THREE.BoxGeometry(0.26, 3.9, 0.22), materialBarra),
+    0,
+    2.12,
+    0,
+  ),
+);
+const degradadoRGB = document.createElement("canvas");
+degradadoRGB.width = 32;
+degradadoRGB.height = 512;
+const contextoRGB = degradadoRGB.getContext("2d");
+const gradienteRGB = contextoRGB.createLinearGradient(0, 0, 0, 512);
+gradienteRGB.addColorStop(0, "#f42cdb");
+gradienteRGB.addColorStop(0.27, "#623cff");
+gradienteRGB.addColorStop(0.52, "#20d9ff");
+gradienteRGB.addColorStop(0.76, "#42ff9b");
+gradienteRGB.addColorStop(1, "#ffbd42");
+contextoRGB.fillStyle = gradienteRGB;
+contextoRGB.fillRect(0, 0, 32, 512);
+const texturaRGB = new THREE.CanvasTexture(degradadoRGB);
+texturaRGB.colorSpace = THREE.SRGBColorSpace;
+const haloRGB = new THREE.Mesh(
+  new THREE.PlaneGeometry(0.42, 3.82),
+  new THREE.MeshBasicMaterial({
+    map: texturaRGB,
+    transparent: true,
+    opacity: 0.42,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+    toneMapped: false,
+  }),
+);
+haloRGB.position.set(0, 2.12, 0.126);
+barraRGB.add(haloRGB);
+const panelRGB = new THREE.Mesh(
+  new THREE.PlaneGeometry(0.2, 3.62),
+  new THREE.MeshBasicMaterial({
+    map: texturaRGB,
+    color: 0xffffff,
+    toneMapped: false,
+  }),
+);
+panelRGB.position.set(0, 2.12, 0.14);
+barraRGB.add(panelRGB);
+const bordeRGB = new THREE.Mesh(
+  new THREE.BoxGeometry(0.035, 3.75, 0.035),
+  rgb(0.4),
+);
+bordeRGB.position.set(0.12, 2.12, 0.13);
+barraRGB.add(bordeRGB);
+const baseRGB = new THREE.Mesh(
+  new THREE.BoxGeometry(0.34, 0.1, 0.3),
+  materialBarra,
+);
+baseRGB.position.set(0, 0.22, 0);
+barraRGB.add(baseRGB);
+const luzBarra = new THREE.PointLight(0x5c45ff, 8, 7, 2);
+luzBarra.position.set(0, 2.1, 0.45);
+barraRGB.add(luzBarra);
+barraRGB.position.set(11.4, 0, -3.6);
+S.add(barraRGB);
+
+const soporteAuriculares = new THREE.Group();
+const materialSoporte = M(0x252c38, { roughness: 0.3, metalness: 0.78 });
+const materialAuricular = M(0x171b22, { roughness: 0.32, metalness: 0.48 });
+const materialAlmohadilla = M(0x090b10, { roughness: 0.92, metalness: 0.02 });
+const materialRojo = M(0xd21e35, { roughness: 0.86, metalness: 0.02 });
+const pieSoporte = new THREE.Mesh(
+  new THREE.CylinderGeometry(0.48, 0.55, 0.14, 40),
+  materialSoporte,
+);
+pieSoporte.position.y = 0.07;
+soporteAuriculares.add(pieSoporte);
+const aroSoporte = new THREE.Mesh(
+  new THREE.TorusGeometry(0.34, 0.022, 8, 36),
+  rgb(0.45),
+);
+aroSoporte.rotation.x = Math.PI / 2;
+aroSoporte.position.y = 0.15;
+soporteAuriculares.add(aroSoporte);
+const posteSoporte = new THREE.Mesh(
+  new THREE.CylinderGeometry(0.08, 0.12, 1.65, 20),
+  materialSoporte,
+);
+posteSoporte.position.set(0, 0.98, -0.1);
+soporteAuriculares.add(posteSoporte);
+const ganchoAuricular = new THREE.Mesh(
+  new THREE.TubeGeometry(
+    new THREE.CatmullRomCurve3([
+      new THREE.Vector3(0, 1.78, -0.1),
+      new THREE.Vector3(0, 1.98, -0.1),
+      new THREE.Vector3(0, 2.08, 0.02),
+      new THREE.Vector3(0, 2.08, 0.2),
+      new THREE.Vector3(0, 1.98, 0.28),
+    ]),
+    24,
+    0.075,
+    10,
+    false,
+  ),
+  materialSoporte,
+);
+soporteAuriculares.add(ganchoAuricular);
+const auriculares = new THREE.Group();
+auriculares.position.set(0, 1.72, 0.25);
+auriculares.rotation.y = 0;
+const geometriaAuriculares = new THREE.Group();
+geometriaAuriculares.position.set(0, -1.72, -0.25);
+auriculares.add(geometriaAuriculares);
+const curvaArco = (z, puntos = [
+  [-0.58, 1.45],
+  [-0.72, 2.12],
+  [-0.52, 2.63],
+  [0, 2.82],
+  [0.52, 2.63],
+  [0.72, 2.12],
+  [0.58, 1.45],
+]) =>
+  new THREE.CatmullRomCurve3(
+    puntos.map(([x, y]) => new THREE.Vector3(x, y, z)),
+  );
+geometriaAuriculares.add(
+  new THREE.Mesh(
+    new THREE.TubeGeometry(curvaArco(0.26), 56, 0.15, 16, false),
+    materialAuricular,
+  ),
+  new THREE.Mesh(
+    new THREE.TubeGeometry(
+      curvaArco(
+        0.33,
+        [
+          [-0.53, 1.62],
+          [-0.63, 2.12],
+          [-0.45, 2.52],
+          [0, 2.68],
+          [0.45, 2.52],
+          [0.63, 2.12],
+          [0.53, 1.62],
+        ],
+      ),
+      48,
+      0.085,
+      12,
+      false,
+    ),
+    materialRojo,
+  ),
+);
+[-1, 1].forEach((lado) => {
+  const copa = new THREE.Group();
+  const carcasa = rb(0.76, 0.98, 0.3, 0.23, materialAuricular);
+  const almohadilla = rb(0.64, 0.85, 0.17, 0.27, materialAlmohadilla);
+  almohadilla.position.z = 0.13;
+  const placaCopa = rb(
+    0.58,
+    0.74,
+    0.055,
+    0.2,
+    M(0x202630, { roughness: 0.38, metalness: 0.58 }),
+  );
+  placaCopa.position.z = 0.19;
+  const aroCopa = new THREE.Mesh(
+    new THREE.TorusGeometry(0.31, 0.035, 10, 48),
+    materialAuricular,
+  );
+  aroCopa.scale.set(0.82, 1.16, 1);
+  aroCopa.position.z = 0.29;
+  aroCopa.material = rgb(lado > 0 ? 0.12 : 0.62);
+  const detalleCopa = new THREE.Mesh(
+    new THREE.CircleGeometry(0.075, 24),
+    M(0xb8c0cc, { roughness: 0.3, metalness: 0.7 }),
+  );
+  detalleCopa.position.z = 0.287;
+  copa.add(carcasa, almohadilla, placaCopa, aroCopa, detalleCopa);
+  copa.position.set(lado * 0.6, 1.42, 0.23);
+  copa.rotation.y = lado * (Math.PI / 2);
+  geometriaAuriculares.add(copa);
+});
+const cableMicrofono = new THREE.Mesh(
+  new THREE.TubeGeometry(
+    new THREE.CatmullRomCurve3([
+      new THREE.Vector3(-0.68, 1.3, 0.4),
+      new THREE.Vector3(-0.79, 1.08, 0.48),
+      new THREE.Vector3(-1.02, 0.99, 0.56),
+      new THREE.Vector3(-1.22, 1.07, 0.6),
+      new THREE.Vector3(-1.3, 1.2, 0.6),
+    ]),
+    24,
+    0.035,
+    8,
+    false,
+  ),
+  materialAuricular,
+);
+geometriaAuriculares.add(cableMicrofono);
+const microfono = new THREE.Mesh(
+  new THREE.SphereGeometry(0.14, 20, 14),
+  materialAlmohadilla,
+);
+microfono.scale.set(1.2, 0.8, 1);
+microfono.position.set(-1.3, 1.2, 0.6);
+geometriaAuriculares.add(microfono);
+const cableAuricular = new THREE.Mesh(
+  new THREE.TubeGeometry(
+    new THREE.CatmullRomCurve3([
+      new THREE.Vector3(0.62, 1.18, 0.28),
+      new THREE.Vector3(0.82, 0.86, 0.32),
+      new THREE.Vector3(0.94, 0.52, 0.38),
+      new THREE.Vector3(0.9, 0.12, 0.42),
+    ]),
+    24,
+    0.025,
+    8,
+    false,
+  ),
+  materialAuricular,
+);
+geometriaAuriculares.add(cableAuricular);
+soporteAuriculares.add(auriculares);
+soporteAuriculares.position.set(8.7, 0, -3.3);
+S.add(soporteAuriculares);
 const D = new THREE.Group();
 S.add(D);
 const regD = (id, o, x, y, z, ex) => {
@@ -1147,7 +1475,10 @@ document.getElementById("rst").onclick = () => {
 document.getElementById("rgb").onclick = (e) => {
   rgbOn = !rgbOn;
   actualizarLucesTorre();
-  bloom.strength = rgbOn ? 0.75 : 0;
+  panelRGB.visible = rgbOn;
+  haloRGB.visible = rgbOn;
+  luzBarra.visible = rgbOn;
+  bloom.strength = rgbOn ? 0.45 : 0;
   e.currentTarget.textContent = rgbOn ? "RGB: ENCENDIDO" : "RGB: APAGADO";
   e.currentTarget.classList.toggle("on", rgbOn);
   e.currentTarget.setAttribute("aria-pressed", String(rgbOn));
@@ -1666,16 +1997,24 @@ function showPart(id) {
     if (spin.includes(o)) gspin.push(B[i]);
   });
   c.updateMatrixWorld(true);
+  const capas = CAPAS[id] || [],
+    partes =
+      c.children.length === capas.length
+        ? c
+        : c.children.length === 1 && c.children[0].children.length === capas.length
+          ? c.children[0]
+          : c;
   const bb = new THREE.Box3().setFromObject(c),
     ct = bb.getCenter(new THREE.Vector3()),
     sz = bb.getSize(new THREE.Vector3());
   c.position.sub(ct);
-  c.children.forEach((k) => (k.userData.p0 = k.position.clone()));
+  partes.children.forEach((k) => (k.userData.p0 = k.position.clone()));
   gobj = new THREE.Group();
   gobj.add(c);
   gobj.scale.setScalar(6.4 / Math.max(sz.x, sz.y, sz.z));
   gobj.userData.ax = src.userData.ax || "z";
   gobj.userData.id = id;
+  gobj.userData.partes = partes;
   gobj.rotation.y = -0.45;
   gobj.rotation.x = src.userData.rx || 0;
   GS.add(gobj);
@@ -1774,7 +2113,7 @@ function mostrarCapaGaleria(x, y, persistente = false) {
   const r = cv.getBoundingClientRect();
   NDC.set(((x - r.left) / r.width) * 2 - 1, -((y - r.top) / r.height) * 2 + 1);
   RC.setFromCamera(NDC, gcam);
-  const c = gobj.children[0],
+  const c = gobj.userData.partes,
     kk = c.children,
     hit = RC.intersectObjects(kk, true)[0];
   if (!hit) {

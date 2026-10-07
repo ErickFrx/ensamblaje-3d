@@ -22,7 +22,7 @@ function iniciarCicloAnimacion() {
       if (rgbOn) {
         material.color
           .setHSL((tiempo / 4000 + material.userData.o) % 1, 1, 0.55)
-          .multiplyScalar(endOn || cur >= 7 ? 2.2 : 1.2);
+          .multiplyScalar(endOn || cur >= 7 ? 1.8 : 1.1);
       } else {
         material.color.set(0x000000);
       }
@@ -40,7 +40,7 @@ function iniciarCicloAnimacion() {
 
       gexp += (gexpT - gexp) * Math.min(1, dt * 5);
       if (gobj) {
-        const piezas = gobj.children[0].children;
+        const piezas = gobj.userData.partes.children;
         piezas.forEach((pieza, i) => {
           if (!pieza.userData.p0) return;
 

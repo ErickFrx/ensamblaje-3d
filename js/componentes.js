@@ -51,13 +51,6 @@
     },
     {
       f: "1 · Ensamblar la torre",
-      n: "Conectar los cables internos",
-      p: [],
-      t: "Identifica el conector ATX de 24 pines de la placa madre, el EPS de 8 pines del procesador y la alimentación PCIe de la tarjeta gráfica. En un equipo real, conecta también la bomba y los ventiladores según sus manuales. Usa solo los cables modulares suministrados con la fuente y mantenlos lejos de las aspas.",
-      c: [-5, 8, 13, -9, 5.5, -1],
-    },
-    {
-      f: "1 · Ensamblar la torre",
       n: "Panel de cristal",
       p: ["glass"],
       t: "Apoya el panel de vidrio en las guías, deslízalo hasta cerrarlo y asegúralo con los tornillos traseros. Colócalo al final para que no estorbe durante el montaje.",
@@ -88,7 +81,7 @@
       f: "3 · Monitor",
       n: "Parlantes",
       p: ["spk"],
-      t: "Coloca los satélites a ambos lados del monitor y conecta el sistema de sonido a la computadora y a la corriente.",
+      t: "Coloca los satélites a ambos lados del monitor; deja el derecho a la derecha de la lámpara. Conecta el sistema de sonido a la computadora y a la corriente.",
       c: [2, 7, 18, 2, 2, -4],
     },
     {
@@ -349,20 +342,16 @@
     ],
     kb: [
       [
-        "Base y teclas",
-        "La base sostiene el circuito; cada tecla activa un interruptor que envía la letra u orden a la computadora.",
+        "Base y carcasa",
+        "La estructura sostiene el teclado y protege sus componentes internos.",
+      ],
+      [
+        "Estructura y detalles internos",
+        "Agrupa componentes internos y detalles visuales del teclado.",
       ],
       [
         "Teclas",
-        "Cada tecla presiona un interruptor que envía su letra o función a la computadora.",
-      ],
-      [
-        "Teclas",
-        "Cada tecla presiona un interruptor que envía su letra o función a la computadora.",
-      ],
-      [
-        "Teclas",
-        "Cada tecla presiona un interruptor que envía su letra o función a la computadora.",
+        "Cada tecla activa un interruptor que envía su letra u orden a la computadora.",
       ],
     ],
     mouse: [
