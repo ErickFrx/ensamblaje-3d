@@ -163,16 +163,100 @@
   {
     const g = pieza("glass", 2, 1, false),
       gm = new THREE.MeshPhysicalMaterial({
-        color: 0x99ccff,
-        transparent: true,
-        opacity: 0.12,
-        roughness: 0.05,
-        metalness: 0.1,
+        color: 0xc5e3f5,
+        roughness: 0.08,
+        metalness: 0,
+        transmission: 0.9,
+        thickness: 0.08,
+        ior: 1.5,
+        clearcoat: 1,
+        clearcoatRoughness: 0.08,
         side: THREE.DoubleSide,
-        depthWrite: false,
       });
     g.traverse((o) => {
       if (o.isMesh) o.material = gm;
+    });
+    const bounds = new THREE.Box3().setFromObject(g),
+      min = bounds.min,
+      max = bounds.max,
+      centerX = (min.x + max.x) / 2,
+      centerY = (min.y + max.y) / 2,
+      width = max.x - min.x,
+      height = max.y - min.y,
+      faceZ = max.z + 0.012,
+      reflectionCanvas = document.createElement("canvas");
+    reflectionCanvas.width = 512;
+    reflectionCanvas.height = 512;
+    const ctx = reflectionCanvas.getContext("2d"),
+      tint = ctx.createLinearGradient(0, 0, 512, 0);
+    tint.addColorStop(0, "rgba(115,185,230,0.22)");
+    tint.addColorStop(0.16, "rgba(65,125,175,0.07)");
+    tint.addColorStop(0.55, "rgba(30,70,110,0.035)");
+    tint.addColorStop(0.88, "rgba(120,190,230,0.09)");
+    tint.addColorStop(1, "rgba(170,220,250,0.26)");
+    ctx.fillStyle = tint;
+    ctx.fillRect(0, 0, 512, 512);
+    const reflection = ctx.createLinearGradient(30, 460, 310, 20);
+    reflection.addColorStop(0, "rgba(255,255,255,0)");
+    reflection.addColorStop(0.42, "rgba(220,245,255,0.035)");
+    reflection.addColorStop(0.5, "rgba(235,250,255,0.24)");
+    reflection.addColorStop(0.58, "rgba(220,245,255,0.045)");
+    reflection.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.fillStyle = reflection;
+    ctx.fillRect(0, 0, 512, 512);
+    ctx.strokeStyle = "rgba(205,235,255,0.3)";
+    ctx.lineWidth = 3;
+    ctx.strokeRect(5, 5, 502, 502);
+    const reflectionMap = new THREE.CanvasTexture(reflectionCanvas);
+    reflectionMap.colorSpace = THREE.SRGBColorSpace;
+    const surface = new THREE.Mesh(
+      new THREE.PlaneGeometry(width, height),
+      new THREE.MeshBasicMaterial({
+        map: reflectionMap,
+        transparent: true,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+        toneMapped: false,
+      }),
+    );
+    surface.position.set(centerX, centerY, faceZ);
+    surface.renderOrder = 2;
+    g.add(surface);
+
+    const frameMaterial = new THREE.MeshStandardMaterial({
+      color: 0x46515e,
+      metalness: 0.82,
+      roughness: 0.24,
+    });
+    const addFrameBar = (w, h, x, y) => {
+      const bar = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.045), frameMaterial);
+      bar.position.set(x, y, faceZ + 0.025);
+      g.add(bar);
+    };
+    const frame = 0.065;
+    addFrameBar(width, frame, centerX, min.y + frame / 2);
+    addFrameBar(width, frame, centerX, max.y - frame / 2);
+    addFrameBar(frame, height, min.x + frame / 2, centerY);
+    addFrameBar(frame, height, max.x - frame / 2, centerY);
+
+    const screwMaterial = new THREE.MeshStandardMaterial({
+      color: 0x9aa7b4,
+      metalness: 0.9,
+      roughness: 0.2,
+    });
+    [
+      [min.x + 0.22, min.y + 0.22],
+      [max.x - 0.22, min.y + 0.22],
+      [min.x + 0.22, max.y - 0.22],
+      [max.x - 0.22, max.y - 0.22],
+    ].forEach(([x, y]) => {
+      const screw = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.075, 0.075, 0.035, 16),
+        screwMaterial,
+      );
+      screw.rotation.x = Math.PI / 2;
+      screw.position.set(x, y, faceZ + 0.055);
+      g.add(screw);
     });
     poner("glass", g, T, Z, "z");
   }

@@ -415,26 +415,35 @@ reg(
   });
   reg("gpu", g, -0.4, 3.0, -1.0, [0, 0, 11]);
 }
-reg(
-  "glass",
-  rb(
+{
+  const panel = rb(
     8.4,
     9,
     0.08,
     0.2,
     new THREE.MeshPhysicalMaterial({
-      color: 0x99ccff,
-      transparent: true,
-      opacity: 0.1,
-      roughness: 0.03,
-      metalness: 0.1,
+      color: 0xc5e3f5,
+      roughness: 0.08,
+      metalness: 0,
+      transmission: 0.9,
+      thickness: 0.08,
+      ior: 1.5,
+      clearcoat: 1,
+      clearcoatRoughness: 0.08,
     }),
-  ),
-  0,
-  4.6,
-  2.3,
-  [0, 6, 10],
-);
+  );
+  panel.add(
+    new THREE.LineSegments(
+      new THREE.EdgesGeometry(panel.geometry),
+      new THREE.LineBasicMaterial({
+        color: 0x80cfff,
+        transparent: true,
+        opacity: 0.85,
+      }),
+    ),
+  );
+  reg("glass", panel, 0, 4.6, 2.3, [0, 6, 10]);
+}
 
 const pcbT = tex(512, 512, (c, w, h) => {
   c.strokeStyle = "#2aa3b5";
