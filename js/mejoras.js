@@ -76,12 +76,12 @@
   const nuevo = () => {
     EST = { t0: 0, t1: 0, ints: 0, ayudas: 0 };
     clearTimeout(tF);
+    $("mhud").innerHTML = "⏱ <b>00:00</b> · Intentos fallidos: <b>0</b>";
   };
   $("rst").addEventListener("click", nuevo);
   $("auto").addEventListener("click", () => {
     if (cur >= PASOS.length - 1) nuevo();
   });
-  mano.insertAdjacentHTML("afterbegin", '<div id="mhud"></div>');
   setInterval(() => {
     const h = $("mhud");
     if (!h || !EST.t0) return;
@@ -93,18 +93,10 @@
       "</b>" +
       (EST.ayudas ? " · Ayudas: <b>" + EST.ayudas + "</b>" : "");
   }, 500);
-  mano.insertAdjacentHTML(
-    "afterbegin",
-    '<button id="mmin">▾ Ocultar controles</button>',
-  );
-  $("mmin").onclick = () => {
-    const v = mano.classList.toggle("mini");
-    $("mmin").textContent = v ? "▴ Mostrar controles" : "▾ Ocultar controles";
-  };
   const _im = iniciarManual;
   iniciarManual = function (...a) {
     if (!EST.t0) EST.t0 = performance.now();
-    if (innerWidth < 700) $("panel").classList.add("min");
+    if (innerWidth < 900) $("panel").classList.add("min");
     return _im(...a);
   };
   let dr = 0;
@@ -195,7 +187,29 @@
     );
     $("ok1").onclick = cerrar;
   }
+  function registrarAccionesExtra() {
+    const util = document.querySelector("#bar .toolbar-utilities");
+    if (!util) return false;
+    if (!util.querySelector("#ayu")) {
+      util.insertAdjacentHTML(
+        "beforeend",
+        '<button id="ayu">Ayuda</button><button id="qzb">Quiz</button>',
+      );
+    }
+    if (!$("ayu")) return false;
+    $("ayu").onclick = ayuda;
+    $("qzb").onclick = quiz;
+    return true;
+  }
   window.mostrarAyuda = ayuda;
+  window.hacerQuiz = quiz;
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", registrarAccionesExtra, {
+      once: true,
+    });
+  } else {
+    registrarAccionesExtra();
+  }
   const QS = [
     [
       "¿Qué pieza convierte la corriente de la pared en la electricidad que necesita cada componente?",
@@ -292,11 +306,11 @@
       const q = QS[i],
         op = mez([q[1], ...q[2]]);
       modal(
-        "<small>Pregunta " +
+        "<div class=\"bt\" style=\"justify-content: space-between; margin-bottom: 8px;\"><small>Pregunta " +
           (i + 1) +
           " de " +
           QS.length +
-          '</small><div class="pb"><i style="width:' +
+          '</small><button id="skipq-pregunta" class="sec">Saltar quiz</button></div><div class="pb"><i style="width:' +
           (i / QS.length) * 100 +
           '%"></i></div><h3>' +
           q[0] +
@@ -309,6 +323,8 @@
             .join("") +
           '<div id="fb"></div>',
       );
+      const skipPregunta = $("skipq-pregunta");
+      if (skipPregunta) skipPregunta.onclick = cerrar;
       md.querySelectorAll(".op").forEach(
         (b) =>
           (b.onclick = () => {
@@ -335,12 +351,7 @@
     };
     ver();
   }
-  document.querySelector("#bar .toolbar-utilities").insertAdjacentHTML(
-    "beforeend",
-    '<button id="ayu">Ayuda</button><button id="qzb">Quiz</button>',
-  );
-  $("ayu").onclick = ayuda;
-  $("qzb").onclick = quiz;
+  registrarAccionesExtra();
   $("panel-toggle").onclick = (e) => {
     const panel = $("panel");
     const oculto = panel.classList.toggle("min");

@@ -157,7 +157,8 @@
   T.children
     .filter((c) => !Object.values(P).includes(c) && !c.isLight)
     .forEach((c) => T.remove(c));
-  T.add(pieza("case", 2, 1, true));
+  T.userData.gabinete = pieza("case", 2, 1, true);
+  T.add(T.userData.gabinete);
   [
     ["psu", 1],
     ["mobo", 1],

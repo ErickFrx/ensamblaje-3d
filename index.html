@@ -25,12 +25,15 @@
         inset: 0;
         width: 100%;
         height: 100%;
+        touch-action: none;
       }
+
+      /* MENÚ IZQUIERDO DE NAVEGACIÓN Y PASOS */
       #panel {
         position: absolute;
         top: 12px;
         left: 12px;
-        width: 330px;
+        width: 310px;
         max-height: calc(100% - 24px);
         overflow: auto;
         background: rgba(15, 15, 20, 0.9);
@@ -38,6 +41,27 @@
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 12px;
         padding: 16px;
+        z-index: 10;
+      }
+      #logo-universidad {
+        position: fixed;
+        top: 14px;
+        right: 16px;
+        z-index: 15;
+        width: clamp(145px, 17vw, 220px);
+        max-height: 60px;
+        object-fit: contain;
+        filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.55));
+      }
+      #panel.min {
+        overflow: hidden;
+      }
+      #panel.min .panel-header {
+        margin-bottom: 0;
+      }
+      #panel.min #bar,
+      #panel.min #lista {
+        display: none;
       }
       .panel-header {
         display: flex;
@@ -126,56 +150,346 @@
         cursor: default;
       }
       button.on {
-        background: #343640;
-        border-color: rgba(210, 216, 230, 0.3);
-        color: #f2f3f6;
+        background: #00ffa3;
+        border-color: #00ffa3;
+        color: #05070d;
+        font-weight: 600;
       }
+
+      /* Control pad */
       #mano {
         display: none;
-        position: absolute;
-        top: 12px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 470px;
-        max-width: calc(100% - 330px);
-        background: rgba(8, 12, 24, 0.86);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(0, 255, 163, 0.5);
-        border-radius: 14px;
-        padding: 12px 14px;
-        font-size: 12.5px;
-        line-height: 1.5;
-        box-shadow: 0 0 25px rgba(0, 255, 163, 0.15);
+        position: fixed;
+        left: 334px;
+        bottom: 24px;
+        z-index: 30;
+        background: rgba(8, 12, 24, 0.92);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 18px;
+        padding: 12px;
+        box-shadow:
+          0 10px 30px rgba(0, 0, 0, 0.6),
+          0 0 15px rgba(0, 255, 163, 0.15);
       }
-      #mano .mt {
-        font-size: 13px;
-        margin-bottom: 4px;
+      .control-pad {
+        display: grid;
+        justify-items: center;
+        gap: 8px;
       }
-      #mano .mt b {
-        color: #00ffa3;
+      .control-title {
+        width: 100%;
+        color: #8290a8;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        line-height: 1;
+        text-align: center;
       }
-      #mst {
-        min-height: 22px;
-        margin-bottom: 6px;
-      }
-      .mrow {
+      .control-rotations,
+      .control-depth {
         display: flex;
-        flex-wrap: wrap;
-        gap: 5px;
-        align-items: center;
-        margin-top: 6px;
+        justify-content: center;
+        gap: 8px;
       }
-      .mrow span {
-        color: #8aa0c8;
-        font-size: 11px;
-        min-width: 62px;
+      .control-rotations {
+        display: grid;
+        grid-template-columns: repeat(3, 42px);
+        grid-template-rows: repeat(3, 42px);
+        gap: 4px;
+      }
+      .control-rotations #mqi {
+        grid-column: 1;
+        grid-row: 1;
+      }
+      .control-rotations #mqe {
+        grid-column: 3;
+        grid-row: 1;
+      }
+      .control-rotations #mwrot {
+        grid-column: 1;
+        grid-row: 2;
+      }
+      .control-rotations #msrot {
+        grid-column: 3;
+        grid-row: 2;
+      }
+      .control-rotations #marot {
+        grid-column: 1;
+        grid-row: 3;
+      }
+      .control-rotations #mdrot {
+        grid-column: 3;
+        grid-row: 3;
+      }
+      .control-arrows {
+        display: grid;
+        grid-template-columns: repeat(3, 42px);
+        grid-template-rows: repeat(2, 42px);
+        gap: 4px;
+      }
+      .control-arrows #mw {
+        grid-column: 2;
+        grid-row: 1;
+      }
+      .control-arrows #ma {
+        grid-column: 1;
+        grid-row: 2;
+      }
+      .control-arrows #ms {
+        grid-column: 2;
+        grid-row: 2;
+      }
+      .control-arrows #md {
+        grid-column: 3;
+        grid-row: 2;
       }
       #mano button {
-        padding: 5px 9px;
+        width: 42px;
+        height: 42px;
+        background: #181c26;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: #e6e8ed;
+        border-radius: 8px;
+        padding: 0;
+        font-size: 20px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 140ms ease;
+      }
+      #mano button:hover {
+        background: #00ffa3;
+        color: #05070d;
+        border-color: #00ffa3;
+        box-shadow: 0 0 10px rgba(0, 255, 163, 0.4);
+      }
+
+      /* Panel de información y descripción unificado */
+      #detalle-pieza {
+        position: fixed;
+        right: 14px;
+        bottom: 14px;
+        width: min(370px, calc(100% - 28px));
+        max-height: calc(100vh - 28px);
+        overflow: visible;
+        background: rgba(8, 12, 24, 0.88);
+        backdrop-filter: blur(14px);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 14px;
+        padding: 14px;
+        font-size: 12.5px;
+        line-height: 1.5;
+        z-index: 25;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      }
+      .info-panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin: -2px 0 10px;
+        color: #9daac0;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.11em;
+        text-transform: uppercase;
+      }
+      #detalle-toggle {
+        width: 28px;
+        height: 26px;
+        padding: 0;
+        color: #e6e8ed;
+        font-size: 15px;
+      }
+      #detalle-panel-content {
+        max-height: min(54vh, calc(100vh - 82px));
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(180, 195, 220, 0.32) transparent;
+        transition:
+          max-height 240ms ease,
+          opacity 180ms ease,
+          visibility 0s;
+      }
+      #detalle-pieza.collapsed {
+        width: min(190px, calc(100% - 28px));
+        padding: 10px 12px;
+      }
+      #detalle-pieza.collapsed .info-panel-header {
+        margin: 0;
+      }
+      #detalle-pieza.collapsed #detalle-panel-content {
+        max-height: 0;
+        overflow: hidden;
+        opacity: 0;
+        visibility: hidden;
+        transition:
+          max-height 240ms ease,
+          opacity 160ms ease,
+          visibility 0s linear 240ms;
+      }
+      .mode-reveal {
+        max-height: 0;
+        overflow: hidden;
+        opacity: 0;
+        visibility: hidden;
+        margin-block: 0 !important;
+        padding-block: 0 !important;
+        border-width: 0 !important;
+        transition:
+          max-height 260ms ease,
+          opacity 180ms ease,
+          margin 260ms ease,
+          padding 260ms ease,
+          border-width 260ms ease,
+          visibility 0s linear 260ms;
+      }
+      #detalle-pieza.modo-manual.pieza-activa .manual-only,
+      #detalle-pieza.modo-manual.pieza-activa #manual-piece-wrap {
+        max-height: 240px;
+        opacity: 1;
+        visibility: visible;
+        transition:
+          max-height 260ms ease,
+          opacity 180ms ease,
+          margin 260ms ease,
+          padding 260ms ease,
+          border-width 260ms ease,
+          visibility 0s;
+      }
+      #info {
+        font-size: 12.5px;
+        line-height: 1.5;
+      }
+      .info-step-card {
+        background: rgba(0, 255, 163, 0.06);
+        border: 1px solid rgba(0, 255, 163, 0.25);
+        border-radius: 10px;
+        padding: 10px 12px;
+        margin-bottom: 12px;
+      }
+      .info-step-card .mt {
+        font-size: 13px;
+        font-weight: 600;
+        color: #e6e8ed;
+        margin-bottom: 4px;
+      }
+      .info-step-card .mt b {
+        color: #00ffa3;
+      }
+      #mhelp {
+        font-size: 11.5px;
+        color: #8aa0c8;
+      }
+      #mhud {
+        padding: 8px 10px;
+        margin: 10px 0;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.04);
+        color: #c3cad8;
         font-size: 11.5px;
       }
-      #mano small {
+      #mhud b {
+        color: #00ffa3;
+      }
+      .info-help-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 10px;
+        padding: 10px 12px;
+        margin-top: 12px;
+      }
+      .info-help-card small {
         color: #8aa0c8;
+        font-size: 11px;
+        line-height: 1.45;
+        display: block;
+      }
+      #modo-dev {
+        margin-top: 9px;
+        color: #8aa0c8;
+        font-size: 11px;
+      }
+      #modo-dev summary {
+        width: fit-content;
+        color: #bfc8d8;
+        cursor: pointer;
+      }
+      #mst {
+        margin-top: 6px;
+        font-size: 11px;
+      }
+      .info-actions {
+        display: flex;
+        gap: 6px;
+        margin-top: 10px;
+      }
+      .info-actions button {
+        width: 34px;
+        height: 32px;
+        padding: 0;
+        font-size: 16px;
+      }
+      #info b {
+        color: #e63946;
+        font-size: 14.5px;
+      }
+
+      /* ELEMENTOS AUXILIARES Y MODALES */
+      #mod {
+        position: fixed;
+        inset: 0;
+        z-index: 200;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 18px;
+        background: rgba(2, 6, 12, 0.72);
+      }
+      #mod .card {
+        width: min(560px, calc(100vw - 24px));
+        max-height: min(82vh, 720px);
+        overflow: auto;
+        background: rgba(12, 18, 28, 0.96);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 20px 18px 16px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.48);
+        color: #e6e8ed;
+      }
+      #mod .card h2,
+      #mod .card h3 {
+        margin-bottom: 10px;
+      }
+      #mod .card ul,
+      #mod .card ol {
+        margin-left: 18px;
+        line-height: 1.6;
+      }
+      #mod .card p,
+      #mod .card li {
+        color: #dfe6f3;
+      }
+      #mod .card .bt {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 16px;
+      }
+      #mod .card .op {
+        display: block;
+        width: 100%;
+        text-align: left;
+        margin: 8px 0;
+      }
+      #mod .card .good {
+        border-color: rgba(0, 255, 163, 0.8);
+        background: rgba(0, 255, 163, 0.12);
+      }
+      #mod .card .bad {
+        border-color: rgba(255, 77, 77, 0.8);
+        background: rgba(255, 77, 77, 0.12);
       }
       #tip {
         display: none;
@@ -188,22 +502,12 @@
         border-radius: 10px;
         padding: 8px 11px;
         font-size: 12.5px;
-        line-height: 1.45;
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
       }
       #tip b {
         color: #e63946;
       }
-      details summary {
-        outline: none;
-      }
-      @media (max-width: 900px) {
-        #mano {
-          left: 354px;
-          transform: none;
-          max-width: calc(100% - 366px);
-        }
-      }
+
       .fase {
         font-size: 10px;
         color: #8d929e;
@@ -223,13 +527,7 @@
         border-radius: 7px;
         font-size: 12px;
         cursor: pointer;
-        border: 1px solid transparent;
-        border-left: 2px solid transparent;
         color: #b8bbc4;
-        transition:
-          background-color 140ms ease,
-          color 140ms ease,
-          border-color 140ms ease;
       }
       .paso::before {
         content: "";
@@ -238,20 +536,6 @@
         flex: 0 0 6px;
         border-radius: 50%;
         background: #686c76;
-      }
-      .paso:hover {
-        background: rgba(255, 255, 255, 0.045);
-        border-color: rgba(255, 255, 255, 0.08);
-      }
-      .paso:focus-visible {
-        outline: 2px solid rgba(230, 57, 70, 0.85);
-        outline-offset: 2px;
-      }
-      .paso.ok {
-        color: #858a95;
-      }
-      .paso.ok::before {
-        background: #697d72;
       }
       .paso.active,
       .paso.act {
@@ -264,138 +548,30 @@
       .paso.act::before {
         background: #d2d7e1;
       }
-      #info {
-        position: absolute;
-        right: 14px;
-        bottom: 14px;
-        width: 360px;
-        background: rgba(8, 12, 24, 0.82);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 14px;
-        padding: 14px;
-        font-size: 13px;
-        line-height: 1.5;
-      }
-      #info.periferico {
-        top: 14px;
-        bottom: auto;
-      }
-      #info b {
-        color: #e63946;
-        font-size: 15px;
-      }
-      .modelo-referencia {
-        margin-top: 4px;
-        font-size: 12px;
-      }
-      .modelo-nota {
-        margin-top: 3px;
-        color: #a4a8b2;
-        font-size: 11px;
-      }
-      #detalle-caracteristicas .modelo-nota {
-        list-style: none;
-        margin-left: 0;
-      }
-      .lista-revision {
-        display: grid;
-        gap: 8px;
-        margin: 10px 0 0;
-        padding: 10px;
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 9px;
-      }
-      .lista-revision legend {
-        padding: 0 5px;
-        color: #f2f3f6;
-        font-weight: 600;
-      }
-      .lista-revision label {
-        display: grid;
-        grid-template-columns: 18px 1fr;
-        gap: 8px;
-        align-items: start;
-        margin: 0;
-        color: #e1e3e8;
-        font-size: 11px;
-        line-height: 1.4;
-        cursor: pointer;
-      }
-      .lista-revision input {
-        width: 16px;
-        height: 16px;
-        margin: 0;
-        accent-color: #e63946;
-      }
-      #revision-estado {
-        color: #ff9a9f;
-        font-size: 11px;
-      }
-      .modelo-referencia a,
-      #detalle-caracteristicas a {
-        color: #ff9a9f;
-        text-decoration: underline;
-        text-underline-offset: 2px;
-      }
-      .modelo-referencia a:hover,
-      #detalle-caracteristicas a:hover {
-        color: #fff;
-      }
-      #detalle-pieza {
-        position: fixed;
-        z-index: 25;
-        right: 14px;
-        bottom: 14px;
-        width: min(360px, calc(100% - 28px));
-        max-height: 48vh;
-        overflow: auto;
-        background: rgba(8, 12, 24, 0.94);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(230, 57, 70, 0.4);
-        border-radius: 14px;
-        padding: 14px;
-        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.3);
-        font-size: 13px;
-        line-height: 1.5;
-      }
-      #detalle-pieza[hidden] {
+
+      #detalle-contenido[hidden] {
         display: none;
       }
-      #detalle-pieza .detalle-cabecera {
+      #detalle-contenido {
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
+        font-size: 12.5px;
+      }
+      .detalle-cabecera {
         display: flex;
-        align-items: flex-start;
+        align-items: center;
         justify-content: space-between;
-        gap: 10px;
+        gap: 8px;
         margin-bottom: 8px;
       }
-      #detalle-pieza h2 {
-        color: #e63946;
-        font-size: 16px;
+      .detalle-cabecera h2 {
+        font-size: 14px;
       }
-      #detalle-pieza .detalle-cerrar {
-        flex: none;
-        padding: 3px 9px;
-        background: #1c2438;
-      }
-      #detalle-pieza h3 {
-        color: #ff737b;
-        font-size: 12px;
-        margin: 10px 0 3px;
-      }
-      #detalle-pieza ul {
-        margin: 3px 0 0 18px;
-        color: #cfe;
-      }
-      #detalle-caracteristicas a:focus-visible,
-      .modelo-referencia a:focus-visible {
-        outline: 2px solid #ff737b;
-        outline-offset: 2px;
+      .detalle-cerrar {
+        padding: 4px 8px;
       }
 
-      #c {
-        touch-action: none;
-      }
       #carga {
         position: fixed;
         inset: 0;
@@ -410,8 +586,17 @@
         text-align: center;
         transition: opacity 0.4s;
       }
+      #logo-facultad {
+        display: block;
+        width: min(220px, 56vw);
+        max-height: 170px;
+        object-fit: contain;
+        margin-bottom: 4px;
+        filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.45));
+      }
       #carga.listo {
         opacity: 0;
+        pointer-events: none;
       }
       #carga h2 {
         color: #e63946;
@@ -437,250 +622,66 @@
         color: #8aa0c8;
         max-width: 420px;
       }
-      #carga.err #ct {
-        color: #ff8899;
-      }
-      #carga.err .bar {
-        display: none;
-      }
-      #mod {
-        position: fixed;
-        inset: 0;
-        z-index: 50;
-        background: rgba(2, 4, 10, 0.72);
-        backdrop-filter: blur(6px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 12px;
-      }
-      #mod .card {
-        background: rgba(8, 12, 24, 0.97);
-        border: 1px solid rgba(230, 57, 70, 0.38);
-        border-radius: 16px;
-        padding: 20px 22px;
-        max-width: 520px;
-        width: 100%;
-        max-height: 92vh;
-        overflow: auto;
-        font-size: 14px;
-        line-height: 1.55;
-        box-shadow: 0 14px 42px rgba(0, 0, 0, 0.38);
-      }
-      #mod h2 {
-        color: #e63946;
-        font-size: 19px;
-        margin-bottom: 8px;
-      }
-      #mod h3 {
-        font-size: 16px;
-        margin: 10px 0;
-      }
-      #mod ul {
-        margin: 6px 0 10px 18px;
-      }
-      #mod li {
-        margin: 5px 0;
-      }
-      #mod .cr {
-        font-size: 11.5px;
-        color: #8aa0c8;
-      }
-      #mod .bt {
-        display: flex;
-        gap: 8px;
-        margin-top: 12px;
-        justify-content: flex-end;
-      }
-      #mod button.sec {
-        background: #1c2438;
-      }
-      #mod .op {
-        display: block;
-        width: 100%;
-        text-align: left;
-        margin: 6px 0;
-        padding: 10px 12px;
-        border-radius: 10px;
-        background: #111a2e;
-        border: 1px solid #26334f;
-        font-weight: 600;
-        font-size: 13.5px;
-      }
-      #mod .op:disabled {
-        opacity: 1;
-        filter: none;
-        cursor: default;
-      }
-      #mod .op.good {
-        border-color: #33ff99;
-        background: rgba(51, 255, 153, 0.15);
-      }
-      #mod .op.bad {
-        border-color: #ff4466;
-        background: rgba(255, 68, 102, 0.15);
-      }
-      .pb {
-        height: 5px;
-        background: #111a2e;
-        border-radius: 4px;
-        margin-top: 5px;
-      }
-      .pb i {
-        display: block;
-        height: 100%;
-        background: #00ffa3;
-        border-radius: 4px;
-      }
-      .stats {
-        display: flex;
-        gap: 8px;
-        margin: 10px 0;
-      }
-      .stats div {
-        flex: 1;
-        background: #111a2e;
-        border-radius: 10px;
-        padding: 10px 6px;
-        text-align: center;
-        font-size: 11.5px;
-        color: #8aa0c8;
-      }
-      .stats b {
-        display: block;
-        font-size: 20px;
-        color: #00ffa3;
-      }
-      .nota {
-        margin-top: 8px;
-        font-size: 12px;
-        color: #8aa0c8;
-        border-left: 3px solid rgba(230, 57, 70, 0.7);
-        padding-left: 8px;
-      }
-      #mano.mini .mrow,
-      #mano.mini > div:last-of-type {
-        display: none;
-      }
-      #mmin {
-        float: right;
-        padding: 3px 10px !important;
-        font-size: 11px !important;
-        background: #1c2438;
-      }
-      #mhud {
-        font-size: 11.5px;
-        color: #ff737b;
-        margin-bottom: 4px;
-      }
-      #panel.min {
-        width: min(210px, calc(100% - 24px));
-        padding: 10px 12px;
-      }
-      #panel.min .panel-header {
-        margin: 0;
-      }
-      #panel.min h1,
-      #panel.min #bar,
-      #panel.min #lista {
-        display: none;
-      }
-      @media (max-width: 700px) {
-        #panel {
-          width: calc(100% - 24px);
-        }
-        #panel.min {
-          width: min(210px, calc(100% - 24px));
-        }
-        #info {
-          width: auto;
-          left: 12px;
-          right: 12px;
-          bottom: 12px;
-          max-height: 30vh;
-          overflow: auto;
-          font-size: 12.5px;
-        }
-        #info.periferico {
-          top: auto;
-          bottom: 12px;
+
+      @media (max-width: 900px) {
+        #logo-universidad {
+          top: 10px;
+          right: 10px;
+          width: clamp(110px, 22vw, 190px);
+          max-height: 54px;
         }
         #mano {
-          left: 12px;
-          right: 12px;
-          top: auto;
-          bottom: 12px;
-          transform: none;
-          width: auto;
-          max-width: none;
-          max-height: 46vh;
-          overflow: auto;
+          left: 14px;
+          bottom: 14px;
         }
-        body:has(#mano[style*="block"]) #info {
-          display: none;
+        #detalle-pieza {
+          width: min(370px, calc(100% - 16px));
+          right: 8px;
+          bottom: 8px;
+          padding: 11px;
         }
-        #gl {
-          display: flex;
-          overflow-x: auto;
-          gap: 6px;
-          padding-bottom: 4px;
+        #detalle-panel-content {
+          max-height: min(48vh, calc(100vh - 74px));
         }
-        #gl .paso {
-          white-space: nowrap;
-          flex: none;
+      }
+      @media (max-width: 600px) {
+        #logo-universidad {
+          top: 8px;
+          right: 8px;
+          width: 96px;
+          max-height: 40px;
         }
-        #panel {
-          max-height: 34vh;
+        #carga {
+          gap: 11px;
         }
-        #info {
-          max-height: 28vh;
+        #logo-facultad {
+          width: min(175px, 52vw);
+          max-height: 135px;
         }
-        #bar button {
-          padding: 6px 8px;
-          font-size: 10.5px;
-          min-height: 40px;
-        }
-        .toolbar-group {
-          gap: 5px;
-        }
-        .toolbar-options {
-          padding-top: 7px;
-        }
-        #panel {
-          padding: 8px 10px;
+        #carga h2 {
+          max-width: 90vw;
+          font-size: 15px;
+          line-height: 1.4;
         }
         #mano {
-          padding: 8px 10px;
-          font-size: 11.5px;
-          max-height: 34vh;
+          bottom: calc(42vh + 20px);
         }
-        #mano .mrow {
-          margin-top: 4px;
-          gap: 4px;
+        #detalle-pieza {
+          width: min(370px, calc(100% - 16px));
         }
-        #mano .mrow span {
-          min-width: 0;
-          font-size: 10px;
-        }
-        #mano button {
-          padding: 4px 8px;
-          font-size: 11px;
-        }
-        #mano > div:last-of-type {
-          display: none;
-        }
-        #mano .mt {
-          margin-bottom: 2px;
-        }
-        #mst {
-          min-height: 0;
-          margin-bottom: 2px;
+        #detalle-panel-content {
+          max-height: min(38vh, calc(100vh - 74px));
         }
       }
     </style>
   </head>
   <body>
     <div id="carga">
+      <img
+        id="logo-facultad"
+        src="images/logo-facultad-ajustado.png"
+        alt="Logo de la Facultad de Ingeniería de Sistemas"
+      />
       <h2>SIMULADOR DE ENSAMBLAJE DE PC</h2>
       <div
         class="bar"
@@ -694,11 +695,20 @@
       </div>
       <p id="ct" role="status" aria-live="polite">Preparando…</p>
     </div>
+
+    <img
+      id="logo-universidad"
+      src="images/logo-universidad-ajustado.png"
+      alt="Universidad Nacional de Cañete"
+    />
+
     <canvas
       id="c"
       role="img"
       aria-label="Escena 3D del simulador. Arrastra para girar y usa la rueda o pellizca para acercar."
     ></canvas>
+
+    <!-- MENÚ IZQUIERDO -->
     <div id="panel" role="region" aria-label="Controles y pasos del ensamblaje">
       <div class="panel-header">
         <h1>SIMULADOR DE ENSAMBLAJE DE PC</h1>
@@ -731,63 +741,224 @@
       </div>
       <div id="lista" role="list" aria-label="Pasos del ensamblaje"></div>
     </div>
-    <section
+
+    <!-- D-Pad flotante con controles de transformación -->
+    <div id="mano">
+      <div class="control-pad" role="group" aria-label="Controles de la pieza">
+        <span class="control-title">ROTAR</span>
+        <div class="control-rotations">
+          <button
+            id="mqi"
+            type="button"
+            aria-label="Rotar a la izquierda"
+            title="Rotar a la izquierda (Q)"
+          >
+            ↺
+          </button>
+          <button
+            id="mqe"
+            type="button"
+            aria-label="Rotar a la derecha"
+            title="Rotar a la derecha (E)"
+          >
+            ↻
+          </button>
+          <button
+            id="mwrot"
+            type="button"
+            aria-label="Inclinar en un eje diagonal hacia arriba"
+            title="Inclinar en el eje X positivo (W)"
+          >
+            ⤴
+          </button>
+          <button
+            id="msrot"
+            type="button"
+            aria-label="Inclinar en un eje diagonal hacia abajo"
+            title="Inclinar en el eje X negativo (S)"
+          >
+            ⤵
+          </button>
+          <button
+            id="marot"
+            type="button"
+            aria-label="Girar en diagonal hacia la izquierda"
+            title="Rotar en el eje Z positivo (A)"
+          >
+            ⤹
+          </button>
+          <button
+            id="mdrot"
+            type="button"
+            aria-label="Girar en diagonal hacia la derecha"
+            title="Rotar en el eje Z negativo (D)"
+          >
+            ⤸
+          </button>
+        </div>
+        <span class="control-title">MOVER</span>
+        <div class="control-arrows">
+          <button
+            id="mw"
+            type="button"
+            aria-label="Mover hacia arriba"
+            title="Mover hacia arriba (↑)"
+          >
+            ⬆
+          </button>
+          <button
+            id="ma"
+            type="button"
+            aria-label="Mover hacia la izquierda"
+            title="Mover hacia la izquierda (←)"
+          >
+            ⬅
+          </button>
+          <button
+            id="ms"
+            type="button"
+            aria-label="Mover hacia abajo"
+            title="Mover hacia abajo (↓)"
+          >
+            ⬇
+          </button>
+          <button
+            id="md"
+            type="button"
+            aria-label="Mover hacia la derecha"
+            title="Mover hacia la derecha (→)"
+          >
+            ➡
+          </button>
+        </div>
+        <span class="control-title">PROFUNDIDAD</span>
+        <div class="control-depth">
+          <button
+            id="mlej"
+            type="button"
+            aria-label="Alejar la pieza"
+            title="Alejar (Re Pág)"
+          >
+            ➕
+          </button>
+          <button
+            id="mcer"
+            type="button"
+            aria-label="Acercar la pieza"
+            title="Acercar (Av Pág)"
+          >
+            ➖
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel inferior derecho de información y descripción -->
+    <aside
       id="detalle-pieza"
-      role="dialog"
-      aria-label="Información del componente"
-      hidden
+      role="region"
+      aria-label="Información del ensamblaje"
     >
-      <div class="detalle-cabecera">
-        <h2 id="detalle-titulo"></h2>
+      <div class="info-panel-header">
+        <span>Información</span>
         <button
-          class="detalle-cerrar"
+          id="detalle-toggle"
           type="button"
-          aria-label="Cerrar información"
+          aria-label="Contraer panel de información"
+          aria-expanded="true"
+          title="Contraer panel"
         >
-          ✕
+          ⌄
         </button>
       </div>
-      <p id="detalle-funcion"></p>
-      <h3>Características técnicas</h3>
-      <ul id="detalle-caracteristicas"></ul>
-      <h3>Instalación</h3>
-      <p id="detalle-instalacion"></p>
-    </section>
-    <div id="mano">
-      <div class="mt">✋ Coloca: <b id="mnom"></b></div>
-      <div id="mst" aria-live="polite"></div>
-      <div class="mrow">
-        <span>Girar</span><button id="mqi">⟲ Q</button
-        ><button id="mqe">E ⟳</button><span style="min-width: 0">Inclinar</span
-        ><button id="mw">⤒ W</button><button id="ms">S ⤓</button
-        ><span style="min-width: 0">Voltear</span><button id="ma">⟲ A</button
-        ><button id="md">D ⟳</button>
-      </div>
-      <div class="mrow">
-        <span>Profundidad</span><button id="mlej">▲ Más lejos</button
-        ><button id="mcer">▼ Más cerca</button
-        ><button id="mprof">Arrastrar en profundidad</button>
-      </div>
-      <div class="mrow">
-        <button id="mguia" class="on">👁 Guía</button
-        ><button id="mauto">Colocar por mí</button>
-      </div>
-      <div style="margin-top: 8px">
-        <small
-          >Arrastra la pieza para moverla (Shift + arrastrar = profundidad).
-          Flechas = mover, Re Pág / Av Pág = lejos / cerca. Gira la vista con el
-          fondo y acerca con la rueda. Cuando la
-          <b style="color: #5f8">guía se pone verde</b>, la pieza encaja
-          sola.</small
+      <div id="detalle-panel-content">
+        <div id="manual-piece-wrap" class="mode-reveal">
+          <div id="manual-piece" class="info-step-card" aria-live="polite">
+            <div class="mt">✋ Coloca: <b id="mnom">---</b></div>
+            <div id="mhelp">Selecciona un paso o inicia el modo manual.</div>
+          </div>
+        </div>
+
+        <div id="info" role="status" aria-live="polite">
+          <b>Bienvenido</b><br />Arrastra para girar la vista y usa la rueda
+          para acercar. Pulsa «Siguiente» (o «Auto») para ensamblar la torre,
+          revisar la lista previa al encendido y conectar los periféricos.
+        </div>
+
+        <div id="manual-instructions-wrap" class="mode-reveal manual-only">
+          <div id="manual-instructions" class="info-help-card">
+            <small
+              >Arrastra la pieza para moverla (Shift + arrastrar = profundidad).
+              Flechas = mover, Re Pág / Av Pág = profundidad. Cuando la
+              <b style="color: #5f8">guía se pone verde</b>, la pieza encaja
+              sola.</small
+            >
+          </div>
+        </div>
+
+        <div id="manual-tools" class="mode-reveal manual-only">
+          <div id="mhud" aria-live="off">
+            ⏱ <b>00:00</b> · Intentos fallidos: <b>0</b>
+          </div>
+          <details id="modo-dev">
+            <summary>Modo Dev</summary>
+            <div id="mst" aria-live="polite"></div>
+          </details>
+          <div class="info-actions" aria-label="Acciones de colocación">
+            <button
+              id="mprof"
+              type="button"
+              aria-label="Alternar arrastre en profundidad"
+              title="Alternar arrastre en profundidad"
+            >
+              ↔
+            </button>
+            <button
+              id="mguia"
+              class="on"
+              type="button"
+              aria-label="Alternar guía visual"
+              title="Alternar guía visual"
+            >
+              👁
+            </button>
+            <button
+              id="mauto"
+              type="button"
+              aria-label="Colocar automáticamente"
+              title="Colocar automáticamente"
+            >
+              ⚡
+            </button>
+          </div>
+        </div>
+
+        <section
+          id="detalle-contenido"
+          aria-label="Descripción del componente"
+          hidden
         >
+          <div class="detalle-cabecera">
+            <h2 id="detalle-titulo"></h2>
+            <button
+              class="detalle-cerrar"
+              type="button"
+              aria-label="Cerrar información"
+            >
+              ✕
+            </button>
+          </div>
+          <p id="detalle-funcion"></p>
+          <h3>Características técnicas</h3>
+          <ul id="detalle-caracteristicas"></ul>
+          <h3>Instalación</h3>
+          <p id="detalle-instalacion"></p>
+        </section>
       </div>
-    </div>
+    </aside>
+
     <div id="tip"></div>
-    <div id="info" role="status" aria-live="polite">
-      <b>Bienvenido</b><br />Arrastra para girar la vista y usa la rueda para
-      acercar. Pulsa «Siguiente» (o «Auto») para ensamblar la torre, revisar la
-      lista previa al encendido y conectar los periféricos.
-    </div>
+
     <script src="js/inicio.js"></script>
   </body>
 </html>

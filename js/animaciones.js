@@ -8,6 +8,8 @@ function iniciarCicloAnimacion() {
     // Limita el salto temporal para que las interpolaciones sigan siendo estables al volver a la pestaña.
     const dt = Math.min(0.05, (tiempo - ultimoFrame) / 1000 || 0);
     ultimoFrame = tiempo;
+    if (window.actualizarMovimientoManual)
+      window.actualizarMovimientoManual(dt);
 
     tw = tw.filter((animacion) => {
       animacion.t += dt;

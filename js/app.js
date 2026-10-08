@@ -1178,7 +1178,7 @@ let tw = [],
   cur = -1,
   fPrev = "";
 function ocultarInfoComponente() {
-  document.getElementById("detalle-pieza").hidden = true;
+  document.getElementById("detalle-contenido").hidden = true;
 }
 PASOS.forEach((p, i) => {
   if (p.f !== fPrev) {
@@ -1352,7 +1352,7 @@ function paso(inst, forzarAuto) {
       : "") +
     `<br>${textoPaso}` +
     (manual
-      ? '<div style="margin-top:8px;color:#ff737b">✋ Arrastra la pieza hasta la guía y gírala para que encaje.</div>'
+      ? '<div class="manual-step-hint mode-reveal manual-only" style="margin-top:8px;color:#ff737b">✋ Arrastra la pieza hasta la guía y gírala para que encaje.</div>'
       : "");
   if (p.p.includes("kb") && window.cargarModeloTeclado)
     window.cargarModeloTeclado();
@@ -1506,11 +1506,15 @@ function actualizarModo() {
   b.textContent = modoManual ? "Manual: SÍ" : "Manual: NO";
   b.classList.toggle("on", modoManual);
   b.setAttribute("aria-pressed", String(modoManual));
+  const panelInfo = document.getElementById("detalle-pieza");
+  panelInfo.classList.toggle("modo-manual", modoManual);
+  panelInfo.classList.toggle("pieza-activa", Boolean(man && man.act));
 }
 let modoManual = false,
   man = null;
 const ST = {},
-  ghosts = {};
+  ghosts = {},
+  manosVR = {};
 const GM = new THREE.MeshBasicMaterial({
   color: 0xff4466,
   transparent: true,
@@ -1519,13 +1523,133 @@ const GM = new THREE.MeshBasicMaterial({
   depthTest: false,
   side: THREE.DoubleSide,
 });
+const MATERIAL_MANOS = new THREE.MeshPhysicalMaterial({
+  color: 0x33cfff,
+  transparent: true,
+  opacity: 0.34,
+  flatShading: true,
+  roughness: 0.24,
+  metalness: 0.12,
+  emissive: 0x078dff,
+  emissiveIntensity: 0.28,
+  depthWrite: false,
+  side: THREE.DoubleSide,
+  clearcoat: 0.65,
+  clearcoatRoughness: 0.2,
+});
+const MATERIAL_TRAMA_MANOS = new THREE.MeshBasicMaterial({
+  color: 0x8af4ff,
+  transparent: true,
+  opacity: 0.82,
+  wireframe: true,
+  depthWrite: false,
+  depthTest: false,
+});
+const MATERIAL_NODOS_MANOS = new THREE.MeshBasicMaterial({
+  color: 0xc5fbff,
+  transparent: true,
+  opacity: 0.92,
+  depthWrite: false,
+});
+let pulsoManos = 0;
 const mano = document.getElementById("mano"),
   mst = document.getElementById("mst"),
-  mnom = document.getElementById("mnom");
+  mnom = document.getElementById("mnom"),
+  mhelp = document.getElementById("mhelp");
+const panelInfo = document.getElementById("detalle-pieza"),
+  botonPanelInfo = document.getElementById("detalle-toggle");
+botonPanelInfo.addEventListener("click", () => {
+  const retraido = panelInfo.classList.toggle("collapsed");
+  botonPanelInfo.setAttribute("aria-expanded", String(!retraido));
+  botonPanelInfo.setAttribute(
+    "aria-label",
+    retraido ? "Expandir panel de información" : "Contraer panel de información",
+  );
+  botonPanelInfo.title = retraido ? "Expandir panel" : "Contraer panel";
+  botonPanelInfo.textContent = retraido ? "⌃" : "⌄";
+});
 const V3 = (...a) => new THREE.Vector3(...a),
   QI = new THREE.Quaternion(),
   DEG = Math.PI / 180,
   PASO_ROT = 15 * DEG;
+const coloresEje = [
+    0xff5b65,
+    0xff5b65,
+    0x50e890,
+    0x50e890,
+    0x63a7ff,
+    0x63a7ff,
+  ],
+  guiaEjes = new THREE.Group(),
+  flechasEje = coloresEje.map((color) => {
+    const flecha = new THREE.ArrowHelper(
+      V3(1, 0, 0),
+      V3(),
+      1,
+      color,
+      0.2,
+      0.12,
+    );
+    flecha.traverse((objeto) => {
+      objeto.renderOrder = 100;
+      if (objeto.material) objeto.material.depthTest = false;
+    });
+    guiaEjes.add(flecha);
+    return flecha;
+  });
+guiaEjes.visible = false;
+S.add(guiaEjes);
+function actualizarGuiaEjes(id) {
+  const s = ST[id];
+  if (!s || !guiaEjes.visible || !man || man.act !== id) return;
+  s.par.updateMatrixWorld(true);
+  guiaEjes.position.copy(s.par.localToWorld(s.pc.clone()));
+}
+function mostrarGuiaEjes(id) {
+  const s = ST[id];
+  if (!s) return;
+  const frente = cam.getWorldDirection(V3()).normalize(),
+    derecha = new THREE.Vector3().crossVectors(frente, V3(0, 1, 0)).normalize(),
+    arriba = new THREE.Vector3().crossVectors(derecha, frente).normalize(),
+    direcciones = [
+      derecha,
+      derecha.clone().negate(),
+      arriba,
+      arriba.clone().negate(),
+      frente,
+      frente.clone().negate(),
+    ],
+    radio = Math.max(0.3, s.dim * 0.18),
+    longitud = Math.max(0.45, s.dim * 0.22),
+    cabeza = Math.min(0.3, longitud * 0.3);
+  flechasEje.forEach((flecha, i) => {
+    const direccion = direcciones[i];
+    flecha.setDirection(direccion);
+    flecha.position.copy(direccion).multiplyScalar(radio);
+    flecha.setLength(longitud, cabeza, cabeza * 0.65);
+  });
+  guiaEjes.visible = true;
+  actualizarGuiaEjes(id);
+}
+function actualizarVisibilidadGuia(id) {
+  const visible = Boolean(man && man.act === id && man.guia && !man.snap);
+  if (ghosts[id]) ghosts[id].visible = visible;
+  if (manosVR[id]) {
+    if (visible && !manosVR[id].visible) manosVR[id].userData.init = false;
+    manosVR[id].visible = visible;
+  }
+  guiaEjes.visible = visible;
+  if (visible) {
+    actualizarManosVR(id, true);
+    mostrarGuiaEjes(id);
+  }
+}
+ctl.addEventListener("change", () => {
+  if (man && man.act && guiaEjes.visible) {
+    actualizarManosVR(man.act, true);
+    mostrarGuiaEjes(man.act);
+  }
+});
 function ghostDe(id) {
   if (ghosts[id]) return ghosts[id];
   const g = P[id].clone(true);
@@ -1541,11 +1665,276 @@ function ghostDe(id) {
   P[id].parent.add(g);
   return (ghosts[id] = g);
 }
+/* ---------- MANOS HOLOGRÁFICAS ----------
+   Mano articulada (palma + 4 dedos de 3 falanges + pulgar + antebrazo).
+   Sistema local de la mano: +Y = dedos, +X = palma (hacia la pieza), +Z = pulgar. */
+const MANO_PALMA_Y = 0.26;
+function crearManoVR() {
+  const mano = new THREE.Group(),
+    inclina = new THREE.Group(),
+    modelo = new THREE.Group();
+  modelo.position.set(0, -MANO_PALMA_Y, 0);
+  inclina.add(modelo);
+  mano.add(inclina);
+  const malla = (geo, padre) => {
+    const base = new THREE.Mesh(geo, MATERIAL_MANOS),
+      trama = new THREE.Mesh(geo, MATERIAL_TRAMA_MANOS);
+    trama.renderOrder = 2;
+    padre.add(base, trama);
+    return base;
+  };
+  const nodo = (padre, p, r) => {
+    const n = new THREE.Mesh(
+      new THREE.IcosahedronGeometry(r, 0),
+      MATERIAL_NODOS_MANOS,
+    );
+    n.position.set(...p);
+    n.renderOrder = 3;
+    padre.add(n);
+  };
+
+  // Palma: caja ahusada (más estrecha en la muñeca) para que parezca el dorso de una mano
+  const palma = new THREE.BoxGeometry(0.17, 0.46, 0.4, 1, 2, 2),
+    pp = palma.attributes.position;
+  for (let i = 0; i < pp.count; i++) {
+    const y = pp.getY(i) / 0.46 + 0.5;
+    pp.setZ(i, pp.getZ(i) * (0.76 + 0.24 * y));
+    pp.setX(i, pp.getX(i) * (1.12 - 0.3 * y));
+  }
+  palma.translate(0, 0.23, 0);
+  malla(palma, modelo);
+  const talon = new THREE.IcosahedronGeometry(0.1, 0);
+  talon.scale(0.9, 1.1, 1);
+  talon.translate(0.05, 0.12, 0.15);
+  malla(talon, modelo);
+
+  // Antebrazo
+  const brazo = new THREE.CylinderGeometry(0.15, 0.23, 1.1, 8, 3, true);
+  brazo.translate(0, -0.57, 0);
+  malla(brazo, modelo);
+  const puño = new THREE.TorusGeometry(0.19, 0.016, 4, 12);
+  puño.rotateX(Math.PI / 2);
+  puño.translate(0, -0.13, 0);
+  malla(puño, modelo);
+
+  // Cadena de falanges: cada articulación es un Group que gira en Z (curvar)
+  const cadena = (raiz, largos, r) => {
+    const juntas = [];
+    let padre = raiz;
+    largos.forEach((largo, i) => {
+      const j = new THREE.Group();
+      if (i > 0) j.position.set(0, largos[i - 1], 0);
+      const g = new THREE.CylinderGeometry(r * 0.78, r, largo, 6, 1);
+      g.translate(0, largo / 2, 0);
+      malla(g, j);
+      nodo(j, [0, 0, 0], r * 0.72);
+      padre.add(j);
+      juntas.push(j);
+      padre = j;
+      r *= 0.8;
+    });
+    const punta = new THREE.Group();
+    punta.position.set(0, largos[largos.length - 1], 0);
+    padre.add(punta);
+    nodo(punta, [0, 0, 0], r * 0.9);
+    return juntas;
+  };
+
+  const defDedos = [
+    { z: 0.15, y: 0.46, l: [0.21, 0.14, 0.12], r: 0.064, abre: 0.1 }, // índice
+    { z: 0.05, y: 0.47, l: [0.24, 0.16, 0.13], r: 0.068, abre: 0.02 },
+    { z: -0.05, y: 0.46, l: [0.22, 0.15, 0.12], r: 0.062, abre: -0.05 },
+    { z: -0.14, y: 0.44, l: [0.17, 0.11, 0.1], r: 0.054, abre: -0.14 },
+  ];
+  mano.userData.dedos = defDedos.map((d) => {
+    const raiz = new THREE.Group();
+    raiz.position.set(0.0, d.y, d.z);
+    raiz.rotation.x = d.abre;
+    modelo.add(raiz);
+    return { raiz, abre: d.abre, juntas: cadena(raiz, d.l, d.r), k: [1, 1.2, 0.8] };
+  });
+
+  const pulgarRaiz = new THREE.Group();
+  pulgarRaiz.position.set(0.03, 0.1, 0.17);
+  pulgarRaiz.rotation.set(0.95, 0, -0.35, "XYZ");
+  modelo.add(pulgarRaiz);
+  mano.userData.pulgar = {
+    raiz: pulgarRaiz,
+    juntas: cadena(pulgarRaiz, [0.17, 0.15, 0.12], 0.078),
+    k: [0.7, 1.0, 0.8],
+  };
+
+  mano.userData.inclina = inclina;
+  mano.userData.fase = Math.random() * 6.28;
+  return mano;
+}
+function posarDedos(mano, curl, abrir, t) {
+  const u = mano.userData;
+  u.dedos.forEach((d, i) => {
+    const onda = Math.sin(t * 1.6 + i * 0.8 + u.fase) * 0.035,
+      c = Math.max(0, curl + onda);
+    d.juntas.forEach((j, n) => (j.rotation.z = -c * d.k[n]));
+    d.raiz.rotation.x = d.abre * (1 + abrir * 1.6);
+  });
+  const p = u.pulgar,
+    cp = Math.max(0, curl * 0.9 + Math.sin(t * 1.3 + u.fase) * 0.03);
+  p.juntas.forEach((j, n) => (j.rotation.z = -cp * p.k[n]));
+}
+function manosVRDe(id) {
+  if (manosVR[id]) return manosVR[id];
+  const o = P[id],
+    holder = new THREE.Group();
+  // Caja local de la pieza (se calcula una sola vez, sin las manos)
+  o.updateMatrixWorld(true);
+  const inv = o.matrixWorld.clone().invert(),
+    caja = new THREE.Box3();
+  o.traverse((m) => {
+    if (!m.isMesh || !m.geometry) return;
+    if (!m.geometry.boundingBox) m.geometry.computeBoundingBox();
+    if (!m.geometry.boundingBox) return;
+    caja.union(
+      m.geometry.boundingBox.clone().applyMatrix4(inv.clone().multiply(m.matrixWorld)),
+    );
+  });
+  holder.add(crearManoVR(), crearManoVR());
+  holder.visible = false;
+  holder.userData = {
+    caja,
+    agarre: 0.55,
+    fade: 0,
+    t: 0,
+    init: false,
+    ultimo: null,
+    vel: V3(),
+    objetivo: [],
+    hologramaManos: true,
+  };
+  o.add(holder);
+  manosVR[id] = holder;
+  actualizarManosVR(id, true);
+  return holder;
+}
+// Calcula dónde deben agarrar las manos según la cámara y la orientación actual de la pieza
+function actualizarManosVR(id, recalcular = false) {
+  const H = manosVR[id],
+    pieza = P[id];
+  if (!H || !pieza || !recalcular) return;
+  const u = H.userData,
+    caja = u.caja;
+  if (caja.isEmpty()) return;
+  pieza.updateMatrixWorld(true);
+  const qi = pieza.getWorldQuaternion(new THREE.Quaternion()).invert(),
+    local = (v) => v.applyQuaternion(cam.quaternion).applyQuaternion(qi),
+    aDer = local(V3(1, 0, 0)).toArray(),
+    aArr = local(V3(0, 1, 0)).toArray(),
+    aCam = local(V3(0, 0, 1)).toArray(),
+    tam = caja.getSize(V3()).toArray(),
+    cen = caja.getCenter(V3()),
+    maxE = Math.max(...tam);
+  let n = 0,
+    mejor = -1;
+  for (let i = 0; i < 3; i++)
+    if (tam[i] >= 0.3 * maxE && Math.abs(aDer[i]) > mejor) {
+      mejor = Math.abs(aDer[i]);
+      n = i;
+    }
+  let f = -1;
+  mejor = -1;
+  for (let i = 0; i < 3; i++)
+    if (i !== n && Math.abs(aArr[i]) > mejor) {
+      mejor = Math.abs(aArr[i]);
+      f = i;
+    }
+  const t = 3 - n - f,
+    eje = (i, signo) => {
+      const v = V3();
+      v.setComponent(i, signo >= 0 ? 1 : -1);
+      return v;
+    },
+    Y = eje(f, aArr[f]),
+    T = eje(t, aCam[t]),
+    X = new THREE.Vector3().crossVectors(Y, T),
+    q = new THREE.Quaternion().setFromRotationMatrix(
+      new THREE.Matrix4().makeBasis(X, Y, T),
+    );
+  const ws = pieza.getWorldScale(V3()),
+    k = Math.max(1e-6, (Math.abs(ws.x) + Math.abs(ws.y) + Math.abs(ws.z)) / 3),
+    s = THREE.MathUtils.clamp(maxE * k * 0.34, 1.0, 2.8) / k,
+    baja = -Math.min(0.14 * tam[f], 0.6 * s);
+  u.escala = s;
+  u.objetivo = [-1, 1].map((lado) => {
+    const sal = X.clone().multiplyScalar(lado);
+    return {
+      lado,
+      sal,
+      base: cen
+        .clone()
+        .addScaledVector(sal, tam[n] / 2)
+        .addScaledVector(Y, baja),
+      q,
+      espejo: lado === -1 ? 1 : -1,
+    };
+  });
+}
+// Animación por cuadro: sigue la pieza, agarra al mover y suelta al encajar
+function animarManosVR(id, H, dt) {
+  const u = H.userData,
+    pieza = P[id];
+  if (!u.objetivo.length) actualizarManosVR(id, true);
+  if (!u.objetivo.length) return;
+  u.t += dt;
+  const suelta = Boolean(man && man.snap),
+    activo = Boolean((man && man.drag) || pulsoManos > 0.12),
+    metaAgarre = suelta ? 0 : activo ? 1 : 0.55;
+  u.agarre += (metaAgarre - u.agarre) * Math.min(1, dt * 10);
+  u.fade += ((suelta ? 0 : 1) - u.fade) * Math.min(1, dt * (suelta ? 12 : 8));
+  if (!u.init) u.fade = 0;
+  const curl = 0.08 + 0.47 * u.agarre,
+    abrir = 1 - u.agarre,
+    s = u.escala,
+    kp = 1 - Math.exp(-dt * 18),
+    kq = 1 - Math.exp(-dt * 11);
+  // velocidad de la pieza para inclinar las manos hacia donde se mueve
+  const wp = pieza.getWorldPosition(V3());
+  if (u.ultimo && dt > 0)
+    u.vel.lerp(wp.clone().sub(u.ultimo).divideScalar(dt), Math.min(1, dt * 10));
+  u.ultimo = wp;
+  H.children.forEach((mano, i) => {
+    const o = u.objetivo[i];
+    if (!o) return;
+    const gap = s * (0.06 + 0.58 * curl) + s * (suelta ? 1.1 : abrir * 0.25),
+      destino = o.base.clone().addScaledVector(o.sal, gap);
+    if (!u.init) {
+      mano.position.copy(destino);
+      mano.quaternion.copy(o.q);
+    } else {
+      mano.position.lerp(destino, kp);
+      mano.quaternion.slerp(o.q, kq);
+    }
+    mano.scale.set(o.espejo * s, s, s);
+    const vl = u.vel
+      .clone()
+      .applyQuaternion(mano.getWorldQuaternion(new THREE.Quaternion()).invert()),
+      lim = (v) => THREE.MathUtils.clamp(v, -0.25, 0.25),
+      ink = mano.userData.inclina;
+    ink.rotation.x =
+      -0.3 + lim(vl.z * 0.03) + Math.sin(u.t * 1.2 + mano.userData.fase) * 0.025;
+    ink.rotation.z =
+      -lim(vl.x * 0.03) * o.espejo + Math.sin(u.t * 0.9 + mano.userData.fase) * 0.025;
+    posarDedos(mano, curl, abrir, u.t);
+  });
+  u.init = true;
+  MATERIAL_MANOS.opacity = 0.42 * u.fade;
+  MATERIAL_TRAMA_MANOS.opacity = 0.75 * u.fade;
+  MATERIAL_NODOS_MANOS.opacity = 0.9 * u.fade;
+}
 function aplicar(id) {
   const s = ST[id],
     o = P[id];
   o.quaternion.copy(s.q);
   o.position.copy(s.pc).sub(s.c0.clone().applyQuaternion(s.q));
+  actualizarManosVR(id, true);
+  actualizarGuiaEjes(id);
 }
 function iniciarManual(p, cb, tb) {
   man = { p, cola: p.p.slice(), act: null, hecho: false };
@@ -1555,6 +1944,7 @@ function iniciarManual(p, cb, tb) {
 function siguientePieza(cb, tb) {
   const m = man;
   m.act = m.cola.shift();
+  limpiarTeclasMovimiento();
   const id = m.act,
     o = P[id],
     par = o.parent,
@@ -1593,6 +1983,14 @@ function siguientePieza(cb, tb) {
       "YXZ",
     ),
   );
+  const worldScale = o.getWorldScale(V3());
+  const sizeLocal = size
+    .clone()
+    .set(
+      size.x / Math.max(Math.abs(worldScale.x), 1e-6),
+      size.y / Math.max(Math.abs(worldScale.y), 1e-6),
+      size.z / Math.max(Math.abs(worldScale.z), 1e-6),
+    );
   ST[id] = {
     pc: start,
     q,
@@ -1601,13 +1999,17 @@ function siguientePieza(cb, tb) {
     tol,
     tolA: 16 * DEG,
     dim,
+    size,
+    sizeLocal,
+    centerLocal: o.worldToLocal(bb.getCenter(V3()).clone()),
     par,
   };
   aplicar(id);
   const g = ghostDe(id);
   g.position.copy(to);
   g.quaternion.identity();
-  g.visible = true;
+  g.visible = false;
+  manosVRDe(id);
   mnom.textContent = PASOS.find((x) => x.p.includes(id)).n;
   man.drag = null;
   man.ok = false;
@@ -1615,6 +2017,8 @@ function siguientePieza(cb, tb) {
   man.prof = false;
   document.getElementById("mprof").classList.remove("on");
   document.getElementById("mguia").classList.add("on");
+  actualizarModo();
+  actualizarVisibilidadGuia(id);
   actualizarEstado();
 }
 function estado(id) {
@@ -1653,8 +2057,10 @@ function actualizarEstado() {
   GM.opacity = ok ? 0.38 : 0.26;
   mst.innerHTML =
     `Posición ${e.okP ? '<b style="color:#5f8">✔</b>' : '<b style="color:#f66">✖</b>'} <small>(${e.d.toFixed(1)} de distancia)</small> &nbsp;·&nbsp; Orientación ${e.okA ? '<b style="color:#5f8">✔</b>' : '<b style="color:#f66">✖</b>'} <small>(${Math.round(e.a / DEG)}° de giro)</small>` +
-    (man.msg ? `<div style="color:#fc6;margin-top:4px">${man.msg}</div>` : "") +
-    (hint ? `<div style="color:#ff737b;margin-top:4px">💡 ${hint}</div>` : "");
+    (man.msg ? `<div style="color:#fc6;margin-top:4px">${man.msg}</div>` : "");
+  mhelp.innerHTML = hint
+    ? `<div style="color:#ff737b">💡 ${hint}</div>`
+    : "Ajusta la pieza con las flechas y los controles de rotación.";
 }
 function manAviso(t) {
   if (!man) return;
@@ -1693,6 +2099,7 @@ function encajar(forzado) {
     if (k >= 1) {
       o.position.copy(to);
       o.quaternion.identity();
+      actualizarVisibilidadGuia(id);
     }
   }).manual = true;
   add(dur + 0.05, (k) => {
@@ -1705,6 +2112,9 @@ function encajar(forzado) {
     }
     m.hecho = true;
     mano.style.display = "none";
+    guiaEjes.visible = false;
+    if (manosVR[id]) manosVR[id].visible = false;
+    limpiarTeclasMovimiento();
     if (id === "kb" || id === "mouse")
       window.actualizarCablePeriferico?.(id, true);
     if (m.p.end) {
@@ -1712,6 +2122,7 @@ function encajar(forzado) {
     }
     info.innerHTML = `<b>${m.p.n}</b><br>${m.p.t}<div style="margin-top:8px;color:#5f8">✔ ¡Pieza colocada correctamente! Pulsa «Siguiente» para continuar.</div>`;
     man = null;
+    actualizarModo();
   }).manual = true;
 }
 function completarManual() {
@@ -1727,15 +2138,23 @@ function completarManual() {
       window.actualizarCablePeriferico?.(id, true);
   });
   mano.style.display = "none";
+  Object.values(manosVR).forEach((hands) => (hands.visible = false));
+  guiaEjes.visible = false;
+  limpiarTeclasMovimiento();
   clearTimeout(m.mt);
   man = null;
+  actualizarModo();
   tw = tw.filter((a) => !a.manual);
 }
 function cerrarManual() {
   Object.values(ghosts).forEach((g) => (g.visible = false));
+  Object.values(manosVR).forEach((hands) => (hands.visible = false));
   mano.style.display = "none";
+  guiaEjes.visible = false;
+  limpiarTeclasMovimiento();
   if (man) clearTimeout(man.mt);
   man = null;
+  actualizarModo();
   drag = null;
 }
 const RC = new THREE.Raycaster(),
@@ -1778,6 +2197,7 @@ window.addEventListener(
       prof: e.shiftKey || man.prof,
       pid: e.pointerId,
     };
+    pulsoManos = 1;
     man.drag = drag;
     ctl.enabled = false;
     cv.style.cursor = "grabbing";
@@ -1813,8 +2233,8 @@ window.addEventListener("pointermove", (e) => {
     if (!pt) return;
     w = pt.add(drag.off);
   }
-  s.pc.copy(s.par.worldToLocal(w));
-  aplicar(drag.id);
+  if (!desplazarPiezaA(drag.id, s.par.worldToLocal(w))) return;
+  pulsoManos = 1;
   actualizarEstado();
 });
 const finDrag = (e) => {
@@ -1832,30 +2252,170 @@ function rotar(eje, sg) {
   const s = ST[man.act];
   s.q.premultiply(new THREE.Quaternion().setFromAxisAngle(eje, sg * PASO_ROT));
   aplicar(man.act);
+  pulsoManos = 1;
   actualizarEstado();
   intentarEncaje();
 }
 function mover(dx, dy, dz) {
   if (!man || !man.act || man.snap) return;
-  const s = ST[man.act],
+  if (desplazarManual(man.act, dx, dy, dz, 0.25)) {
+    pulsoManos = 1;
+    actualizarEstado();
+    intentarEncaje();
+  }
+}
+function limitarMovimiento(id, candidato) {
+  const s = ST[id];
+  if (!s || s.par !== T) return candidato;
+  const gabinete = T.userData.gabinete;
+  if (gabinete) {
+    T.updateMatrixWorld(true);
+    const caja = new THREE.Box3()
+      .setFromObject(gabinete)
+      .applyMatrix4(T.matrixWorld.clone().invert())
+      .expandByScalar(-0.12);
+    const unidad = Math.max(0.14, Math.min(0.48, s.dim * 0.11)),
+      rotacion = new THREE.Matrix4().makeRotationFromQuaternion(s.q).elements,
+      hx = s.size.x / 2 + unidad * 0.62,
+      hy = s.size.y / 2,
+      hz = s.size.z / 2,
+      margenX =
+        Math.abs(rotacion[0]) * hx +
+        Math.abs(rotacion[4]) * hy +
+        Math.abs(rotacion[8]) * hz,
+      margenZ =
+        Math.abs(rotacion[2]) * hx +
+        Math.abs(rotacion[6]) * hy +
+        Math.abs(rotacion[10]) * hz,
+      limites = [
+        ["x", caja.min.x + margenX, caja.max.x - margenX],
+        ["z", caja.min.z + margenZ, caja.max.z - margenZ],
+      ];
+    limites.forEach(([eje, min, max]) => {
+      if (min > max) return;
+      const actual = s.pc[eje];
+      if (actual < min) {
+        if (candidato[eje] < actual) candidato[eje] = actual;
+        else if (candidato[eje] > max && actual < max) candidato[eje] = max;
+      } else if (actual > max) {
+        if (candidato[eje] > actual) candidato[eje] = actual;
+        else if (candidato[eje] < min && actual > min) candidato[eje] = min;
+      } else {
+        candidato[eje] = THREE.MathUtils.clamp(candidato[eje], min, max);
+      }
+    });
+  }
+  return candidato;
+}
+function movimientoPermitido(id, candidato) {
+  const s = ST[id],
+    o = P[id];
+  if (!s || s.par !== T) return true;
+  const centroAnterior = s.par.localToWorld(s.pc.clone()),
+    centroSiguiente = s.par.localToWorld(candidato.clone()),
+    delta = centroSiguiente.sub(centroAnterior),
+    cajaPieza = new THREE.Box3().setFromObject(o).translate(delta),
+    suelo = superficieTablero.position.y + 0.025;
+  if (cajaPieza.min.y < suelo) return false;
+  const placa = P.mobo;
+  if (placa && placa.visible && id !== "mobo") {
+    const cajaPlaca = new THREE.Box3().setFromObject(placa);
+    if (
+      cajaPieza.intersectsBox(cajaPlaca) &&
+      candidato.distanceTo(s.tgt) >= s.pc.distanceTo(s.tgt)
+    )
+      return false;
+  }
+  return true;
+}
+function desplazarPiezaA(id, candidato) {
+  const s = ST[id];
+  limitarMovimiento(id, candidato);
+  if (candidato.distanceToSquared(s.pc) < 1e-10) return false;
+  if (!movimientoPermitido(id, candidato)) return false;
+  s.pc.copy(candidato);
+  aplicar(id);
+  return true;
+}
+function desplazarManual(id, dx, dy, dz, paso) {
+  const s = ST[id],
     f = cam.getWorldDirection(V3()),
     r = new THREE.Vector3().crossVectors(f, V3(0, 1, 0)).normalize(),
     u = new THREE.Vector3().crossVectors(r, f).normalize(),
-    st = 0.25;
-  s.pc
-    .add(r.multiplyScalar(dx * st))
-    .add(u.multiplyScalar(dy * st))
-    .add(f.multiplyScalar(dz * st * 2));
-  aplicar(man.act);
-  actualizarEstado();
-  intentarEncaje();
+    longitud = Math.hypot(dx, dy, dz);
+  if (!longitud) return false;
+  const escala = paso / longitud,
+    candidato = s.pc
+      .clone()
+      .add(r.multiplyScalar(dx * escala))
+      .add(u.multiplyScalar(dy * escala))
+      .add(f.multiplyScalar(dz * escala * 2));
+  return desplazarPiezaA(id, candidato);
 }
 const EX = V3(1, 0, 0),
   EY = V3(0, 1, 0),
   EZ = V3(0, 0, 1);
+const keysPressed = {
+  up: { keyboard: false, pointers: new Set() },
+  down: { keyboard: false, pointers: new Set() },
+  left: { keyboard: false, pointers: new Set() },
+  right: { keyboard: false, pointers: new Set() },
+  near: { keyboard: false, pointers: new Set() },
+  far: { keyboard: false, pointers: new Set() },
+};
+const dpadPresses = new Map();
+function limpiarTeclasMovimiento() {
+  Object.values(keysPressed).forEach((state) => {
+    state.keyboard = false;
+    state.pointers.clear();
+  });
+  dpadPresses.clear();
+}
+const directionKeys = {
+  arrowup: "up",
+  arrowdown: "down",
+  arrowleft: "left",
+  arrowright: "right",
+  pageup: "far",
+  pagedown: "near",
+};
+window.actualizarMovimientoManual = (dt) => {
+  pulsoManos += (0 - pulsoManos) * Math.min(1, dt * 8);
+  Object.entries(manosVR).forEach(([id, hands]) => {
+    if (hands.visible) animarManosVR(id, hands, dt);
+  });
+  if (!man || !man.act || gal || man.snap) return;
+  const activo = (key) =>
+      keysPressed[key].keyboard || keysPressed[key].pointers.size > 0,
+    dx = Number(activo("right")) - Number(activo("left")),
+    dy = Number(activo("up")) - Number(activo("down")),
+    dz = Number(activo("far")) - Number(activo("near"));
+  if (!dx && !dy && !dz) return;
+  const paso = 2.1 * dt;
+  if (
+    desplazarManual(
+      man.act,
+      dx,
+      dy,
+      dz,
+      paso,
+    )
+  ) {
+    dpadPresses.forEach((press) => (press.moved = true));
+    actualizarEstado();
+    intentarEncaje();
+  }
+};
 addEventListener("keydown", (e) => {
   if (!man || !man.act || gal || man.snap) return;
   const k = e.key.toLowerCase();
+  const direction = directionKeys[k];
+  if (direction) {
+    if (!keysPressed[direction].keyboard) pulsoManos = 1;
+    keysPressed[direction].keyboard = true;
+    e.preventDefault();
+    return;
+  }
   let h = true;
   if (k === "q") rotar(EY, 1);
   else if (k === "e") rotar(EY, -1);
@@ -1863,22 +2423,60 @@ addEventListener("keydown", (e) => {
   else if (k === "s") rotar(EX, 1);
   else if (k === "a") rotar(EZ, 1);
   else if (k === "d") rotar(EZ, -1);
-  else if (k === "arrowleft") mover(-1, 0, 0);
-  else if (k === "arrowright") mover(1, 0, 0);
-  else if (k === "arrowup") mover(0, 1, 0);
-  else if (k === "arrowdown") mover(0, -1, 0);
-  else if (k === "pageup") mover(0, 0, 1);
-  else if (k === "pagedown") mover(0, 0, -1);
   else h = false;
   if (h) e.preventDefault();
+});
+addEventListener("keyup", (e) => {
+  const direction = directionKeys[e.key.toLowerCase()];
+  if (direction) keysPressed[direction].keyboard = false;
+});
+addEventListener("blur", () => {
+  Object.values(keysPressed).forEach((state) => {
+    state.keyboard = false;
+    state.pointers.clear();
+  });
+  dpadPresses.clear();
+});
+const dpadDirections = [
+  ["mw", "up", 0, 1, 0],
+  ["ms", "down", 0, -1, 0],
+  ["ma", "left", -1, 0, 0],
+  ["md", "right", 1, 0, 0],
+];
+dpadDirections.forEach(([id, direction, dx, dy, dz]) => {
+  const button = document.getElementById(id);
+  button.addEventListener("pointerdown", (e) => {
+    if (!man || !man.act) return;
+    e.preventDefault();
+    keysPressed[direction].pointers.add(e.pointerId);
+    dpadPresses.set(e.pointerId, { direction, moved: false });
+    button.setPointerCapture(e.pointerId);
+  });
+  const liberar = (e) => {
+    const press = dpadPresses.get(e.pointerId);
+    if (!press) return;
+    keysPressed[press.direction].pointers.delete(e.pointerId);
+    dpadPresses.delete(e.pointerId);
+    if (!press.moved && man && man.act && !man.snap) mover(dx, dy, dz);
+  };
+  button.addEventListener("pointerup", liberar);
+  button.addEventListener("pointercancel", (e) => {
+    const press = dpadPresses.get(e.pointerId);
+    if (!press) return;
+    keysPressed[press.direction].pointers.delete(e.pointerId);
+    dpadPresses.delete(e.pointerId);
+  });
+  button.addEventListener("click", (e) => {
+    if (e.detail === 0 && man && man.act) mover(dx, dy, dz);
+  });
 });
 const bm = (id, fn) => (document.getElementById(id).onclick = fn);
 bm("mqi", () => rotar(EY, 1));
 bm("mqe", () => rotar(EY, -1));
-bm("mw", () => rotar(EX, -1));
-bm("ms", () => rotar(EX, 1));
-bm("ma", () => rotar(EZ, 1));
-bm("md", () => rotar(EZ, -1));
+bm("mwrot", () => rotar(EX, -1));
+bm("msrot", () => rotar(EX, 1));
+bm("marot", () => rotar(EZ, 1));
+bm("mdrot", () => rotar(EZ, -1));
 bm("mlej", () => mover(0, 0, 1));
 bm("mcer", () => mover(0, 0, -1));
 bm("mprof", () => {
@@ -1889,7 +2487,7 @@ bm("mprof", () => {
 bm("mguia", () => {
   if (!man || !man.act) return;
   man.guia = !man.guia;
-  ghosts[man.act].visible = man.guia;
+  actualizarVisibilidadGuia(man.act);
   document.getElementById("mguia").classList.toggle("on", man.guia);
 });
 bm("mauto", () => {
@@ -1986,6 +2584,10 @@ function showPart(id) {
   src.traverse((o) => A.push(o));
   c.traverse((o) => {
     B.push(o);
+    if (o.userData.hologramaManos) {
+      o.visible = false;
+      return;
+    }
     o.visible = true;
     if (o.isMesh && !o.material.isMeshBasicMaterial) {
       o.material = o.material.clone();
@@ -2058,6 +2660,9 @@ function galeria(on) {
   ocultarInfoComponente();
   limpiarHover();
   gal = on;
+  guiaEjes.visible = false;
+  Object.values(ghosts).forEach((g) => (g.visible = false));
+  Object.values(manosVR).forEach((hands) => (hands.visible = false));
   comp.passes[0].scene = on ? GS : S;
   comp.passes[0].camera = on ? gcam : cam;
   ctl.enabled = !on;
@@ -2068,9 +2673,11 @@ function galeria(on) {
   if (on) {
     stopAuto();
     showPart(Object.keys(FICHA)[0]);
-  } else
+  } else {
     info.innerHTML =
       "<b>Simulador de ensamblaje</b><br>Pulsa «Siguiente» o «Auto» para continuar.";
+    if (man && man.act) mostrarGuiaEjes(man.act);
+  }
 }
 gp.querySelector("#gv").onclick = () => galeria(false);
 gp.querySelector("#gr").onclick = () => (gctl.autoRotate = !gctl.autoRotate);

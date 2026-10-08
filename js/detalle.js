@@ -265,6 +265,7 @@ P.mon.add(
 );
 P.kb.add(cyl(0.18, 0.12, rgb(0.4), 3.2, 0.3, -0.85, "z"));
 const detallePieza = document.getElementById("detalle-pieza");
+const detalleContenido = document.getElementById("detalle-contenido");
 const detalleTitulo = document.getElementById("detalle-titulo");
 const detalleFuncion = document.getElementById("detalle-funcion");
 const detalleCaracteristicas = document.getElementById(
@@ -272,13 +273,13 @@ const detalleCaracteristicas = document.getElementById(
 );
 const detalleInstalacion = document.getElementById("detalle-instalacion");
 const cerrarDetalle = () => {
-  detallePieza.hidden = true;
+  detalleContenido.hidden = true;
 };
 detallePieza
   .querySelector(".detalle-cerrar")
   .addEventListener("click", cerrarDetalle);
 addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && !detallePieza.hidden) cerrarDetalle();
+  if (e.key === "Escape" && !detalleContenido.hidden) cerrarDetalle();
 });
 
 const piezaRaycaster = new THREE.Raycaster(),
@@ -348,7 +349,7 @@ addEventListener("pointerup", (e) => {
     }),
   );
   detalleInstalacion.textContent = pasoPieza ? pasoPieza.t : "";
-  detallePieza.hidden = false;
+  detalleContenido.hidden = false;
 
   raiz.updateMatrixWorld(true);
   const caja = new THREE.Box3().setFromObject(raiz),
