@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8"><title>ASUS ROG Strix G16 · 3D</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#05070d;color:#cfe;font-family:'Segoe UI',sans-serif;overflow:hidden}
+#c{position:absolute;inset:0;width:100%;height:100%}
+#panel{position:absolute;top:12px;left:12px;width:280px;max-height:calc(100% - 24px);overflow:auto;background:rgba(8,12,24,.78);backdrop-filter:blur(10px);border:1px solid rgba(0,229,255,.35);border-radius:14px;padding:12px}
+h1{font:800 13px 'Segoe UI';color:#00e5ff;letter-spacing:2px;margin-bottom:10px}
+#bar{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap}
+button{background:linear-gradient(135deg,#00e5ff,#7000ff);border:0;color:#fff;font-weight:700;padding:7px 12px;border-radius:16px;cursor:pointer;font-size:12px}
+button:hover{filter:brightness(1.2)}button.on{background:linear-gradient(135deg,#00ffa3,#00a6ff);color:#04121a}
+.paso{padding:6px 8px;margin:2px 0;border-radius:8px;font-size:13px;cursor:pointer;border:1px solid transparent;color:#9ab}
+.paso:hover{border-color:#00e5ff}.paso.ok{color:#5f8}.paso.act{background:rgba(112,0,255,.4);color:#fff}
+#info{position:absolute;right:14px;bottom:14px;width:360px;background:rgba(8,12,24,.82);backdrop-filter:blur(10px);border:1px solid rgba(112,0,255,.55);border-radius:14px;padding:14px;font-size:13px;line-height:1.5}
+#info b{color:#00e5ff;font-size:15px}
+</style></head><body>
+<canvas id="c"></canvas>
+<div id="panel"><h1>ASUS ROG STRIX G16 · 3D</h1>
+<div id="bar"><button id="prev">◀ Anterior</button><button id="sig">Siguiente ▶</button><button id="auto">Auto</button><button id="rst">Reiniciar</button></div>
+<div id="lista"></div></div>
+<div id="info"><b>Bienvenido</b><br>Arrastra para girar y usa la rueda para acercar. Pulsa «Siguiente» (o «Auto») para ensamblar la ASUS ROG Strix G16 (G614FP-RV010W) pieza por pieza.</div>
+
+<!-- Usa las mismas librerías de tu proyecto: pon este archivo junto a tu index.html -->
+<script src="js/three.min.js"></script><script src="js/OrbitControls.js"></script>
+<script src="js/CopyShader.js"></script><script src="js/LuminosityHighPassShader.js"></script><script src="js/EffectComposer.js"></script><script src="js/MaskPass.js"></script><script src="js/ShaderPass.js"></script><script src="js/RenderPass.js"></script><script src="js/UnrealBloomPass.js"></script>
+<script>
+// ================= 1. PASOS DEL ENSAMBLAJE =================
+// id = nombre de la pieza | c = cámara [x,y,z, mira-x,mira-y,mira-z]
+const VISTA=[0,13,13,0,0,-1];
+const PASOS=[
+ {n:'Chasis inferior',id:'base',t:'Es la base de la laptop. Aquí se alojan todos los componentes internos.',c:[0,15,15,0,0,0]},
+ {n:'Placa base (con RTX 5070)',id:'mobo',t:'Conecta todos los componentes. Lleva soldada la GPU NVIDIA GeForce RTX 5070 Laptop (8 GB GDDR7) y se fija al chasis con tornillos.',c:VISTA},
+ {n:'AMD Ryzen 9 9955HX',id:'cpu',t:'Procesador de 16 núcleos y 32 hilos, 2.5 GHz base y hasta 5.4 GHz, con 80 MB de caché.',c:[-2,7,5,-1.5,.4,-2.6]},
+ {n:'Memoria RAM (×2)',id:'ram',t:'Dos módulos SO-DIMM DDR5-5600 de 8 GB (16 GB en total). Se insertan inclinados y se presionan hasta que hagan clic.',c:[4,7,6,4.5,.4,0]},
+ {n:'SSD M.2',id:'ssd',t:'SSD NVMe de 1 TB. Se inserta en su ranura M.2 y se asegura con un tornillo.',c:[-4,7,6,-4.5,.4,.2]},
+ {n:'Enfriamiento',id:'cool',t:'Heatpipes de cobre y 2 ventiladores sacan el calor de la CPU y GPU. Es clave en una laptop gamer.',c:[-1,9,7,-1.5,.5,-2.6]},
+ {n:'Batería 90 Wh',id:'bat',t:'Batería de ion-litio de 90 Wh. Va en la parte delantera del chasis.',c:[0,10,13,0,.3,3]},
+ {n:'Teclado RGB y carcasa superior',id:'deck',t:'La carcasa superior (Eclipse Gray) cierra el equipo. Incluye teclado con RGB por tecla, touchpad y la barra de luz Aura frontal.',c:[0,11,16,0,1,0]},
+ {n:'Pantalla 16" FHD+',id:'lid',t:'Pantalla de 16 pulgadas FHD+ (1920×1200, 16:10). La tapa se une a la base por las bisagras traseras y se conecta con un cable plano.',c:[0,8,22,0,3,-3]},
+ {n:'Encender',id:null,t:'<b>¡Ensamblaje completo!</b> ASUS ROG Strix G16 G614FP-RV010W encendida: Ryzen 9 9955HX, RTX 5070, 16 GB RAM y 1 TB SSD.',c:[0,6,23,0,3,-1]}];
+
+// ================= 2. ESCENA =================
+const cv=document.getElementById('c'),R=new THREE.WebGLRenderer({canvas:cv,antialias:true});
+R.setPixelRatio(Math.min(devicePixelRatio,2));
+const S=new THREE.Scene();S.background=new THREE.Color(0x04060b);
+const cam=new THREE.PerspectiveCamera(42,1,.1,200);cam.position.set(...VISTA.slice(0,3));
+const ctl=new THREE.OrbitControls(cam,cv);ctl.enableDamping=true;ctl.target.set(0,0,-1);
+S.add(new THREE.HemisphereLight(0xaabbee,0x101018,1.1));
+const dl=new THREE.DirectionalLight(0xffffff,1.1);dl.position.set(6,14,12);S.add(dl);
+S.add(new THREE.GridHelper(40,40,0x00e5ff,0x112233)).position.y=-.01;
+{const pm=new THREE.PMREMGenerator(R),es=new THREE.Scene();es.background=new THREE.Color(0x0b0e16);   // reflejos de paneles de luz
+ [[0x44ccff,-8,6,5],[0xff44cc,9,5,-4],[0xffffff,0,10,2]].forEach(([c,x,y,z])=>{const b=new THREE.Mesh(new THREE.BoxGeometry(7,.4,7),new THREE.MeshBasicMaterial({color:new THREE.Color(c).multiplyScalar(4)}));b.position.set(x,y,z);es.add(b)});
+ S.environment=pm.fromScene(es,.04).texture}
+const comp=new THREE.EffectComposer(R);comp.addPass(new THREE.RenderPass(S,cam));comp.addPass(new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),.6,.6,.9));
+function ajustar(){R.setSize(innerWidth,innerHeight,false);comp.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix()}
+addEventListener('resize',ajustar);ajustar();
+
+// ================= 3. UTILIDADES =================
+const M=(c,o={})=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.5,metalness:.4},o));
+const box=(w,h,d,m,x,y,z)=>{const b=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);b.position.set(x,y,z);return b};
+const dark=M(0x1b2030),pcbM=M(0x0b3d2e,{metalness:.2}),chip=M(0x0a0a0f),cobre=M(0xc4733a,{metalness:.9,roughness:.3});
+const neon=M(0x00e5ff,{emissive:0x00e5ff,emissiveIntensity:.9});
+const L=new THREE.Group();S.add(L);          // grupo de toda la laptop
+const P={};                                  // piezas por id
+function pieza(id,hijos,pos){const g=new THREE.Group();hijos.forEach(h=>g.add(h));
+ g.userData={to:pos||new THREE.Vector3(),t:1};g.position.copy(g.userData.to);g.visible=false;L.add(g);P[id]=g;return g}
+
+// ================= 4. PIEZAS (más realistas) =================
+const alu=M(0x2b303b,{metalness:.9,roughness:.35}),oro=M(0xd4af37,{metalness:1,roughness:.3}),niquel=M(0xd0d4da,{metalness:1,roughness:.2}),plata=M(0xaab0b8,{metalness:.9,roughness:.3});
+function lienzo(w,h,f){const c=document.createElement('canvas');c.width=w;c.height=h;f(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);t.anisotropy=8;return t}
+function rgeo(w,h,d,r){const x=-w/2,y=-d/2,s=new THREE.Shape();   // caja con esquinas redondeadas y bisel
+ s.moveTo(x+r,y);s.lineTo(x+w-r,y);s.quadraticCurveTo(x+w,y,x+w,y+r);s.lineTo(x+w,y+d-r);s.quadraticCurveTo(x+w,y+d,x+w-r,y+d);s.lineTo(x+r,y+d);s.quadraticCurveTo(x,y+d,x,y+d-r);s.lineTo(x,y+r);s.quadraticCurveTo(x,y,x+r,y);
+ const g=new THREE.ExtrudeGeometry(s,{depth:h,amount:h,bevelEnabled:true,bevelSize:.02,bevelThickness:.02,bevelSegments:2});g.rotateX(-Math.PI/2);g.translate(0,-h/2,0);return g}
+const rb=(w,h,d,r,m,x,y,z)=>{const b=new THREE.Mesh(rgeo(w,h,d,r),m);b.position.set(x,y,z);return b};
+const cil=(r,h,m,x,y,z)=>{const c=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,16),m);c.position.set(x,y,z);return c};
+const plano=(w,d,tex,x,y,z,tr=true)=>{const p=new THREE.Mesh(new THREE.PlaneGeometry(w,d),new THREE.MeshBasicMaterial({map:tex,transparent:tr,depthWrite:false}));p.rotation.x=-Math.PI/2;p.position.set(x,y,z);return p};
+const etiqueta=(txt,col,bg)=>lienzo(512,128,(g,w,h)=>{g.fillStyle=bg;g.fillRect(0,0,w,h);g.fillStyle=col;g.font='bold 44px Segoe UI';g.textAlign='center';g.fillText(txt,w/2,h/2+15)});
+
+// chasis: carcasa de aluminio, tornillos, rejillas de aire y puertos
+const ch=[rb(16,.2,11,.5,alu,0,.1,0),box(16,.7,.3,alu,0,.45,-5.35),box(16,.7,.3,alu,0,.45,5.35),box(.3,.7,11,alu,-7.85,.45,0),box(.3,.7,11,alu,7.85,.45,0)];
+[[-7.3,-4.8],[7.3,-4.8],[-7.3,4.8],[7.3,4.8],[0,-4.8],[0,4.8]].forEach(([x,z])=>ch.push(cil(.13,.1,plata,x,.24,z)));
+for(let i=0;i<10;i++)[-5.6+i*.25,1.2+i*.25].forEach(x=>ch.push(box(.1,.03,2.4,chip,x,.21,-2.6)));
+[-3,-1.6,-.2].forEach(z=>{ch.push(box(.4,.22,.8,chip,-7.85,.45,z));ch.push(box(.4,.22,.8,chip,7.85,.45,z+.3))});
+ch.push(box(.4,.22,1.4,chip,-7.85,.45,2));
+pieza('base',ch);
+
+// placa base: PCB con pistas dibujadas, condensadores, inductores, ranuras y GPU con VRAM
+const pistas=lienzo(1400,640,(g,w,h)=>{g.fillStyle='#0c3b2c';g.fillRect(0,0,w,h);g.strokeStyle='#17795a';g.lineWidth=2;
+ for(let i=0;i<420;i++){let x=Math.random()*w,y=Math.random()*h;g.beginPath();g.moveTo(x,y);for(let k=0;k<4;k++){if(k%2)y+=(Math.random()-.5)*160;else x+=(Math.random()-.5)*220;g.lineTo(x,y)}g.stroke()}
+ g.fillStyle='#d4af37';for(let i=0;i<500;i++)g.fillRect(Math.random()*w,Math.random()*h,6,6)});
+const mb=[box(14,.1,6.4,M(0xffffff,{map:pistas,metalness:.2,roughness:.55}),0,.25,-1.9),box(1.4,.08,1.4,chip,3,.34,.4),box(1,.08,1,chip,-6,.34,-4.2),box(1.2,.08,.8,chip,-6.3,.34,.9)];
+for(let i=0;i<8;i++)mb.push(cil(.17,.28,plata,-6.8+i*.5,.4,-4.7));                 // condensadores
+for(let i=0;i<4;i++)mb.push(rb(.55,.28,.55,.06,M(0x30343c,{metalness:.7,roughness:.4}),1+i*.8,.4,-4.7));  // inductores VRM
+[-.4,.6].forEach(z=>mb.push(box(3.4,.12,.5,chip,4.5,.33,z)));                       // ranuras SO-DIMM
+mb.push(box(2.2,.04,2.2,pcbM,5.6,.32,-2.4),rb(1.2,.08,1.2,.05,niquel,5.6,.38,-2.4),plano(1.1,.28,etiqueta('RTX 5070','#3d7a00','#d8dde2'),5.6,.425,-2.4));  // GPU
+[[4.7,-3.7],[4.7,-1.1],[6.5,-3.7],[6.5,-1.1]].forEach(([x,z])=>mb.push(box(.5,.07,.5,chip,x,.37,z)));  // VRAM
+pieza('mobo',mb);
+
+// CPU: sustrato verde + tapa metálica (IHS) con su etiqueta
+pieza('cpu',[rb(1.9,.06,1.9,.05,pcbM,-1.5,.33,-2.6),rb(1.4,.1,1.4,.08,niquel,-1.5,.41,-2.6),
+ plano(1.25,1.25,lienzo(256,256,(g,w,h)=>{g.fillStyle='#000';g.font='bold 34px Segoe UI';g.textAlign='center';g.fillText('AMD',128,80);g.fillText('RYZEN 9',128,130);g.font='26px Segoe UI';g.fillText('9955HX',128,182)}),-1.5,.465,-2.6)]);
+
+// RAM: PCB, chips, contactos dorados y etiqueta
+const ram=z=>[rb(3.2,.08,.9,.04,pcbM,4.5,.43,z),...[3.7,4.3,4.9].map(x=>box(.5,.07,.55,chip,x,.5,z)),box(3,.02,.1,oro,4.5,.43,z-.42),
+ plano(1.4,.35,etiqueta('DDR5-5600 8GB','#fff','#3a3f4a'),5.2,.545,z)];
+pieza('ram',[...ram(-.4),...ram(.6)]);
+
+// SSD M.2: controlador, memorias NAND y etiqueta
+pieza('ssd',[rb(2.4,.06,.8,.04,M(0x15171d),-4.5,.36,.2),box(.5,.06,.5,chip,-3.8,.4,.2),box(.6,.06,.6,chip,-4.6,.4,.2),box(.6,.06,.6,chip,-5.3,.4,.2),
+ box(.12,.02,.7,oro,-3.4,.36,.2),plano(1,.3,etiqueta('NVMe 1TB','#00e5ff','#101820'),-4.6,.435,.2)]);
+
+// enfriamiento: placa de cobre, heatpipes curvos, aletas de aluminio y ventiladores con aspas inclinadas
+const fans=[];
+function fan(x,z){const g=new THREE.Group();g.position.set(x,.5,z);
+ g.add(new THREE.Mesh(new THREE.CylinderGeometry(1.3,1.3,.2,40),chip));
+ const r=new THREE.Mesh(new THREE.TorusGeometry(1.3,.05,8,40),neon);r.rotation.x=Math.PI/2;r.position.y=.1;g.add(r);
+ const sp=new THREE.Group();sp.position.y=.14;
+ for(let i=0;i<9;i++){const b=box(.95,.03,.34,M(0x3a4658,{metalness:.6}),.65,0,0);b.rotation.x=.45;const h=new THREE.Group();h.rotation.y=i*Math.PI*2/9;h.add(b);sp.add(h)}
+ sp.add(cil(.32,.1,neon,0,0,0));g.add(sp);fans.push(sp);return g}
+const tubo=pts=>new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts.map(p=>new THREE.Vector3(p[0],.5,p[1]))),24,.1,10),cobre);
+const cool=[rb(2.2,.08,2.2,.1,cobre,-1.5,.52,-2.6),
+ tubo([[-1.5,-2.9],[-3.5,-3.8],[-5.2,-4.1],[-6.7,-3.4]]),tubo([[-1.5,-2.3],[-3.5,-1.4],[-5.2,-1.1],[-6.7,-1.8]]),
+ tubo([[-1.5,-2.9],[0,-3.8],[2,-4.1],[3.8,-3.4]]),tubo([[-1.5,-2.3],[0,-1.4],[2,-1.1],[3.8,-1.8]]),fan(-5,-2.6),fan(2,-2.6)];
+for(let i=0;i<7;i++){cool.push(box(.04,.5,2.5,plata,-6.45-i*.1,.5,-2.6));cool.push(box(.04,.5,2.5,plata,3.55+i*.1,.5,-2.6))}
+pieza('cool',cool);
+
+// batería con etiqueta y cable plano
+pieza('bat',[rb(13,.3,3,.1,M(0x1c2230),0,.35,3.9),
+ plano(12.4,2.6,lienzo(1240,260,(g,w,h)=>{g.fillStyle='#232b3b';g.fillRect(0,0,w,h);g.strokeStyle='#3a4660';g.lineWidth=3;for(let i=1;i<6;i++){g.beginPath();g.moveTo(i*w/6,0);g.lineTo(i*w/6,h);g.stroke()}
+  g.fillStyle='#00ffa3';g.fillRect(0,0,w,26);g.fillStyle='#fff';g.font='bold 52px Segoe UI';g.textAlign='center';g.fillText('Li-ion Polymer · 90Wh · ASUS',w/2,150);g.font='30px Segoe UI';g.fillText('⚠ No perforar · Batería recargable',w/2,205)}),0,.515,3.9,false),
+ box(1.2,.03,.7,M(0xd98a1a),-6.9,.53,2.6)]);
+
+// teclado: teclas 3D redondeadas + letras + RGB por columna, altavoces y botón de encendido
+const teclas=[],kg=rgeo(.9,.14,.85,.12),
+ kh=[rb(16,.25,11,.45,M(0x34373e,{metalness:.8,roughness:.4}),0,.925,0),rb(4.5,.04,2.6,.15,M(0x2a3040,{metalness:.2,roughness:.15}),0,1.07,3.2),cil(.3,.06,neon,7,1.08,-5),box(12,.06,.1,M(0xff1f3d,{emissive:0xff1f3d,emissiveIntensity:.9}),0,.93,5.52)];
+for(let c=0;c<14;c++){const m=M(0x14171e,{emissive:0x000000,roughness:.55,metalness:.3});teclas.push(m);
+ for(let r=0;r<5;r++){const k=new THREE.Mesh(kg,m);k.position.set(-6.5+c,1.11,-4.4+r);kh.push(k)}}
+for(let i=0;i<5;i++)[-1,1].forEach(sg=>kh.push(box(.07,.02,2.6,chip,sg*(7.2+i*.17),1.06,1.2)));
+const filas=[["Esc","F1","F2","F3","F4","F5","F6","F7","F8","F9","F10","F11","F12","Del"],["`","1","2","3","4","5","6","7","8","9","0","-","=","←"],["Tab","Q","W","E","R","T","Y","U","I","O","P","[","]","\\"],["Caps","A","S","D","F","G","H","J","K","L",";","'","Enter",""],["Shift","Z","X","C","V","B","N","M",",",".","/","↑","Fn","Ctrl"]];
+kh.push(plano(14,5,lienzo(1400,500,(g)=>{g.fillStyle='#e8f4ff';g.textAlign='center';filas.forEach((f,r)=>f.forEach((t,c)=>{g.font=(t.length>2?'bold 22px':'bold 34px')+' Segoe UI';g.fillText(t,c*100+50,r*100+62)}))}),0,1.19,-2.4));
+pieza('deck',kh);
+
+// pantalla: tapa de aluminio, marco, webcam, logo luminoso y bisagras
+function pantallaTex(on){return lienzo(1024,614,(g)=>{if(on){const d=g.createLinearGradient(0,0,1024,614);d.addColorStop(0,'#120508');d.addColorStop(.5,'#7a0b1c');d.addColorStop(1,'#ff1f3d');
+  g.fillStyle=d;g.fillRect(0,0,1024,614);g.fillStyle='#fff';g.textAlign='center';g.font='bold 70px Segoe UI';g.fillText('ROG STRIX G16',512,280);g.font='30px Segoe UI';g.fillText('Ryzen 9 9955HX · RTX 5070 · 16 GB · 1 TB',512,345)}
+ else{g.fillStyle='#02040a';g.fillRect(0,0,1024,614)}})}
+const texOn=pantallaTex(true),texOff=pantallaTex(false),scr=new THREE.MeshBasicMaterial({map:texOff});
+const pant=new THREE.Mesh(new THREE.PlaneGeometry(15,9),scr);pant.rotation.x=Math.PI/2;pant.position.set(0,-.16,5);
+const logo=plano(3.4,1.2,lienzo(340,120,(g)=>{g.fillStyle='#ff1f3d';g.font='bold 90px Segoe UI';g.textAlign='center';g.fillText('ROG',170,90)}),0,.17,5);
+const bis=x=>{const c=cil(.28,1.6,alu,x,0,0);c.rotation.z=Math.PI/2;return c};
+const tapa=pieza('lid',[rb(16,.3,10,.45,M(0x34373e,{metalness:.85,roughness:.35}),0,0,5),pant,cil(.07,.02,neon,0,-.17,.28),logo,bis(-6.2),bis(6.2)],new THREE.Vector3(0,1,-5.5));
+tapa.rotation.x=-1.85;                       // abre la tapa ~106°
+
+// ================= 5. CONTROL DE PASOS =================
+let paso=-1,encendido=false,trans=1,c0={p:new THREE.Vector3(),t:new THREE.Vector3()},c1={p:new THREE.Vector3(),t:new THREE.Vector3()},timer=null;
+const lista=document.getElementById('lista'),info=document.getElementById('info');
+PASOS.forEach((p,i)=>{const d=document.createElement('div');d.className='paso';d.textContent=(i+1)+' · '+p.n;d.onclick=()=>ir(i);lista.appendChild(d)});
+function ir(n){n=Math.max(-1,Math.min(PASOS.length-1,n));
+ PASOS.forEach((p,i)=>{if(!p.id)return;const g=P[p.id],ver=i<=n;
+  if(ver&&!g.visible)g.userData.t=0;          // pieza nueva: empieza la animación de entrada
+  g.visible=ver});
+ encendido=n===PASOS.length-1;scr.map=encendido?texOn:texOff;scr.needsUpdate=true;
+ [...lista.children].forEach((d,i)=>d.className='paso'+(i<n?' ok':i===n?' act':''));
+ info.innerHTML=n<0?'<b>Bienvenido</b><br>Pulsa «Siguiente» para empezar.':'<b>'+PASOS[n].n+'</b><br>'+PASOS[n].t;
+ const c=n<0?VISTA:PASOS[n].c;c0.p.copy(cam.position);c0.t.copy(ctl.target);c1.p.set(c[0],c[1],c[2]);c1.t.set(c[3],c[4],c[5]);trans=0;paso=n}
+document.getElementById('sig').onclick=()=>ir(paso+1);
+document.getElementById('prev').onclick=()=>ir(paso-1);
+document.getElementById('rst').onclick=()=>{clearInterval(timer);timer=null;auto.classList.remove('on');ir(-1)};
+const auto=document.getElementById('auto');
+auto.onclick=()=>{if(timer){clearInterval(timer);timer=null;auto.classList.remove('on');return}
+ auto.classList.add('on');if(paso>=PASOS.length-1)ir(-1);
+ timer=setInterval(()=>{if(paso>=PASOS.length-1){clearInterval(timer);timer=null;auto.classList.remove('on')}else ir(paso+1)},2800)};
+
+// ================= 6. ANIMACIÓN =================
+const ease=k=>1-Math.pow(1-k,3),EX=new THREE.Vector3(0,9,0),clk=new THREE.Clock();
+(function loop(){requestAnimationFrame(loop);const dt=Math.min(clk.getDelta(),.05),tm=clk.elapsedTime;
+ Object.values(P).forEach(g=>{if(g.userData.t<1){g.userData.t=Math.min(1,g.userData.t+dt/.9);
+  g.position.copy(g.userData.to).addScaledVector(EX,1-ease(g.userData.t))}});
+ if(trans<1){trans=Math.min(1,trans+dt/1.2);const k=ease(trans);cam.position.lerpVectors(c0.p,c1.p,k);ctl.target.lerpVectors(c0.t,c1.t,k)}
+ fans.forEach((f,i)=>f.rotation.y+=dt*(encendido?14:2)*(i?-1:1));
+ teclas.forEach((m,i)=>{m.emissive.setHSL((tm*.2+i/14)%1,1,.5);m.emissiveIntensity=encendido?.5:(P.deck.visible?.1:0)});
+ ctl.update();comp.render()})();
+// ================= 7. MODELOS REALES (.glb) =================
+// Si existe el archivo en models/laptop/, reemplaza la pieza hecha con código por el modelo real.
+// [archivo, giro X, giro Y, giro Z en grados]  -> si un modelo sale acostado o al revés, cambia los giros (ej: 90, 0, 0)
+const MODELOS={base:['chasis.glb',0,0,0],mobo:['placa.glb',0,0,0],cpu:['cpu.glb',0,0,0],ram:['ram.glb',0,0,0],
+ ssd:['ssd.glb',0,0,0],cool:['cooler.glb',0,0,0],bat:['bateria.glb',0,0,0],deck:['teclado.glb',0,0,0]};
+function leerGLB(buf){   // lector mínimo de .glb (sin Draco): mallas, jerarquía, materiales PBR y texturas
+ const jl=new DataView(buf).getUint32(12,true),J=JSON.parse(new TextDecoder().decode(new Uint8Array(buf,20,jl))),bo=28+jl;
+ if((J.extensionsRequired||[]).some(e=>/draco|meshopt/i.test(e)))throw new Error('modelo comprimido (Draco): descarga la versión sin comprimir');
+ const acc=i=>{const a=J.accessors[i],bv=J.bufferViews[a.bufferView],n={SCALAR:1,VEC2:2,VEC3:3,VEC4:4}[a.type],
+   T={5120:Int8Array,5121:Uint8Array,5122:Int16Array,5123:Uint16Array,5125:Uint32Array,5126:Float32Array}[a.componentType],
+   sz=T.BYTES_PER_ELEMENT,st=bv.byteStride||n*sz,o=bo+(bv.byteOffset||0)+(a.byteOffset||0);
+   if(st===n*sz)return new T(buf.slice(o,o+a.count*n*sz));
+   const v=new T(buf.slice(o,o+st*a.count)),out=new T(a.count*n);
+   for(let i=0;i<a.count;i++)for(let k=0;k<n;k++)out[i*n+k]=v[i*st/sz+k];return out};
+ const tx={},tex=i=>{if(tx[i])return tx[i];const t=J.textures[i],im=J.images[t.source];if(im.bufferView==null)return null;
+   const bv=J.bufferViews[im.bufferView],o=bo+(bv.byteOffset||0),img=new Image(),T=new THREE.Texture(img);
+   img.onload=()=>{T.needsUpdate=true};img.src=URL.createObjectURL(new Blob([buf.slice(o,o+bv.byteLength)],{type:im.mimeType}));
+   T.flipY=false;T.wrapS=T.wrapT=THREE.RepeatWrapping;T.anisotropy=4;return tx[i]=T};
+ const mats=(J.materials||[]).map(m=>{const pb=m.pbrMetallicRoughness||{},o={color:new THREE.Color().fromArray((pb.baseColorFactor||[1,1,1]).slice(0,3)),
+   metalness:pb.metallicFactor==null?1:pb.metallicFactor,roughness:pb.roughnessFactor==null?1:pb.roughnessFactor,side:m.doubleSided?THREE.DoubleSide:THREE.FrontSide};
+  if(pb.baseColorTexture)o.map=tex(pb.baseColorTexture.index);
+  if(pb.metallicRoughnessTexture)o.metalnessMap=o.roughnessMap=tex(pb.metallicRoughnessTexture.index);
+  if(m.normalTexture)o.normalMap=tex(m.normalTexture.index);
+  if(m.emissiveFactor&&m.emissiveFactor.some(c=>c>0)){o.emissive=new THREE.Color().fromArray(m.emissiveFactor);if(m.emissiveTexture)o.emissiveMap=tex(m.emissiveTexture.index)}
+  if(m.alphaMode==='MASK')o.alphaTest=m.alphaCutoff==null?.5:m.alphaCutoff;else if(m.alphaMode==='BLEND')o.transparent=true;
+  Object.keys(o).forEach(k=>o[k]==null&&delete o[k]);return new THREE.MeshStandardMaterial(o)});
+ const malla=mi=>{const g=new THREE.Group();J.meshes[mi].primitives.forEach(pr=>{const G=new THREE.BufferGeometry(),a=pr.attributes;
+   G.setAttribute('position',new THREE.BufferAttribute(acc(a.POSITION),3));
+   if(a.NORMAL)G.setAttribute('normal',new THREE.BufferAttribute(acc(a.NORMAL),3));
+   if(a.TEXCOORD_0)G.setAttribute('uv',new THREE.BufferAttribute(acc(a.TEXCOORD_0),2));
+   if(pr.indices!=null)G.setIndex(new THREE.BufferAttribute(new Uint32Array(acc(pr.indices)),1));
+   if(!a.NORMAL)G.computeVertexNormals();g.add(new THREE.Mesh(G,pr.material!=null?mats[pr.material]:M(0x888888)))});return g};
+ const nodo=i=>{const n=J.nodes[i],g=n.mesh!=null?malla(n.mesh):new THREE.Group();
+  if(n.matrix){g.matrix.fromArray(n.matrix);g.matrix.decompose(g.position,g.quaternion,g.scale)}
+  else{if(n.translation)g.position.fromArray(n.translation);if(n.rotation)g.quaternion.fromArray(n.rotation);if(n.scale)g.scale.fromArray(n.scale)}
+  (n.children||[]).forEach(c=>g.add(nodo(c)));return g};
+ const raiz=new THREE.Group();J.scenes[J.scene||0].nodes.forEach(i=>raiz.add(nodo(i)));return raiz}
+async function cargarModelo(id,[f,rx,ry,rz]){
+ try{const r=await fetch('models/laptop/'+f);if(!r.ok)return;const modelo=leerGLB(await r.arrayBuffer()),g=P[id],V=THREE.Vector3;
+  L.updateMatrixWorld(true);const bb=new THREE.Box3().setFromObject(g),a=bb.getSize(new V),bc=bb.getCenter(new V);   // espacio que ocupaba la pieza simple
+  const w=new THREE.Group(),D=Math.PI/180;w.add(modelo);w.rotation.set(rx*D,ry*D,rz*D);w.updateMatrixWorld(true);
+  const mb=new THREE.Box3().setFromObject(w),m=mb.getSize(new V),mc=mb.getCenter(new V),k=Math.min(a.x/m.x,a.z/m.z);   // escala para que quepa
+  w.scale.setScalar(k);w.position.set(bc.x-mc.x*k,bb.min.y-mb.min.y*k,bc.z-mc.z*k);
+  while(g.children.length)g.remove(g.children[0]);g.add(w);if(id==='cool')fans.length=0;console.log('Modelo real cargado:',id)}
+ catch(e){console.warn('No se pudo cargar',f,e)}}
+Object.entries(MODELOS).forEach(([id,c])=>cargarModelo(id,c));
+ir(-1);
+</script></body></html>

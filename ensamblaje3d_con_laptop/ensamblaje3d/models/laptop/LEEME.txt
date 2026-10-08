@@ -1,0 +1,21 @@
+MODELOS 3D REALES PARA LA ASUS ROG STRIX G16 (G614FP-RV010W)
+=============================================================
+Pon aqui archivos .glb con estos nombres EXACTOS (los que no pongas se quedan con la pieza simple):
+
+  chasis.glb    -> carcasa inferior de laptop
+  placa.glb     -> placa madre (motherboard)
+  cpu.glb       -> procesador AMD Ryzen 9
+  ram.glb       -> memoria RAM SO-DIMM DDR5
+  ssd.glb       -> SSD M.2 NVMe
+  cooler.glb    -> disipador / ventiladores
+  bateria.glb   -> bateria de laptop
+  teclado.glb   -> teclado
+
+DONDE BUSCARLOS (sketchfab.com, filtra por "Downloadable" y licencia CC):
+  "ASUS ROG Strix G16", "AMD Ryzen 9 CPU", "laptop motherboard", "SO-DIMM DDR5", "M.2 SSD", "laptop battery", "laptop heatsink fan"
+  Al descargar elige formato "glTF"/"glb". Evita los que digan Draco.
+
+IMPORTANTE:
+  - Abre la pagina con Live Server (clic derecho en laptop.html > Open with Live Server). Con doble clic NO cargan los modelos.
+  - Si un modelo sale acostado o al reves, cambia sus numeros de giro en la lista MODELOS de laptop.html (ej: 90,0,0).
+  - Las licencias CC-BY piden dar credito: anota autor y titulo del modelo en tu trabajo.
