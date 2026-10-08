@@ -7,8 +7,7 @@
     cpu: N1,
     ram: N1,
     ssd: N1,
-    glass:
-      "Es lo último que se coloca, después de revisar y ordenar los cables.",
+    glass: "Es lo último que se coloca para que no estorbe durante el montaje.",
   };
   let md = null;
   let focoPrevio = null;
@@ -147,16 +146,8 @@
   };
   function felicitar() {
     EST.t1 = EST.t1 || performance.now();
-    const indiceRevision = PASOS.findIndex((paso) => paso.checklist),
-      revisionCompleta =
-        indiceRevision >= 0 &&
-        PASOS[indiceRevision].checklist.every((_, i) => verificaciones.has(i));
     let h =
-      "<h2>🎉 ¡Vista final del ensamblaje!</h2><p>La torre, los periféricos y el monitor están listos. " +
-      (revisionCompleta
-        ? "La revisión previa también está completa."
-        : "Si solo querías ver el resultado, puedes saltarte la lista; para energizar un equipo real, completa primero la revisión.") +
-      "</p>";
+      "<h2>🎉 ¡Ensamblaje completo!</h2><p>La torre, los periféricos y el monitor están listos.</p>";
     if (EST.t0)
       h +=
         '<div class="stats"><div><b>' +
@@ -183,7 +174,7 @@
   }
   function ayuda() {
     modal(
-      '<h2>Cómo usar el simulador</h2><ul><li><b>Ver:</b> arrastra para girar la vista y usa la rueda (o pellizca en el celular) para acercar.</li><li><b>Avanzar:</b> «Siguiente» recorre las piezas y los periféricos. «Auto» avanza automáticamente y «Piezas» abre la galería.</li><li><b>Manual:</b> arrastra las piezas hasta su guía y gíralas (Q/E, W/S, A/D). Cuando la guía se pone verde, encajan solas.</li><li><b>Conexiones:</b> sigue las indicaciones de cada pieza y comprueba las conexiones internas en la lista antes de encender.</li><li><b>Revisión:</b> es obligatoria al avanzar paso a paso; selecciona «Encender el equipo» en la lista si solo quieres ver el resultado.</li><li><b>Quiz:</b> comprueba lo aprendido con 8 preguntas.</li></ul><div class="bt"><button id="ok1">Entendido</button></div>',
+      '<h2>Cómo usar el simulador</h2><ul><li><b>Ver:</b> arrastra para girar la vista y usa la rueda (o pellizca en el celular) para acercar.</li><li><b>Escena:</b> alterna «Aula 3D» para mostrar u ocultar el laboratorio.</li><li><b>Avanzar:</b> «Siguiente» recorre las piezas y los periféricos. «Auto» avanza automáticamente y «Piezas» abre la galería; usa «⌃» para contraerla.</li><li><b>Manual:</b> arrastra las piezas hasta su guía y gíralas (Q/E, W/S, A/D). Cuando la guía se pone verde, encajan solas.</li><li><b>Conexiones:</b> sigue las indicaciones de instalación indicadas para cada componente.</li><li><b>Quiz:</b> comprueba lo aprendido con 8 preguntas.</li></ul><div class="bt"><button id="ok1">Entendido</button></div>',
     );
     $("ok1").onclick = cerrar;
   }

@@ -27,22 +27,16 @@ const gruposEsperados = {
 };
 
 test("los pasos cubren una vez cada componente documentado", () => {
-  assert.equal(PASOS.length, 14);
+  assert.equal(PASOS.length, 13);
   assert.equal(PASOS.at(-1).end, 1);
   assert.deepEqual([...new Set(idsDePiezas)].sort(), Object.keys(FICHA).sort());
   assert.equal(idsDePiezas.length, Object.keys(FICHA).length);
 });
 
-test("la revisión previa precede al encendido sin un paso separado de cableado", () => {
-  const indiceRevision = PASOS.findIndex((paso) => paso.checklist);
-  const indiceEncendido = PASOS.findIndex((paso) => paso.end);
-
-  assert.ok(
-    PASOS.every((paso) => paso.n !== "Conectar los cables internos"),
-  );
-  assert.ok(indiceRevision < indiceEncendido);
-  assert.equal(PASOS[indiceRevision].checklist.length, 6);
-  assert.ok(PASOS[indiceRevision].checklist.every(Boolean));
+test("el encendido es el paso final sin una comprobación intermedia", () => {
+  assert.ok(PASOS.every((paso) => paso.n !== "Conectar los cables internos"));
+  assert.equal(PASOS.at(-1).n, "Encender el equipo");
+  assert.ok(PASOS.slice(0, -1).every((paso) => paso.p.length > 0));
   assert.match(AVISO_MODELO, /representación educativa/);
 });
 
@@ -67,7 +61,10 @@ test("todas las piezas tienen función, ficha y modelo con fuente", () => {
 });
 
 test("cada capa del modelo tiene exactamente una descripción", () => {
-  assert.deepEqual(Object.keys(CAPAS).sort(), Object.keys(gruposEsperados).sort());
+  assert.deepEqual(
+    Object.keys(CAPAS).sort(),
+    Object.keys(gruposEsperados).sort(),
+  );
   for (const [id, cantidad] of Object.entries(gruposEsperados)) {
     assert.equal(CAPAS[id].length, cantidad, `Cantidad de capas para ${id}`);
     assert.ok(
@@ -98,8 +95,7 @@ test("las instrucciones y las cámaras existen en todos los pasos de pieza", () 
     assert.ok(paso.t, `Falta instrucción: ${paso.n}`);
     assert.equal(paso.c.length, 6, `Cámara inválida: ${paso.n}`);
     assert.ok(
-      paso.p.length > 0 ||
-        paso.checklist,
+      paso.p.length > 0 || paso.end,
       `Paso sin pieza ni actividad: ${paso.n}`,
     );
   }

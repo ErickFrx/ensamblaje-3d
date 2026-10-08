@@ -17,6 +17,7 @@
     "images/facultad-data.js",
     "js/componentes.js",
     "js/app.js",
+    "js/laboratorio.js",
     "js/detalle.js",
     "models/meta.js",
     "models/case.js",

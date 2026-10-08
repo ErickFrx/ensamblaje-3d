@@ -60,7 +60,9 @@
         margin-bottom: 0;
       }
       #panel.min #bar,
-      #panel.min #lista {
+      #panel.min #gallery-bar,
+      #panel.min #lista,
+      #panel.min #gl {
         display: none;
       }
       .panel-header {
@@ -84,7 +86,13 @@
         padding: 5px 8px;
         color: #bfc3cd;
       }
-      #bar {
+      #gallery-toggle {
+        flex: none;
+        padding: 5px 8px;
+        color: #bfc3cd;
+      }
+      #bar,
+      #gallery-bar {
         display: flex;
         align-items: center;
         gap: 10px;
@@ -733,6 +741,9 @@
         <div class="toolbar-options">
           <div class="toolbar-settings">
             <button id="gbtn">Piezas</button>
+            <button id="laboratorio-toggle" type="button" aria-pressed="true">
+              Aula 3D: SÍ
+            </button>
             <button id="modo" aria-pressed="false">Manual: NO</button>
             <button id="rgb" aria-pressed="true">RGB: ENCENDIDO</button>
           </div>
@@ -882,7 +893,7 @@
         <div id="info" role="status" aria-live="polite">
           <b>Bienvenido</b><br />Arrastra para girar la vista y usa la rueda
           para acercar. Pulsa «Siguiente» (o «Auto») para ensamblar la torre,
-          revisar la lista previa al encendido y conectar los periféricos.
+          conectar los periféricos y encender el equipo.
         </div>
 
         <div id="manual-instructions-wrap" class="mode-reveal manual-only">

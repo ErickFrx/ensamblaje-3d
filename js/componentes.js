@@ -85,26 +85,11 @@
       c: [2, 7, 18, 2, 2, -4],
     },
     {
-      f: "4 · Verificación final",
-      n: "Comprobar antes de encender",
-      p: [],
-      checklist: [
-        "El conector ATX de 24 pines y el EPS de CPU están firmes; la GPU tiene conectado su cable PCIe de alimentación.",
-        "La bomba y los ventiladores están conectados a los encabezados correctos y pueden girar sin cables en medio.",
-        "La RAM está asentada, el SSD está fijado y la tarjeta gráfica está encajada y sujeta al chasis.",
-        "El monitor está conectado a una salida de la tarjeta gráfica, no a la placa madre.",
-        "No quedaron tornillos sueltos ni objetos dentro del case; los cables no obstruyen el flujo de aire.",
-        "Con el equipo desconectado de la corriente, terminaste de revisar las conexiones; enciende la fuente solo al finalizar.",
-      ],
-      t: "Marca cada comprobación después de revisar el montaje. No energices el equipo si detectas una conexión floja, un cable dañado o un ventilador bloqueado.",
-      c: [-5, 8, 13, -9, 5.5, -1],
-    },
-    {
-      f: "5 · Finalizado",
+      f: "4 · Finalizado",
       n: "Encender el equipo",
       p: [],
       end: 1,
-      t: "<b>¡Ensamblaje completo!</b> La revisión previa está hecha. En un equipo real, conecta la fuente y el monitor a la corriente y enciende el equipo.",
+      t: "<b>¡Ensamblaje completo!</b> Conecta la fuente y el monitor a la corriente y enciende el equipo.",
       c: [5, 8, 26, -3, 4, 0],
     },
   ];

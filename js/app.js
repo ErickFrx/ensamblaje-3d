@@ -1216,60 +1216,8 @@ const add = (dur, fn, delay = 0, tag) => {
   tw.push(o);
   return o;
 };
-const verificaciones = new Set();
-function actualizarEstadoRevision() {
-  const indiceRevision = PASOS.findIndex((p) => p.checklist);
-  if (cur !== indiceRevision) return;
-  const completo = PASOS[indiceRevision].checklist.every((_, i) =>
-    verificaciones.has(i),
-  );
-  btnNext.disabled = !completo;
-  const estado = document.getElementById("revision-estado");
-  if (estado)
-    estado.textContent = completo
-      ? "Revisión completa. Ya puedes avanzar al encendido."
-      : "Marca todas las comprobaciones para habilitar «Siguiente».";
-}
-function mostrarListaRevision(p) {
-  if (!p.checklist) return;
-  const lista = document.createElement("fieldset");
-  lista.className = "lista-revision";
-  const titulo = document.createElement("legend");
-  titulo.textContent = "Lista de comprobación";
-  lista.appendChild(titulo);
-  p.checklist.forEach((texto, i) => {
-    const etiqueta = document.createElement("label");
-    const casilla = document.createElement("input");
-    casilla.type = "checkbox";
-    casilla.checked = verificaciones.has(i);
-    casilla.addEventListener("change", () => {
-      if (casilla.checked) verificaciones.add(i);
-      else verificaciones.delete(i);
-      actualizarEstadoRevision();
-    });
-    etiqueta.append(casilla, document.createTextNode(texto));
-    lista.appendChild(etiqueta);
-  });
-  const estado = document.createElement("div");
-  estado.id = "revision-estado";
-  estado.setAttribute("role", "status");
-  estado.setAttribute("aria-live", "polite");
-  lista.appendChild(estado);
-  info.appendChild(lista);
-  actualizarEstadoRevision();
-}
 function paso(inst, forzarAuto) {
   if (cur >= PASOS.length - 1) return;
-  const pasoActual = PASOS[cur];
-  if (
-    !inst &&
-    pasoActual?.checklist &&
-    !pasoActual.checklist.every((_, i) => verificaciones.has(i))
-  ) {
-    stopAuto();
-    actualizarEstadoRevision();
-    return;
-  }
   ocultarInfoComponente();
   if (man) completarManual();
   const p = PASOS[++cur];
@@ -1333,14 +1281,6 @@ function paso(inst, forzarAuto) {
     else q.el.removeAttribute("aria-current");
   });
   const producto = p.p.length ? PRODUCTOS[p.p[0]] : null;
-  const indiceRevision = PASOS.findIndex((paso) => paso.checklist);
-  const revisionCompleta =
-    indiceRevision >= 0 &&
-    PASOS[indiceRevision].checklist.every((_, i) => verificaciones.has(i));
-  const textoPaso =
-    p.end && !revisionCompleta
-      ? "<b>¡Vista final del equipo!</b> Puedes omitir la lista para ver el resultado. Para un ensamblaje real, completa la revisión antes de conectar la corriente."
-      : p.t;
   info.classList.toggle(
     "periferico",
     p.p.includes("kb") || p.p.includes("mouse"),
@@ -1350,14 +1290,13 @@ function paso(inst, forzarAuto) {
     (producto
       ? `<div class="modelo-referencia">Modelo propuesto: <a href="${producto.fuente}" target="_blank" rel="noopener noreferrer">${producto.nombre}</a></div><div class="modelo-nota">${AVISO_MODELO}</div>`
       : "") +
-    `<br>${textoPaso}` +
+    `<br>${p.t}` +
     (manual
       ? '<div class="manual-step-hint mode-reveal manual-only" style="margin-top:8px;color:#ff737b">✋ Arrastra la pieza hasta la guía y gírala para que encaje.</div>'
       : "");
   if (p.p.includes("kb") && window.cargarModeloTeclado)
     window.cargarModeloTeclado();
   btnNext.disabled = false;
-  mostrarListaRevision(p);
   btnPrev.disabled = false;
 }
 let endOn = 0,
@@ -1368,13 +1307,12 @@ function actualizarLucesTorre() {
     luz.visible = encendidas;
   });
 }
-function reset(limpiarRevision = true) {
+function reset() {
   ocultarInfoComponente();
   cerrarManual();
   tw = [];
   cur = -1;
   endOn = 0;
-  if (limpiarRevision) verificaciones.clear();
   btnNext.disabled = false;
   actualizarLucesTorre();
   ctl.autoRotate = false;
@@ -1402,7 +1340,7 @@ function stopAuto() {
 function irAtras(i) {
   const ca = cam.position.clone(),
     ta = ctl.target.clone();
-  reset(false);
+  reset();
   while (cur < i) paso(true);
   const cb = cam.position.clone(),
     tb = ctl.target.clone();
@@ -1428,19 +1366,10 @@ function goTo(i) {
     irAtras(i);
     return;
   }
-  const indiceRevision = PASOS.findIndex((p) => p.checklist);
   const indiceFinal = PASOS.findIndex((p) => p.end);
   if (i === indiceFinal && i > cur) {
     while (cur < i - 1) paso(true);
     paso(true);
-    return;
-  }
-  if (
-    indiceRevision > cur &&
-    indiceRevision <= i &&
-    !PASOS[indiceRevision].checklist.every((_, j) => verificaciones.has(j))
-  ) {
-    while (cur < indiceRevision) paso(true);
     return;
   }
   while (cur < i - 1) paso(true);
@@ -2547,7 +2476,7 @@ const gp = document.createElement("div");
 gp.id = "panel";
 gp.style.display = "none";
 gp.innerHTML =
-  '<h1>GALERÍA DE PIEZAS</h1><div id="bar"><button id="gv">◀ Volver</button><button id="gr">Girar ⏯</button><button id="ge">Explotar</button></div><div id="gl"></div>';
+  '<div class="panel-header"><h1>GALERÍA DE PIEZAS</h1><button id="gallery-toggle" type="button" aria-expanded="true" aria-controls="gallery-bar gl" aria-label="Contraer galería de piezas" title="Contraer galería">⌃</button></div><div id="gallery-bar"><button id="gv">◀ Volver</button><button id="gr">Girar ⏯</button><button id="ge">Explotar</button></div><div id="gl"></div>';
 document.body.appendChild(gp);
 const gl = gp.querySelector("#gl"),
   nom = (id) => PASOS.find((q) => q.p[0] === id).n;
@@ -2682,6 +2611,18 @@ function galeria(on) {
 gp.querySelector("#gv").onclick = () => galeria(false);
 gp.querySelector("#gr").onclick = () => (gctl.autoRotate = !gctl.autoRotate);
 gp.querySelector("#ge").onclick = () => (gexpT = gexpT ? 0 : 1);
+gp.querySelector("#gallery-toggle").onclick = (e) => {
+  const button = e.currentTarget;
+  const expanded = button.getAttribute("aria-expanded") === "true";
+  gp.classList.toggle("min", expanded);
+  button.setAttribute("aria-expanded", String(!expanded));
+  button.setAttribute(
+    "aria-label",
+    expanded ? "Expandir galería de piezas" : "Contraer galería de piezas",
+  );
+  button.title = expanded ? "Expandir galería" : "Contraer galería";
+  button.textContent = expanded ? "⌄" : "⌃";
+};
 document.getElementById("gbtn").onclick = () => galeria(true);
 addEventListener("keydown", (e) => {
   if (e.key === "Escape" && gal) galeria(false);
