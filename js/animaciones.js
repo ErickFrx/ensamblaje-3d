@@ -62,6 +62,7 @@ function iniciarCicloAnimacion() {
       ctl.update();
     }
 
+    if (piezaActivaHelper) piezaActivaHelper.update();
     comp.render();
   })(0);
 }

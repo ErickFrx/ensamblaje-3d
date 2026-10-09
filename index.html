@@ -681,6 +681,639 @@
           max-height: min(38vh, calc(100vh - 74px));
         }
       }
+      :root {
+        color-scheme: dark;
+        --accent: #ff4057;
+        --accent-light: #ff7182;
+        --accent-soft: rgba(255, 64, 87, 0.16);
+        --glass: rgba(14, 17, 27, 0.76);
+        --glass-border: rgba(255, 255, 255, 0.12);
+      }
+      body {
+        background:
+          radial-gradient(ellipse at 52% 42%, rgba(105, 20, 40, 0.18), transparent 38%),
+          radial-gradient(ellipse at 88% 14%, rgba(255, 43, 74, 0.1), transparent 30%),
+          #07080e;
+        color: #edf0f6;
+        font-family: Inter, "Segoe UI", sans-serif;
+      }
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: 1;
+        pointer-events: none;
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+        background-size: 44px 44px;
+        mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.75), transparent 88%);
+      }
+      #panel,
+      #detalle-pieza,
+      #mano,
+      #mod .card,
+      #tip {
+        background: var(--glass);
+        border: 1px solid var(--glass-border);
+        backdrop-filter: blur(22px) saturate(145%);
+        -webkit-backdrop-filter: blur(22px) saturate(145%);
+        box-shadow:
+          0 24px 70px rgba(0, 0, 0, 0.42),
+          inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      }
+      #panel {
+        top: 18px;
+        left: 18px;
+        width: 340px;
+        max-height: calc(100% - 118px);
+        border-radius: 20px;
+        padding: 18px;
+      }
+      #panel h1 {
+        display: flex;
+        align-items: center;
+        font-size: 12px;
+        letter-spacing: 0.13em;
+      }
+      #panel h1::before {
+        content: "◉";
+        display: inline-grid;
+        place-items: center;
+        flex: none;
+        width: 28px;
+        height: 28px;
+        margin-right: 9px;
+        color: var(--accent-light);
+        border: 1px solid rgba(255, 64, 87, 0.36);
+        border-radius: 9px;
+        background: var(--accent-soft);
+        box-shadow: 0 0 20px rgba(255, 64, 87, 0.14);
+      }
+      button {
+        min-height: 36px;
+        background: rgba(255, 255, 255, 0.055);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #e7eaf1;
+        border-radius: 10px;
+        font-size: 12px;
+        transition: transform 150ms ease, background 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+      }
+      button:hover:not(:disabled) {
+        transform: translateY(-1px);
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 113, 130, 0.5);
+      }
+      button.on,
+      #sig {
+        background: linear-gradient(135deg, #ff4057, #c7193c);
+        border-color: rgba(255, 113, 130, 0.68);
+        color: white;
+        box-shadow: 0 6px 22px rgba(255, 34, 68, 0.2);
+      }
+      #sig:hover:not(:disabled),
+      button.on:hover:not(:disabled) {
+        background: linear-gradient(135deg, #ff6174, #dc2146);
+      }
+      button:focus-visible,
+      .paso:focus-visible {
+        outline: 2px solid var(--accent-light);
+        outline-offset: 3px;
+      }
+      .toolbar-navigation {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+      .toolbar-navigation button {
+        min-height: 40px;
+        padding: 7px 10px;
+      }
+      .toolbar-settings {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 7px;
+      }
+      .toolbar-settings button {
+        min-height: 38px;
+      }
+      .toolbar-options {
+        margin-top: 10px;
+        padding-top: 12px;
+        border-color: rgba(255, 255, 255, 0.1);
+      }
+      .rgb-picker {
+        grid-column: 1 / -1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 42px;
+        padding: 7px 10px;
+        color: #c8cfdd;
+        border: 1px solid rgba(255, 255, 255, 0.09);
+        border-radius: 10px;
+        background: rgba(0, 0, 0, 0.2);
+        font-size: 11px;
+        letter-spacing: 0.04em;
+      }
+      .rgb-picker span {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .rgb-picker span::before {
+        content: "";
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--accent-light);
+        box-shadow: 0 0 12px var(--accent);
+      }
+      #rgb-color {
+        width: 38px;
+        height: 28px;
+        padding: 2px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        background: transparent;
+        cursor: pointer;
+      }
+      #lista {
+        padding-right: 3px;
+      }
+      .fase {
+        margin: 17px 0 8px;
+        color: #788397;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+      }
+      .paso {
+        position: relative;
+        min-height: 38px;
+        margin: 4px 0;
+        padding: 9px 11px;
+        border: 1px solid transparent;
+        border-radius: 10px;
+        color: #aeb7c8;
+        transition: color 150ms ease, background 150ms ease, border-color 150ms ease;
+      }
+      .paso::before {
+        width: 7px;
+        height: 7px;
+        flex-basis: 7px;
+        background: #414958;
+      }
+      .paso.active,
+      .paso.act {
+        color: #fff;
+        background: linear-gradient(100deg, rgba(255, 64, 87, 0.2), rgba(255, 64, 87, 0.04));
+        border-color: rgba(255, 87, 105, 0.18);
+      }
+      .paso.active::before,
+      .paso.act::before {
+        background: var(--accent-light);
+        box-shadow: 0 0 12px var(--accent);
+      }
+      .paso.ok::before {
+        background: #65e4b5;
+        box-shadow: 0 0 10px rgba(101, 228, 181, 0.65);
+      }
+      #detalle-pieza {
+        right: 20px;
+        bottom: 96px;
+        width: min(390px, calc(100% - 40px));
+        max-height: calc(100vh - 140px);
+        border-radius: 18px;
+        padding: 17px;
+      }
+      .info-panel-header {
+        color: #aeb8ca;
+        letter-spacing: 0.15em;
+      }
+      #info {
+        color: #c6cedd;
+        font-size: 13px;
+      }
+      #info b,
+      #info [style*="color:#ff737b"],
+      #detalle-titulo {
+        color: #ff7182 !important;
+      }
+      #info b {
+        font-size: 15px;
+      }
+      #info a {
+        color: #ff929f;
+        text-decoration-color: rgba(255, 113, 130, 0.45);
+      }
+      #detalle-contenido {
+        border-color: rgba(255, 255, 255, 0.1);
+      }
+      #detalle-contenido h3 {
+        margin: 12px 0 5px;
+        color: #ff929f;
+        font-size: 12px;
+      }
+      .info-step-card {
+        background: rgba(255, 64, 87, 0.09);
+        border-color: rgba(255, 64, 87, 0.28);
+      }
+      .info-step-card .mt b,
+      #mhud b {
+        color: #ff7182;
+      }
+      #mhelp,
+      .info-help-card small {
+        color: #a4aec1;
+      }
+      #mano {
+        left: 370px;
+        bottom: 96px;
+        border-radius: 18px;
+      }
+      #mano button {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.055);
+      }
+      #mano button:hover {
+        background: var(--accent);
+        border-color: var(--accent-light);
+        color: white;
+        box-shadow: 0 0 18px rgba(255, 64, 87, 0.38);
+      }
+      .control-title {
+        color: #929db0;
+        letter-spacing: 0.16em;
+      }
+      #dock {
+        position: fixed;
+        left: 50%;
+        bottom: 18px;
+        z-index: 30;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: max-content;
+        max-width: calc(100% - 32px);
+        padding: 9px;
+        border: 1px solid rgba(255, 255, 255, 0.13);
+        border-radius: 17px;
+        background: rgba(14, 17, 27, 0.8);
+        backdrop-filter: blur(24px) saturate(150%);
+        -webkit-backdrop-filter: blur(24px) saturate(150%);
+        box-shadow: 0 16px 50px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+        transform: translateX(-50%);
+      }
+      #dock button {
+        min-width: 48px;
+        min-height: 44px;
+        font-size: 14px;
+      }
+      #dock #dock-next {
+        min-width: 126px;
+        font-weight: 700;
+      }
+      #dock-state {
+        min-width: 96px;
+        padding: 0 9px;
+        color: #9da7ba;
+        font-size: 10px;
+        text-align: center;
+        white-space: nowrap;
+      }
+      #dock-state strong {
+        display: block;
+        margin-bottom: 2px;
+        color: #eef1f8;
+        font-size: 11px;
+      }
+      #dock-progress-label {
+        display: block;
+        max-width: 220px;
+        overflow: hidden;
+        color: #aab3c3;
+        font-size: 9px;
+        text-overflow: ellipsis;
+      }
+      #dock-progress-track {
+        width: min(220px, 24vw);
+        height: 3px;
+        margin-top: 6px;
+        overflow: hidden;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.12);
+      }
+      #dock-progress-fill {
+        display: block;
+        width: 0;
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, #ff4057, #ff9b70);
+        box-shadow: 0 0 10px rgba(255, 64, 87, 0.8);
+        transition: width 260ms ease;
+      }
+      #touch-view-controls {
+        position: fixed;
+        top: 50%;
+        right: 14px;
+        z-index: 28;
+        display: none;
+        grid-template-columns: repeat(2, 46px);
+        gap: 7px;
+        padding: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 16px;
+        background: rgba(14, 17, 27, 0.78);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        box-shadow: 0 12px 34px rgba(0, 0, 0, 0.35);
+        transform: translateY(-50%);
+      }
+      #touch-view-controls button {
+        width: 46px;
+        min-width: 46px;
+        height: 46px;
+        min-height: 46px;
+        padding: 0;
+        border-radius: 13px;
+        font-size: 18px;
+        touch-action: manipulation;
+      }
+      #pieza-activa {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        z-index: 9;
+        display: none;
+        max-width: min(420px, calc(100vw - 36px));
+        padding: 10px 15px;
+        border: 1px solid rgba(255, 113, 130, 0.24);
+        border-radius: 13px;
+        background: rgba(14, 17, 27, 0.72);
+        color: #e9edf5;
+        font-size: 11px;
+        text-align: center;
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+        transform: translateX(-50%);
+        pointer-events: none;
+      }
+      #pieza-activa strong {
+        color: var(--accent-light);
+      }
+      #logo-universidad {
+        top: 19px;
+        right: 20px;
+        z-index: 12;
+      }
+      #carga {
+        background:
+          radial-gradient(ellipse at 50% 35%, rgba(145, 24, 47, 0.18), transparent 38%),
+          #07080e;
+      }
+      #carga h2 {
+        color: #ff7182;
+      }
+      #cb {
+        background: linear-gradient(90deg, #ff4057, #ff9b70);
+        box-shadow: 0 0 15px rgba(255, 64, 87, 0.65);
+      }
+      #ct {
+        color: #a4aec1;
+      }
+      #gl {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+      }
+      #gl .paso {
+        display: flex;
+        min-height: 92px;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 9px;
+        margin: 0;
+        background: rgba(255, 255, 255, 0.035);
+        border: 1px solid rgba(255, 255, 255, 0.075);
+        border-radius: 12px;
+        color: #dce2ed;
+        font-size: 10px;
+      }
+      #gl .paso::before {
+        display: none;
+      }
+      .pieza-thumb {
+        display: grid;
+        place-items: center;
+        width: 100%;
+        height: 48px;
+        border: 1px solid rgba(255, 255, 255, 0.075);
+        border-radius: 9px;
+        background:
+          radial-gradient(circle at 50% 40%, rgba(255, 64, 87, 0.2), transparent 62%),
+          rgba(3, 5, 10, 0.62);
+        color: #ff7182;
+        font-family: "Segoe UI Emoji", "Apple Color Emoji", sans-serif;
+        font-size: 25px;
+        line-height: 1;
+        filter: drop-shadow(0 0 9px rgba(255, 64, 87, 0.24));
+      }
+      #gl .paso:hover,
+      #gl .paso.act {
+        background: rgba(255, 64, 87, 0.12);
+        border-color: rgba(255, 113, 130, 0.4);
+      }
+      #mod .card .good {
+        border-color: rgba(255, 113, 130, 0.8);
+        background: rgba(255, 64, 87, 0.15);
+      }
+      #tip b {
+        color: #ff7182;
+      }
+      @media (max-width: 900px) {
+        #panel {
+          top: 10px;
+          left: 10px;
+          width: min(320px, calc(100vw - 20px));
+          max-height: min(58vh, calc(100vh - 180px));
+          padding: 13px;
+        }
+        #mano {
+          left: 10px;
+          bottom: 88px;
+        }
+        #detalle-pieza {
+          right: 10px;
+          bottom: 88px;
+          width: min(370px, calc(100% - 20px));
+          max-height: min(48vh, calc(100vh - 120px));
+        }
+        #logo-universidad {
+          top: 10px;
+          right: 12px;
+        }
+        #dock {
+          bottom: 10px;
+        }
+        #touch-view-controls {
+          display: grid;
+          top: 58px;
+          right: 8px;
+          grid-template-columns: 42px;
+          transform: none;
+        }
+        #pieza-activa {
+          display: none !important;
+        }
+      }
+      @media (max-width: 600px) {
+        #logo-universidad {
+          top: 9px;
+          right: 9px;
+          width: 82px;
+          max-height: 34px;
+        }
+        #panel {
+          top: 9px;
+          left: 9px;
+          width: min(290px, calc(100vw - 105px));
+          max-height: min(53vh, calc(100vh - 190px));
+          padding: 11px;
+          border-radius: 15px;
+        }
+        #panel h1 {
+          font-size: 9px;
+          letter-spacing: 0.08em;
+        }
+        #panel h1::before {
+          width: 23px;
+          height: 23px;
+          margin-right: 6px;
+        }
+        #panel-toggle {
+          min-height: 32px;
+          padding: 3px 7px;
+        }
+        .toolbar-settings button {
+          min-height: 34px;
+          padding: 5px 6px;
+          font-size: 10px;
+        }
+        .toolbar-navigation button {
+          min-height: 36px;
+        }
+        .rgb-picker {
+          min-height: 36px;
+        }
+        #lista .paso {
+          min-height: 34px;
+          padding: 7px 9px;
+          font-size: 11px;
+        }
+        #dock {
+          bottom: max(8px, env(safe-area-inset-bottom));
+          gap: 5px;
+          max-width: calc(100% - 16px);
+          padding: 6px;
+          border-radius: 15px;
+        }
+        #dock button {
+          min-width: 42px;
+          min-height: 46px;
+          padding: 5px;
+        }
+        #dock #dock-next {
+          min-width: 92px;
+          font-size: 11px;
+        }
+        #dock-state {
+          min-width: 90px;
+          padding: 0 4px;
+        }
+        #dock-state strong {
+          font-size: 10px;
+        }
+        #dock-progress-label {
+          max-width: 104px;
+          font-size: 8px;
+        }
+        #dock-progress-track {
+          width: 100%;
+        }
+        #touch-view-controls {
+          top: 54px;
+          right: 8px;
+          grid-template-columns: 42px;
+          gap: 5px;
+          padding: 6px;
+          border-radius: 15px;
+          transform: none;
+        }
+        #touch-view-controls button {
+          width: 42px;
+          min-width: 42px;
+          height: 42px;
+          min-height: 42px;
+        }
+        #mano {
+          bottom: calc(40vh + 78px);
+          padding: 8px;
+        }
+        #mano button {
+          width: 38px;
+          height: 38px;
+        }
+        .control-rotations,
+        .control-arrows {
+          grid-template-columns: repeat(3, 38px);
+          grid-template-rows: repeat(3, 38px);
+          gap: 3px;
+        }
+        .control-arrows {
+          grid-template-rows: repeat(2, 38px);
+        }
+        #detalle-pieza {
+          right: 8px;
+          bottom: 72px;
+          width: min(370px, calc(100% - 16px));
+          max-height: 42vh;
+          padding: 12px;
+        }
+        #detalle-panel-content {
+          max-height: min(32vh, calc(100vh - 120px));
+        }
+      }
+      @media (max-width: 380px) {
+        #dock-state {
+          min-width: 72px;
+        }
+        #dock-progress-label {
+          max-width: 78px;
+        }
+        #panel {
+          width: calc(100vw - 100px);
+        }
+        #mano {
+          transform: scale(0.88);
+          transform-origin: bottom left;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          scroll-behavior: auto !important;
+          transition-duration: 0.01ms !important;
+          animation-duration: 0.01ms !important;
+        }
+      }
     </style>
   </head>
   <body>
@@ -746,6 +1379,11 @@
             </button>
             <button id="modo" aria-pressed="false">Manual: NO</button>
             <button id="rgb" aria-pressed="true">RGB: ENCENDIDO</button>
+            <button id="sonido" class="on" type="button" aria-pressed="true">Sonido: SÍ</button>
+            <label class="rgb-picker" for="rgb-color">
+              <span>Color de iluminación</span>
+              <input id="rgb-color" type="color" value="#ff4057" aria-label="Color de iluminación RGB" />
+            </label>
           </div>
           <div class="toolbar-utilities"></div>
         </div>
@@ -967,6 +1605,25 @@
         </section>
       </div>
     </aside>
+
+    <nav id="dock" aria-label="Navegación rápida del ensamblaje">
+      <button id="dock-prev" type="button" aria-label="Paso anterior" title="Paso anterior">←</button>
+      <div id="dock-state" aria-live="polite">
+        <strong>LISTO</strong>
+        <span id="dock-progress-label">0 de 12 montados · Siguiente: Fuente de alimentación</span>
+        <span id="dock-progress-track" aria-hidden="true"><i id="dock-progress-fill"></i></span>
+      </div>
+      <button id="dock-next" class="on" type="button" aria-label="Montar siguiente componente">Siguiente <span aria-hidden="true">→</span></button>
+      <button id="dock-auto" type="button" aria-label="Ensamblaje automático" title="Ensamblaje automático">▶</button>
+    </nav>
+
+    <div id="touch-view-controls" role="group" aria-label="Controles táctiles de la cámara">
+      <button id="view-left" type="button" aria-label="Girar vista a la izquierda" title="Girar a la izquierda">↶</button>
+      <button id="view-right" type="button" aria-label="Girar vista a la derecha" title="Girar a la derecha">↷</button>
+      <button id="view-zoom-in" type="button" aria-label="Acercar vista" title="Acercar">＋</button>
+      <button id="view-zoom-out" type="button" aria-label="Alejar vista" title="Alejar">−</button>
+    </div>
+    <div id="pieza-activa" role="status" aria-live="polite"></div>
 
     <div id="tip"></div>
 

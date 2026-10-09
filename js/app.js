@@ -38,8 +38,9 @@ const dark = M(0x12151c),
   pcb = M(0x0a0d14, { roughness: 0.6, metalness: 0.2 });
 let rgbOn = true;
 const rgbs = [];
+const rgbColor = new THREE.Color(0xff4057);
 const rgb = (o = 0) => {
-  const m = new THREE.MeshBasicMaterial({ color: 0xffffff });
+  const m = new THREE.MeshBasicMaterial({ color: rgbColor });
   m.userData.o = o;
   rgbs.push(m);
   return m;
@@ -1177,9 +1178,65 @@ const lista = document.getElementById("lista"),
 let tw = [],
   cur = -1,
   fPrev = "";
+let piezaActivaHelper = null;
+function enfocarPiezaActiva(id) {
+  if (piezaActivaHelper) {
+    S.remove(piezaActivaHelper);
+    piezaActivaHelper.geometry.dispose();
+    piezaActivaHelper.material.dispose();
+    piezaActivaHelper = null;
+  }
+  const indicador = document.getElementById("pieza-activa");
+  if (!id || !P[id]) {
+    indicador.style.display = "none";
+    indicador.textContent = "";
+    return;
+  }
+  const pieza = P[id];
+  piezaActivaHelper = new THREE.BoxHelper(pieza, rgbColor);
+  piezaActivaHelper.renderOrder = 10;
+  piezaActivaHelper.material.depthTest = false;
+  piezaActivaHelper.material.transparent = true;
+  piezaActivaHelper.material.opacity = 0.95;
+  piezaActivaHelper.update();
+  S.add(piezaActivaHelper);
+  indicador.innerHTML = `<strong>Componente en foco</strong> · ${nom(id)}`;
+  indicador.style.display = "block";
+}
 function ocultarInfoComponente() {
   document.getElementById("detalle-contenido").hidden = true;
 }
+let audioMontaje = null;
+let sonidoOn = true;
+function respuestaMontaje() {
+  if ("vibrate" in navigator) navigator.vibrate(22);
+  if (!sonidoOn) return;
+  const AudioContextDisponible = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContextDisponible) return;
+  if (!audioMontaje) audioMontaje = new AudioContextDisponible();
+  if (audioMontaje.state === "suspended") audioMontaje.resume();
+  const ahora = audioMontaje.currentTime;
+  [620, 880].forEach((frecuencia, indice) => {
+    const oscilador = audioMontaje.createOscillator();
+    const volumen = audioMontaje.createGain();
+    const inicio = ahora + indice * 0.075;
+    oscilador.type = "sine";
+    oscilador.frequency.setValueAtTime(frecuencia, inicio);
+    volumen.gain.setValueAtTime(0.0001, inicio);
+    volumen.gain.exponentialRampToValueAtTime(0.045, inicio + 0.018);
+    volumen.gain.exponentialRampToValueAtTime(0.0001, inicio + 0.14);
+    oscilador.connect(volumen);
+    volumen.connect(audioMontaje.destination);
+    oscilador.start(inicio);
+    oscilador.stop(inicio + 0.15);
+  });
+}
+document.getElementById("sonido").addEventListener("click", (evento) => {
+  sonidoOn = !sonidoOn;
+  evento.currentTarget.textContent = sonidoOn ? "Sonido: SÍ" : "Sonido: NO";
+  evento.currentTarget.setAttribute("aria-pressed", String(sonidoOn));
+  evento.currentTarget.classList.toggle("on", sonidoOn);
+});
 PASOS.forEach((p, i) => {
   if (p.f !== fPrev) {
     lista.insertAdjacentHTML(
@@ -1221,6 +1278,7 @@ function paso(inst, forzarAuto) {
   ocultarInfoComponente();
   if (man) completarManual();
   const p = PASOS[++cur];
+  enfocarPiezaActiva(p.p[0] || null);
   const manual = !inst && !forzarAuto && modoManual && p.p.length > 0;
   const ca = cam.position.clone(),
     ta = ctl.target.clone(),
@@ -1258,6 +1316,7 @@ function paso(inst, forzarAuto) {
     endOn = 1;
     ctl.autoRotate = true;
   }
+  if (p.p.length && !manual) respuestaMontaje();
   actualizarLucesTorre();
   if (inst) {
     cam.position.copy(cb);
@@ -1280,6 +1339,7 @@ function paso(inst, forzarAuto) {
     if (j === cur) q.el.setAttribute("aria-current", "step");
     else q.el.removeAttribute("aria-current");
   });
+  actualizarDock(cur);
   const producto = p.p.length ? PRODUCTOS[p.p[0]] : null;
   info.classList.toggle(
     "periferico",
@@ -1312,6 +1372,7 @@ function reset() {
   cerrarManual();
   tw = [];
   cur = -1;
+  enfocarPiezaActiva(null);
   endOn = 0;
   btnNext.disabled = false;
   actualizarLucesTorre();
@@ -1327,6 +1388,7 @@ function reset() {
     q.el.className = "paso";
     q.el.removeAttribute("aria-current");
   });
+  actualizarDock(-1);
   ajustarCamaraInicio();
   info.innerHTML =
     "<b>Listo para empezar</b><br>Pulsa «Siguiente» para ensamblar la torre.";
@@ -1336,6 +1398,8 @@ function stopAuto() {
   clearInterval(autoT);
   autoT = 0;
   document.getElementById("auto").textContent = "Auto ▶";
+  botonDockAuto.textContent = "▶";
+  botonDockAuto.setAttribute("aria-label", "Ensamblaje automático");
 }
 function irAtras(i) {
   const ca = cam.position.clone(),
@@ -1388,7 +1452,73 @@ function anterior() {
 }
 const btnPrev = document.getElementById("prev");
 const btnNext = document.getElementById("sig");
+const estadoDock = document.getElementById("dock-state");
+const botonDockAnterior = document.getElementById("dock-prev");
+const botonDockSiguiente = document.getElementById("dock-next");
+const botonDockAuto = document.getElementById("dock-auto");
+const etiquetaProgresoDock = document.getElementById("dock-progress-label");
+const barraProgresoDock = document.getElementById("dock-progress-fill");
+const totalComponentes = PASOS.reduce((total, paso) => total + paso.p.length, 0);
+function actualizarDock(indice = cur) {
+  const titulo = estadoDock.querySelector("strong");
+  const montados =
+    indice >= PASOS.length - 1 && PASOS[indice]?.end
+      ? totalComponentes
+      : PASOS.slice(0, Math.max(0, indice)).reduce(
+          (total, paso) => total + paso.p.length,
+          0,
+        );
+  if (indice < 0) {
+    titulo.textContent = "LISTO";
+    const siguiente = PASOS.find((paso) => paso.p.length);
+    etiquetaProgresoDock.textContent = `0 de ${totalComponentes} montados · Siguiente: ${siguiente.n}`;
+  } else {
+    const pasoActual = PASOS[indice];
+    titulo.textContent = pasoActual.end ? "ENSAMBLAJE LISTO" : `PASO ${indice + 1}`;
+    const pasoSiguiente = PASOS.slice(indice + 1).find((paso) => paso.p.length);
+    etiquetaProgresoDock.textContent = pasoActual.end
+      ? `${totalComponentes} de ${totalComponentes} montados · Equipo listo`
+      : `${montados} de ${totalComponentes} montados · En curso: ${pasoActual.n}`;
+    if (pasoActual.end && pasoSiguiente)
+      etiquetaProgresoDock.textContent = `${montados} de ${totalComponentes} montados · Siguiente: ${pasoSiguiente.n}`;
+  }
+  barraProgresoDock.style.width =
+    `${Math.round((montados / totalComponentes) * 100)}%`;
+  botonDockAnterior.disabled = indice < 0;
+}
 btnPrev.disabled = true;
+botonDockAnterior.disabled = true;
+botonDockAnterior.addEventListener("click", () => btnPrev.click());
+botonDockSiguiente.addEventListener("click", () => btnNext.click());
+botonDockAuto.addEventListener("click", () =>
+  document.getElementById("auto").click(),
+);
+const controlesVistaTactil = document.getElementById("touch-view-controls");
+[
+  ["view-left", -1, 1],
+  ["view-right", 1, 1],
+  ["view-zoom-in", 0, 0.88],
+  ["view-zoom-out", 0, 1.14],
+].forEach(([id, giro, escala]) => {
+  document.getElementById(id).addEventListener("click", () => {
+    if (gal || !ctl.enabled) return;
+    const objetivo = ctl.target;
+    if (giro) {
+      const desplazamiento = cam.position.clone().sub(objetivo);
+      desplazamiento.applyAxisAngle(V3(0, 1, 0), giro * 0.18);
+      cam.position.copy(objetivo).add(desplazamiento);
+    } else {
+      const desplazamiento = cam.position.clone().sub(objetivo);
+      const distancia = THREE.MathUtils.clamp(
+        desplazamiento.length() * escala,
+        5,
+        55,
+      );
+      cam.position.copy(objetivo).add(desplazamiento.setLength(distancia));
+    }
+    ctl.update();
+  });
+});
 btnNext.onclick = () => {
   stopAuto();
   siguiente();
@@ -1412,12 +1542,34 @@ document.getElementById("rgb").onclick = (e) => {
   e.currentTarget.classList.toggle("on", rgbOn);
   e.currentTarget.setAttribute("aria-pressed", String(rgbOn));
 };
+function aplicarColorRGB(color) {
+  rgbColor.set(color);
+  rgbs.forEach((material) => material.color.copy(rgbColor));
+  lucesTorre.forEach((luz) => luz.color.copy(rgbColor));
+  luzBarra.color.copy(rgbColor);
+  panelRGB.material.color.copy(rgbColor);
+  haloRGB.material.color.copy(rgbColor);
+  if (piezaActivaHelper) piezaActivaHelper.material.color.copy(rgbColor);
+  document.documentElement.style.setProperty("--accent", color);
+  document.documentElement.style.setProperty(
+    "--accent-light",
+    rgbColor.clone().lerp(new THREE.Color(0xffffff), 0.32).getStyle(),
+  );
+}
+const controlColorRGB = document.getElementById("rgb-color");
+controlColorRGB.addEventListener("input", (evento) => {
+  aplicarColorRGB(evento.currentTarget.value);
+});
+document.getElementById("rgb").classList.toggle("on", rgbOn);
+aplicarColorRGB(controlColorRGB.value);
 document.getElementById("auto").onclick = () => {
   if (autoT) {
     stopAuto();
     return;
   }
   document.getElementById("auto").textContent = "Pausar ⏸";
+  botonDockAuto.textContent = "Ⅱ";
+  botonDockAuto.setAttribute("aria-label", "Pausar ensamblaje automático");
   if (man) completarManual();
   if (cur >= PASOS.length - 1) reset();
   autoT = setInterval(() => {
@@ -2035,6 +2187,7 @@ function encajar(forzado) {
     if (k < 1) return;
     ghosts[id].visible = false;
     m.snap = false;
+    respuestaMontaje();
     if (m.cola.length) {
       siguientePieza();
       return;
@@ -2480,12 +2633,32 @@ gp.innerHTML =
 document.body.appendChild(gp);
 const gl = gp.querySelector("#gl"),
   nom = (id) => PASOS.find((q) => q.p[0] === id).n;
+const miniaturasPiezas = {
+  psu: "🔌",
+  mobo: "▦",
+  cpu: "▣",
+  aio: "❄",
+  ram: "▥",
+  ssd: "▰",
+  gpu: "▰",
+  glass: "◫",
+  kb: "⌨",
+  mouse: "🖱",
+  mon: "▣",
+  spk: "♫",
+};
 gl.setAttribute("role", "group");
 gl.setAttribute("aria-label", "Galería de componentes");
 Object.keys(FICHA).forEach((id) => {
   const d = document.createElement("div");
   d.className = "paso";
-  d.textContent = nom(id);
+  const miniatura = document.createElement("span");
+  miniatura.className = "pieza-thumb";
+  miniatura.setAttribute("aria-hidden", "true");
+  miniatura.textContent = miniaturasPiezas[id] || "◈";
+  const etiqueta = document.createElement("span");
+  etiqueta.textContent = nom(id);
+  d.append(miniatura, etiqueta);
   d.setAttribute("role", "button");
   d.setAttribute("aria-pressed", "false");
   d.tabIndex = 0;
@@ -2597,6 +2770,8 @@ function galeria(on) {
   ctl.enabled = !on;
   gctl.enabled = on;
   document.getElementById("panel").style.display = on ? "none" : "";
+  document.getElementById("dock").style.display = on ? "none" : "";
+  controlesVistaTactil.style.display = on ? "none" : "";
   mano.style.display = on ? "none" : man ? "block" : "none";
   gp.style.display = on ? "" : "none";
   if (on) {
