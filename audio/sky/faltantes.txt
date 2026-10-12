@@ -1,0 +1,15 @@
+Grabaciones faltantes para Sky (sin voz robótica ni sintetizados):
+
+- audio/sky/psu.mp3 — "Fuente de alimentación. Alinea la fuente con el chasis y fija los cuatro tornillos."
+- audio/sky/mobo.mp3 — "Placa madre. Ubica la placa sobre los separadores y atorníllala con cuidado."
+- audio/sky/cpu.mp3 — "Procesador. Alinea el triángulo dorado con la marca del zócalo y cierra la palanca."
+- audio/sky/aio.mp3 — "Refrigeración. Coloca la bomba y ajusta la tapa en cruz con los tornillos."
+- audio/sky/ram.mp3 — "Memoria RAM. Alinea la muesca de cada módulo con la ranura y presiona hasta encajar."
+- audio/sky/ssd.mp3 — "SSD M.2. Inserta el disco inclinado, apriétalo y fíjalo con el tornillo."
+- audio/sky/gpu.mp3 — "Tarjeta gráfica. Alinea la GPU con la ranura PCIe y asegúrala al chasis."
+- audio/sky/glass.mp3 — "Panel de vidrio. Desliza el panel hasta cerrar el case y asegúralo."
+- audio/sky/kb.mp3 — "Teclado. Conecta el cable USB del teclado al puerto del panel frontal o superior."
+- audio/sky/mouse.mp3 — "Mouse. Conecta su cable USB a un puerto disponible del case."
+- audio/sky/mon.mp3 — "Monitor. Conecta el cable de video y enciende la pantalla."
+- audio/sky/spk.mp3 — "Parlantes. Colócalos a ambos lados del monitor y conecta el audio."
+- audio/sky/end.mp3 — "Encender el equipo. Conecta la fuente y el monitor a la corriente y enciende el equipo."

@@ -1574,7 +1574,7 @@ document.getElementById("auto").onclick = () => {
   if (cur >= PASOS.length - 1) reset();
   autoT = setInterval(() => {
     if (cur >= PASOS.length - 1) stopAuto();
-    else paso(false, true);
+    else if (!(window.SKY && window.SKY.hablando())) paso(false, true); // espera a que Sky termine de hablar
   }, 3600);
 };
 document.getElementById("modo").onclick = () => {
@@ -2762,6 +2762,11 @@ function galeria(on) {
   ocultarInfoComponente();
   limpiarHover();
   gal = on;
+  if (on) {
+    if (window.SKY && window.SKY.suspender) window.SKY.suspender();
+  } else if (window.SKY && window.SKY.reanudar) {
+    window.SKY.reanudar();
+  }
   guiaEjes.visible = false;
   Object.values(ghosts).forEach((g) => (g.visible = false));
   Object.values(manosVR).forEach((hands) => (hands.visible = false));

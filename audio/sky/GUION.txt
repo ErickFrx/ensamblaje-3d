@@ -1,0 +1,51 @@
+GUION DE SKY — textos para grabar con tu voz (ElevenLabs u otra)
+=====================================================================
+Cómo usarlo: graba cada texto, guarda el MP3 con el nombre indicado dentro de esta carpeta (audio/sky/)
+y registra la ruta en la tabla AUDIOS al inicio de js/sky.js, por ejemplo:  psu: "audio/sky/psu.mp3",
+Los pasos que no tengan grabación los dice la voz en español del navegador.
+
+Ya incluidos (voz original de Sky):
+  bienvenida.mp3 -> "¡Hola! Soy Sky, tu pequeña asistente de ensamblaje de computadoras de la UNDC."
+  final.mp3      -> "¡Excelente trabajo! Lo hiciste muy bien. Sigamos aprendiendo juntos."
+
+Pasos (Sky dice: nombre del paso + indicación):
+
+psu.mp3
+  Fuente de alimentación. Coloca la fuente en la parte inferior del case con el ventilador hacia la rejilla. Alinea sus 4 agujeros con el chasis y fíjala con 4 tornillos.
+
+mobo.mp3
+  Placa madre. Instala primero los separadores del case, baja la placa alineando sus agujeros con ellos y atorníllala. Comprueba que el panel de puertos encaje en la abertura trasera.
+
+cpu.mp3
+  Procesador. Abre la palanca del zócalo, alinea el triángulo dorado del procesador con la marca y colócalo sin presionar. Cierra la placa de carga y asegura la palanca.
+
+aio.mp3
+  Refrigeración líquida RGB. Aplica pasta térmica sobre el procesador, coloca la bomba y ajusta sus 4 tornillos en cruz. Fija el radiador de 240 mm con sus 2 ventiladores RGB al frente del case y conecta sus cables.
+
+ram.mp3
+  Memoria RAM RGB (×4). Abre las pestañas de las ranuras, alinea la muesca de cada módulo DDR5 y presiona por ambos extremos hasta que encaje. Repite con los 4 módulos.
+
+ssd.mp3
+  Unidad SSD M.2. Retira el disipador de la ranura M.2, inserta el SSD inclinado, presiónalo hasta dejarlo plano y fíjalo con su tornillo. Vuelve a colocar el disipador.
+
+gpu.mp3
+  Tarjeta de video RGB. Retira las tapas traseras del case, alinea la tarjeta con la ranura PCIe x16 y presiónala hasta que la traba haga clic. Fíjala al case y conecta su cable de alimentación de 16 pines.
+
+glass.mp3
+  Panel de cristal. Apoya el panel de vidrio en las guías, deslízalo hasta cerrarlo y asegúralo con los tornillos traseros. Colócalo al final para que no estorbe durante el montaje.
+
+kb.mp3
+  Teclado RGB. Conecta el cable USB que sale de la parte posterior del teclado a un puerto USB del panel superior/frontal del case. La ruta del cable se muestra sobre la mesa y sube hasta el puerto.
+
+mouse.mp3
+  Mouse RGB. Conecta el cable USB que sale de la parte posterior del mouse a otro puerto USB del panel superior/frontal del case. La ruta del cable se muestra sobre la mesa y sube hasta el puerto.
+
+mon.mp3
+  Monitor. Conecta el cable DisplayPort o HDMI a la tarjeta de video (no a la placa madre), conecta el cable de alimentación del monitor y enciéndelo.
+
+spk.mp3
+  Parlantes. Coloca los satélites a ambos lados del monitor; deja el derecho a la derecha de la lámpara. Conecta el sistema de sonido a la computadora y a la corriente.
+
+end.mp3
+  Encender el equipo. <b>¡Ensamblaje completo!</b> Conecta la fuente y el monitor a la corriente y enciende el equipo.
+

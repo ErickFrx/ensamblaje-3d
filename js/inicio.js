@@ -32,6 +32,7 @@
     "models/spk.js",
     "js/cargador.js",
     "js/mejoras.js",
+    "js/sky.js",
   ];
   let archivosCargados = 0,
     errorCarga = false,
