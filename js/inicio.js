@@ -13,6 +13,7 @@
     "js/ShaderPass.js",
     "js/RenderPass.js",
     "js/UnrealBloomPass.js",
+    "js/render-base.js",
     "js/luces.js",
     "js/animaciones.js",
     "images/facultad-data.js",

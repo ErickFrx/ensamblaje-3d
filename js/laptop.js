@@ -74,8 +74,7 @@
 
       // ================= 2. ESCENA =================
       const cv = document.getElementById("c"),
-        R = new THREE.WebGLRenderer({ canvas: cv, antialias: true });
-      R.setPixelRatio(1);
+        R = crearRendererSimulador(cv, 1);
       const S = new THREE.Scene();
       S.background = new THREE.Color(0x04060b);
       const cam = new THREE.PerspectiveCamera(42, 1, 0.1, 200);
@@ -109,9 +108,7 @@
         S.environment = pm.fromScene(es, 0.04).texture;
         es.traverse(o=>{if(o.isMesh){o.geometry.dispose();o.material.dispose()}});pm.dispose();
       }
-      const comp = new THREE.EffectComposer(R);
-      comp.addPass(new THREE.RenderPass(S, cam));
-      comp.addPass(
+      const comp = crearComposerSimulador(R, S, cam,
         new THREE.UnrealBloomPass(
           new THREE.Vector2(innerWidth, innerHeight),
           0.6,
@@ -121,8 +118,7 @@
       );
       comp.passes[1].enabled=false;
       function ajustar() {
-        R.setSize(innerWidth, innerHeight, false);
-        comp.setSize(innerWidth, innerHeight);
+        ajustarResolucionRender(R, comp, innerWidth, innerHeight);
         cam.aspect = innerWidth / innerHeight;
         cam.fov = innerWidth < 600 ? 82 : 42;
         if(innerWidth>700)cam.setViewOffset(innerWidth,innerHeight,-Math.min(110,(innerWidth-700)*.18),0,innerWidth,innerHeight);else cam.clearViewOffset();
@@ -518,7 +514,7 @@
       function scheduleLaptop(){cancelAnimationFrame(laptopFrame);laptopFrame=0;clk.getDelta();if(window.SIM_ACTIVE&&!document.hidden)laptopFrame=requestAnimationFrame(loop)}
       window.addEventListener('sim:visibility',e=>{if(!e.detail){clearInterval(timer);timer=null;auto.classList.remove('on')}scheduleLaptop()});
       document.addEventListener('visibilitychange',()=>{if(document.hidden){clearInterval(timer);timer=null;auto.classList.remove('on')}scheduleLaptop()});
-      window.addEventListener('sim:quality',e=>{R.setPixelRatio(e.detail?1:Math.min(devicePixelRatio,2));comp.passes[1].enabled=!e.detail;ajustar()});
+      window.addEventListener('sim:quality',e=>{ajustarCalidadRender(R,comp,innerWidth,innerHeight,e.detail);ajustar()});
       function loop() {
         laptopFrame=0;if(!window.SIM_ACTIVE||document.hidden)return;
         laptopFrame=requestAnimationFrame(loop);

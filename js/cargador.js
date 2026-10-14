@@ -21,14 +21,16 @@
     if(!J.nodes?.length||J.nodes.some(n=>n.mesh==null||n.children?.length)||J.meshes.some(m=>m.primitives.length!==1))throw new Error('Se requieren mallas planas preprocesadas: '+id);
     for(const a of J.accessors){const v=J.bufferViews[a.bufferView];if(a.sparse||!v||v.buffer!==0||bo+(v.byteOffset||0)+v.byteLength>u.length)throw new Error('Accessor no admitido: '+id)}
     const tx = [],
-      tex = (i) => {
-        if (tx[i]) return tx[i];
+      tex = (i, encoding = THREE.LinearEncoding) => {
+        const key = i + ':' + encoding;
+        if (tx[key]) return tx[key];
         const t = J.textures[i],
           im = J.images[t.source],
           bv = J.bufferViews[im.bufferView],
           o = bo - 28 + 28;
         const img = new Image(),
           T = new THREE.Texture(img);
+        T.encoding = encoding;
         img.onload = () => {
           T.needsUpdate = true;URL.revokeObjectURL(img.src);
         };
@@ -44,7 +46,7 @@
         T.wrapT =
           s.wrapT === 33071 ? THREE.ClampToEdgeWrapping : THREE.RepeatWrapping;
         T.anisotropy = 4;
-        return (tx[i] = T);
+        return (tx[key] = T);
       };
     const mats = J.materials.map((m) => {
       const pb = m.pbrMetallicRoughness || {},
@@ -56,7 +58,7 @@
           roughness: pb.roughnessFactor == null ? 1 : pb.roughnessFactor,
           side: m.doubleSided ? THREE.DoubleSide : THREE.FrontSide,
         };
-      if (pb.baseColorTexture) o.map = tex(pb.baseColorTexture.index);
+      if (pb.baseColorTexture) o.map = tex(pb.baseColorTexture.index, THREE.sRGBEncoding);
       if (pb.metallicRoughnessTexture)
         o.metalnessMap = o.roughnessMap = tex(
           pb.metallicRoughnessTexture.index,
@@ -65,7 +67,7 @@
       const ef = m.emissiveFactor || (m.emissiveTexture ? [1, 1, 1] : null);
       if (ef && ef.some((c) => c > 0)) {
         o.emissive = new THREE.Color().fromArray(ef);
-        if (m.emissiveTexture) o.emissiveMap = tex(m.emissiveTexture.index);
+        if (m.emissiveTexture) o.emissiveMap = tex(m.emissiveTexture.index, THREE.sRGBEncoding);
         o.emissiveIntensity = Math.min((m.extras && m.extras.es) || 1, 1.6);
       }
       if (m.alphaMode === "MASK")
@@ -234,7 +236,7 @@
     ctx.lineWidth = 3;
     ctx.strokeRect(5, 5, 502, 502);
     const reflectionMap = new THREE.CanvasTexture(reflectionCanvas);
-    reflectionMap.colorSpace = THREE.SRGBColorSpace;
+    reflectionMap.encoding = THREE.sRGBEncoding;
     const surface = new THREE.Mesh(
       new THREE.PlaneGeometry(width, height),
       new THREE.MeshBasicMaterial({

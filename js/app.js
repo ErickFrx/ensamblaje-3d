@@ -1,8 +1,7 @@
 const PASOS = window.COMPONENTES.PASOS;
 
 const cv = document.getElementById("c"),
-  R = new THREE.WebGLRenderer({ canvas: cv, antialias: true });
-R.setPixelRatio(Math.min(devicePixelRatio, innerWidth < 700 ? 1.5 : 2));
+  R = crearRendererSimulador(cv, Math.min(devicePixelRatio, innerWidth < 700 ? 1.5 : 2));
 const S = new THREE.Scene();
 S.background = new THREE.Color(0x04060b);
 S.fog = new THREE.Fog(0x04060b, 35, 80);
@@ -34,9 +33,7 @@ function ajustarCamaraInicio() {
 }
 const bloom = configurarIluminacion(R, S);
 bloom.strength = 0.45;
-const comp = new THREE.EffectComposer(R);
-comp.addPass(new THREE.RenderPass(S, cam));
-comp.addPass(bloom);
+const comp = crearComposerSimulador(R, S, cam, bloom);
 const M = (c, o = {}) =>
   new THREE.MeshStandardMaterial(
     Object.assign({ color: c, roughness: 0.4, metalness: 0.7 }, o),
@@ -115,6 +112,7 @@ const tex = (w, h, fn) => {
   c.height = h;
   fn(c.getContext("2d"), w, h);
   const t = new THREE.CanvasTexture(c);
+  t.encoding = THREE.sRGBEncoding;
   t.anisotropy = 8;
   return t;
 };
@@ -629,7 +627,7 @@ for (let i = 0; i < 180; i++) {
   tableroContext.stroke();
 }
 const tableroTextura = new THREE.CanvasTexture(tableroCanvas);
-tableroTextura.colorSpace = THREE.SRGBColorSpace;
+tableroTextura.encoding = THREE.sRGBEncoding;
 tableroTextura.anisotropy = 8;
 const superficieTablero = new THREE.Mesh(
   new THREE.PlaneGeometry(35.7, 13.7),
@@ -687,6 +685,7 @@ gradienteSombra.addColorStop(1, "rgba(0, 0, 0, 0)");
 sombraContext.fillStyle = gradienteSombra;
 sombraContext.fillRect(0, 0, 128, 128);
 const texturaSombra = new THREE.CanvasTexture(sombraCanvas);
+texturaSombra.encoding = THREE.sRGBEncoding;
 const agregarSombraContacto = (x, z, ancho, fondo, opacidad = 1) => {
   const sombra = new THREE.Mesh(
     new THREE.PlaneGeometry(ancho, fondo),
@@ -743,7 +742,7 @@ gradienteRGB.addColorStop(1, "#ffbd42");
 contextoRGB.fillStyle = gradienteRGB;
 contextoRGB.fillRect(0, 0, 32, 512);
 const texturaRGB = new THREE.CanvasTexture(degradadoRGB);
-texturaRGB.colorSpace = THREE.SRGBColorSpace;
+texturaRGB.encoding = THREE.sRGBEncoding;
 const haloRGB = new THREE.Mesh(
   new THREE.PlaneGeometry(0.42, 3.82),
   new THREE.MeshBasicMaterial({
@@ -2853,8 +2852,7 @@ cv.addEventListener("pointerleave", (e) => {
   if (e.pointerType !== "touch" && !detalleTactil) limpiarHover();
 });
 function resize() {
-  R.setSize(innerWidth, innerHeight);
-  comp.setSize(innerWidth, innerHeight);
+  ajustarResolucionRender(R, comp, innerWidth, innerHeight);
   cam.aspect = gcam.aspect = innerWidth / innerHeight;
   cam.fov = gcam.fov =
     cam.aspect < 1
@@ -2872,7 +2870,7 @@ iniciarCicloAnimacion();
 reset();
 
 window.addEventListener("sim:visibility",e=>{if(!e.detail)stopAuto()});
-window.addEventListener("sim:quality",e=>{R.setPixelRatio(e.detail?1:Math.min(devicePixelRatio,2));comp.passes[1].enabled=!e.detail;R.setSize(innerWidth,innerHeight,false);comp.setSize(innerWidth,innerHeight)});
+window.addEventListener("sim:quality",e=>ajustarCalidadRender(R,comp,innerWidth,innerHeight,e.detail));
 window.dispatchEvent(new Event("sim:ready"));
 
 document.addEventListener('visibilitychange',()=>{if(document.hidden)stopAuto()});

@@ -29,7 +29,7 @@ x.fillStyle = "#fff";
 x.font = "20px Segoe UI";
 x.textAlign = "left";
 x.fillText("●  UNDC   |   Windows", 20, 704);
-const texture = new T.CanvasTexture(sc);texture.userData.fondoListo=false;
+const texture = new T.CanvasTexture(sc);texture.encoding=T.sRGBEncoding;texture.userData.fondoListo=false;
 const imagenFacultad = new Image();
 imagenFacultad.onload = () => {
   const escala = Math.max(

@@ -16,8 +16,9 @@ try{
  await p.evaluate(()=>{modoManual=false;for(let i=0;i<PASOS.length;i++)paso(true)});assert.equal(await p.evaluate(()=>ctl.autoRotate),false);await p.locator('#giro-auto').click();assert.equal(await p.evaluate(()=>ctl.autoRotate),true);await p.locator('#giro-auto').click();
  await p.evaluate(()=>{reset();modoManual=true;actualizarModo();goTo(0);SKY.ocultar()});await p.waitForFunction(()=>man?.act==='psu');assert.equal(await p.evaluate(()=>piezaActivaHelper),null);
  await p.waitForFunction(()=>tw.length===0);
+ // Use an interior mesh patch: residual orbit damping can move an edge pixel between events.
  const picks=await p.evaluate(()=>{const box=new THREE.Box3().setFromObject(P.psu).expandByScalar(.35);let empty=null,real=null;
-  for(let y=90;y<550;y+=8)for(let x=365;x<1160;x+=8){if(document.elementFromPoint(x,y)!==cv)continue;const e={clientX:x,clientY:y};const hit=interseccionPieza(e,'psu');const inBox=rayo(e).intersectBox(box,new THREE.Vector3());if(inBox&&!hit&&!empty)empty={x,y};if(hit&&!real)real={x,y};if(empty&&real)return {empty,real}}return {empty,real}});
+  for(let y=90;y<550;y+=8)for(let x=365;x<1160;x+=8){if(document.elementFromPoint(x,y)!==cv)continue;const e={clientX:x,clientY:y};const hit=interseccionPieza(e,'psu');const inBox=rayo(e).intersectBox(box,new THREE.Vector3());if(inBox&&!hit&&!empty)empty={x,y};if(hit&&!real&&[-3,0,3].every(dx=>[-3,0,3].every(dy=>interseccionPieza({clientX:x+dx,clientY:y+dy},'psu'))))real={x,y};if(empty&&real)return {empty,real}}return {empty,real}});
  assert(picks.empty&&picks.real,'Need real mesh and empty old hitbox samples');await p.mouse.move(picks.empty.x,picks.empty.y);await p.mouse.down();assert.equal(await p.evaluate(()=>drag),null);await p.mouse.up();await p.mouse.move(picks.real.x,picks.real.y);await p.mouse.down();assert.equal(await p.evaluate(()=>drag?.id),'psu');await p.mouse.up();
  await p.evaluate(()=>{modoManual=false;reset();galeria(true)});
  const loader=process.env.SKY_GLTF_LOADER;if(loader)await p.addScriptTag({content:fs.readFileSync(loader,'utf8')});

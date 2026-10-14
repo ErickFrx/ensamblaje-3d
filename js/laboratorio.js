@@ -295,7 +295,7 @@
     woodContext.stroke();
   }
   const woodTexture = new THREE.CanvasTexture(woodCanvas);
-  woodTexture.colorSpace = THREE.SRGBColorSpace;
+  woodTexture.encoding = THREE.sRGBEncoding;
   woodTexture.anisotropy = Math.min(4, R.capabilities.getMaxAnisotropy());
   const mainTableTop = new THREE.Mesh(
     document.body.classList.contains("laptop-mode")?new THREE.BoxGeometry(24,.4,12):new THREE.PlaneGeometry(34,12),
