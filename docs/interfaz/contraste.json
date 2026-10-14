@@ -1,0 +1,18 @@
+{
+  "a": {
+    "texto": 14.27,
+    "boton": 4.94,
+    "enlace": 4.52,
+    "aviso": 8.74,
+    "correcto": 4.57,
+    "secundario": 7.21
+  },
+  "b": {
+    "texto": 11.99,
+    "boton": 5.73,
+    "enlace": 5.25,
+    "aviso": 4.79,
+    "correcto": 5.74,
+    "secundario": 7.88
+  }
+}
