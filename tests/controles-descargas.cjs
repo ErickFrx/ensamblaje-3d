@@ -12,8 +12,9 @@ const p=await browser.newPage({viewport:{width:1366,height:768}});const errors=[
 await p.addInitScript(()=>{window.Audio=class{play(){return Promise.reject(new Error('Silencio de prueba'))}pause(){}}});
 try{
  await p.goto(url+'/#pc');await p.waitForFunction(()=>window.SKY&&window.exportarPiezaGLB&&!document.getElementById('carga'));
- await p.locator('#giro-auto').click();assert.equal(await p.evaluate(()=>ctl.autoRotate),true);assert.equal(await p.locator('#giro-auto').textContent(),'Pausar giro');await p.locator('#giro-auto').click();assert.equal(await p.evaluate(()=>ctl.autoRotate),false);
+ await p.locator('#ui-menu').click();await p.locator('#giro-auto').click();assert.equal(await p.evaluate(()=>ctl.autoRotate),true);assert.equal(await p.locator('#giro-auto').textContent(),'Pausar giro');await p.locator('#giro-auto').click();assert.equal(await p.evaluate(()=>ctl.autoRotate),false);
  await p.evaluate(()=>{modoManual=false;for(let i=0;i<PASOS.length;i++)paso(true)});assert.equal(await p.evaluate(()=>ctl.autoRotate),false);await p.locator('#giro-auto').click();assert.equal(await p.evaluate(()=>ctl.autoRotate),true);await p.locator('#giro-auto').click();
+ await p.locator('#ui-close-options').click();
  await p.evaluate(()=>{reset();modoManual=true;actualizarModo();goTo(0);SKY.ocultar()});await p.waitForFunction(()=>man?.act==='psu');assert.equal(await p.evaluate(()=>piezaActivaHelper),null);
  await p.waitForFunction(()=>tw.length===0);
  // Use an interior mesh patch: residual orbit damping can move an edge pixel between events.

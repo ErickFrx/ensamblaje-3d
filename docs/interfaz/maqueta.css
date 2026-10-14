@@ -2,7 +2,7 @@
 @font-face{font-family:Poppins;src:url('../../fonts/Poppins-Medium.ttf');font-weight:500;font-display:swap}
 @font-face{font-family:Lora;src:url('../../fonts/Lora-Variable.ttf');font-weight:400 700;font-display:swap}
 *{box-sizing:border-box}
-:root{--surface:#f3f5f7;--ink:#1b2433;--action:#0078a8;--attention:#900018;--success:#2f7d5b;--line:#d5dbe2;--on-action:#fff;--scene:#f3f5f7;--body-size:14px;--step-size:22px;--title-size:clamp(32px,3vw,40px)}
+:root{--surface:#f3f5f7;--ink:#1b2433;--action:#a64b43;--attention:#900018;--success:#2f7d5b;--line:#d5dbe2;--on-action:#fff;--scene:#f3f5f7;--body-size:14px;--step-size:22px;--title-size:clamp(32px,3vw,40px)}
 .theme-b{--surface:#25272c;--ink:#e9e6df;--action:#4da3c7;--attention:#e46c7a;--success:#5fb08a;--line:#3e4148;--on-action:#17212a;--scene:#25272c;color-scheme:dark}
 body{min-height:100svh;margin:0;color:var(--ink);background:var(--surface);font:400 var(--body-size)/1.55 Poppins,sans-serif}
 button,a,input,select{font:inherit}
