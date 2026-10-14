@@ -1,0 +1,280 @@
+{
+  "version": 2,
+  "nota": "Se retiraron de los pasos los clips genéricos de RAM, CPU y SSD. Cada etapa sin una grabación ajustada muestra una guía concreta, sin sustituir la voz. Bienvenida, placa madre de PC, refrigeración y final conservan clips temáticos pertinentes. Las grabaciones originales se mantienen como recursos.",
+  "clips": [
+    {
+      "id": 0,
+      "archivo": "linea-00.mp3",
+      "texto": "¡Hola! Soy Sky, tu pequeña asistente de ensamblaje de computadoras de la UNDC."
+    },
+    {
+      "id": 1,
+      "archivo": "linea-01.mp3",
+      "texto": "Hoy aprenderemos algo muy interesante. Primero, reconozcamos las piezas que vamos a utilizar."
+    },
+    {
+      "id": 2,
+      "archivo": "linea-02.mp3",
+      "texto": "Primero, vamos a colocar el procesador en la placa madre."
+    },
+    {
+      "id": 3,
+      "archivo": "linea-03.mp3",
+      "texto": "Hazlo con cuidado, ¿de acuerdo?"
+    },
+    {
+      "id": 4,
+      "archivo": "linea-04.mp3",
+      "texto": "Ahora instalaremos el SSD. Comprobemos si tu unidad es M.2 o SATA y qué conexión necesita."
+    },
+    {
+      "id": 5,
+      "archivo": "linea-05.mp3",
+      "texto": "Continuemos con la refrigeración. Un procesador necesita disipar el calor para funcionar correctamente."
+    },
+    {
+      "id": 6,
+      "archivo": "linea-06.mp3",
+      "texto": "¡Muy bien! Ahora vamos a instalar la placa madre en el gabinete."
+    },
+    {
+      "id": 7,
+      "archivo": "linea-07.mp3",
+      "texto": "Conectemos la alimentación con paciencia. Vamos a revisar cada conector."
+    },
+    {
+      "id": 8,
+      "archivo": "linea-08.mp3",
+      "texto": "¡Oh! Parece que algo no encaja... Mmm, déjame comprobarlo. ¡Ah, ya lo tengo! Inténtalo una vez más."
+    },
+    {
+      "id": 9,
+      "archivo": "linea-09.mp3",
+      "texto": "¡Excelente trabajo! Lo hiciste muy bien. Sigamos aprendiendo juntos."
+    }
+  ],
+  "bienvenida": {
+    "clip": 0
+  },
+  "final": {
+    "clip": 9
+  },
+  "repetir": "Reproduce el mismo mensaje e índice de clip vigente; cancela antes la sesión anterior.",
+  "pc": [
+    {
+      "id": "psu",
+      "titulo": "Fuente de alimentación",
+      "guia": "Coloca la fuente en la parte inferior del case con el ventilador hacia la rejilla. Alinea sus 4 agujeros con el chasis y fíjala con 4 tornillos.",
+      "clip": null,
+      "estado": "texto_especifico_sin_grabacion",
+      "texto_audible": null,
+      "guia_sky": "Coloca la fuente en la parte inferior del gabinete, con el ventilador hacia la rejilla, y fija sus cuatro tornillos."
+    },
+    {
+      "id": "mobo",
+      "titulo": "Placa madre",
+      "guia": "Instala primero los separadores del case, baja la placa alineando sus agujeros con ellos y atorníllala. Comprueba que el panel de puertos encaje en la abertura trasera.",
+      "clip": 6,
+      "estado": "clip_tematico; instruccion_especifica_en_panel",
+      "texto_audible": "¡Muy bien! Ahora vamos a instalar la placa madre en el gabinete.",
+      "guia_sky": "Coloca la placa madre sobre los separadores del gabinete, alinea sus agujeros y fíjala con los tornillos."
+    },
+    {
+      "id": "cpu",
+      "titulo": "Procesador",
+      "guia": "Abre la palanca del zócalo, alinea el triángulo dorado del procesador con la marca y colócalo sin presionar. Cierra la placa de carga y asegura la palanca.",
+      "clip": null,
+      "estado": "texto_especifico_sin_grabacion",
+      "texto_audible": null,
+      "guia_sky": "Alinea el triángulo del procesador con la marca del zócalo. Colócalo sin presionar y cierra la palanca."
+    },
+    {
+      "id": "aio",
+      "titulo": "Refrigeración líquida RGB",
+      "guia": "Aplica pasta térmica sobre el procesador, coloca la bomba y ajusta sus 4 tornillos en cruz. Fija el radiador de 240 mm con sus 2 ventiladores RGB al frente del case y conecta sus cables.",
+      "clip": 5,
+      "estado": "clip_tematico; instruccion_especifica_en_panel",
+      "texto_audible": "Continuemos con la refrigeración. Un procesador necesita disipar el calor para funcionar correctamente.",
+      "guia_sky": "Coloca la bomba sobre el procesador, fija el radiador y conecta sus ventiladores. Sigue las indicaciones de pasta térmica del panel."
+    },
+    {
+      "id": "ram",
+      "titulo": "Memoria RAM RGB (×4)",
+      "guia": "Abre las pestañas de las ranuras, alinea la muesca de cada módulo DDR5 y presiona por ambos extremos hasta que encaje. Repite con los 4 módulos.",
+      "clip": null,
+      "estado": "texto_especifico_sin_grabacion",
+      "texto_audible": null,
+      "guia_sky": "Abre las pestañas, alinea la muesca de la RAM y presiona ambos extremos hasta encajar. Instala los cuatro módulos."
+    },
+    {
+      "id": "ssd",
+      "titulo": "Unidad SSD M.2",
+      "guia": "Retira el disipador de la ranura M.2, inserta el SSD inclinado, presiónalo hasta dejarlo plano y fíjalo con su tornillo. Vuelve a colocar el disipador.",
+      "clip": null,
+      "estado": "texto_especifico_sin_grabacion",
+      "texto_audible": null,
+      "guia_sky": "Inserta el SSD M.2 inclinado, bájalo hasta su soporte y fíjalo con el tornillo. Vuelve a colocar el disipador."
+    },
+    {
+      "id": "gpu",
+      "titulo": "Tarjeta de video RGB",
+      "guia": "Retira las tapas traseras del case, alinea la tarjeta con la ranura PCIe x16 y presiónala hasta que la traba haga clic. Fíjala al case y conecta su cable de alimentación de 16 pines.",
+      "clip": null,
+      "estado": "texto_especifico_sin_grabacion",
+      "texto_audible": null,
+      "guia_sky": "Inserta la tarjeta gráfica en la ranura PCIe x16, fíjala al gabinete y conecta su cable de alimentación."
+    },
+    {
+      "id": "glass",
+      "titulo": "Panel de cristal",
+      "guia": "Apoya el panel de vidrio en las guías, deslízalo hasta cerrarlo y asegúralo con los tornillos traseros. Colócalo al final para que no estorbe durante el montaje.",
+      "clip": null,
+      "estado": "texto_especifico_sin_grabacion",
+      "texto_audible": null,
+      "guia_sky": "Coloca el panel de vidrio en sus guías, cierra el gabinete y asegura el panel."
+    },
+    {
+      "id": "kb",
+      "titulo": "Teclado RGB",
+      "guia": "Conecta el cable USB que sale de la parte posterior del teclado a un puerto USB del panel superior/frontal del case. La ruta del cable se muestra sobre la mesa y sube hasta el puerto.",
+      "clip": null,
+      "estado": "texto_especifico_sin_grabacion",
+      "texto_audible": null,
+      "guia_sky": "Conecta el cable USB del teclado a un puerto del gabinete. Sigue la ruta del cable que muestra el modelo."
+    },
+    {
+      "id": "mouse",
+      "titulo": "Mouse RGB",
+      "guia": "Conecta el cable USB que sale de la parte posterior del mouse a otro puerto USB del panel superior/frontal del case. La ruta del cable se muestra sobre la mesa y sube hasta el puerto.",
+      "clip": null,
+      "estado": "texto_especifico_sin_grabacion",
+      "texto_audible": null,
+      "guia_sky": "Conecta el cable USB del mouse a otro puerto del gabinete."
+    },
+    {
+      "id": "mon",
+      "titulo": "Monitor",
+      "guia": "Conecta el cable DisplayPort o HDMI a la tarjeta de video (no a la placa madre), conecta el cable de alimentación del monitor y enciéndelo.",
+      "clip": null,
+      "estado": "texto_especifico_sin_grabacion",
+      "texto_audible": null,
+      "guia_sky": "Conecta el monitor a la tarjeta gráfica mediante HDMI o DisplayPort y conecta su alimentación."
+    },
+    {
+      "id": "spk",
+      "titulo": "Parlantes",
+      "guia": "Coloca los satélites a ambos lados del monitor; deja el derecho a la derecha de la lámpara. Conecta el sistema de sonido a la computadora y a la corriente.",
+      "clip": null,
+      "estado": "texto_especifico_sin_grabacion",
+      "texto_audible": null,
+      "guia_sky": "Coloca los parlantes a ambos lados del monitor y conecta el sistema de audio y su alimentación."
+    },
+    {
+      "id": "final",
+      "titulo": "Encender el equipo",
+      "guia": "¡Ensamblaje completo! Conecta la fuente y el monitor a la corriente y enciende el equipo.",
+      "clip": 9,
+      "estado": "clip_tematico; detalle_tecnico_en_panel",
+      "texto_audible": "¡Excelente trabajo! Lo hiciste muy bien. Sigamos aprendiendo juntos."
+    }
+  ],
+  "laptop": [
+    {
+      "id": "base",
+      "titulo": "Chasis inferior",
+      "guia": "Es la base de la laptop. Aquí se alojan todos los componentes internos.",
+      "clip": null,
+      "estado": "texto_especifico_sin_grabacion",
+      "texto_audible": null,
+      "guia_sky": "Reconoce el chasis inferior: sus soportes, aberturas y puntos de fijación sostienen el conjunto."
+    },
+    {
+      "id": "mobo",
+      "titulo": "Placa base",
+      "guia": "Alinea la placa base con los soportes y los puertos del chasis; fíjala en sus puntos de montaje.",
+      "clip": null,
+      "estado": "texto_especifico_sin_grabacion",
+      "texto_audible": null,
+      "guia_sky": "Alinea la placa base con los soportes y los puertos del chasis; fíjala en sus puntos de montaje."
+    },
+    {
+      "id": "cpu",
+      "titulo": "Identificar el procesador",
+      "guia": "Identifica el procesador soldado a la placa. En esta laptop educativa no se extrae ni se inserta en un zócalo.",
+      "clip": null,
+      "estado": "texto_especifico_sin_grabacion",
+      "texto_audible": null,
+      "guia_sky": "Identifica el procesador BGA sobre la placa. Está soldado: en este modelo no se extrae ni se instala en un zócalo."
+    },
+    {
+      "id": "ram",
+      "titulo": "Memoria RAM",
+      "guia": "Alinea la muesca del SO-DIMM, introdúcelo inclinado y bájalo hasta que los retenedores lo sujeten. Repite con el segundo módulo.",
+      "clip": null,
+      "estado": "texto_especifico_sin_grabacion",
+      "texto_audible": null,
+      "guia_sky": "Alinea la muesca del SO-DIMM, introdúcelo inclinado y bájalo hasta que los retenedores lo sujeten. Repite con el segundo módulo."
+    },
+    {
+      "id": "ssd",
+      "titulo": "SSD M.2",
+      "guia": "Inserta la unidad en su ranura M.2 y asegúrala con el tornillo.",
+      "clip": null,
+      "estado": "texto_especifico_sin_grabacion",
+      "texto_audible": null,
+      "guia_sky": "Inserta el SSD M.2 en su conector, bájalo hasta el soporte y asegúralo con el tornillo."
+    },
+    {
+      "id": "cool",
+      "titulo": "Enfriamiento",
+      "guia": "Instala el sistema térmico sobre la placa para disipar el calor de los componentes.",
+      "clip": 5,
+      "estado": "clip_tematico; instruccion_especifica_en_panel",
+      "texto_audible": "Continuemos con la refrigeración. Un procesador necesita disipar el calor para funcionar correctamente.",
+      "guia_sky": "Coloca las placas de contacto sobre CPU y GPU y fija el conjunto de heatpipes y ventiladores."
+    },
+    {
+      "id": "bat",
+      "titulo": "Batería",
+      "guia": "Coloca la batería en la parte delantera del chasis y conecta su cable.",
+      "clip": null,
+      "estado": "texto_especifico_sin_grabacion",
+      "texto_audible": null,
+      "guia_sky": "Fija la batería en su alojamiento y revisa su conector. Es una representación educativa; sigue el manual de tu equipo para conectarla."
+    },
+    {
+      "id": "deck",
+      "titulo": "Teclado y carcasa superior",
+      "guia": "Antes de cerrar la carcasa superior, revisa las conexiones del teclado y el touchpad. Alinea y fija la cubierta.",
+      "clip": null,
+      "estado": "texto_especifico_sin_grabacion",
+      "texto_audible": null,
+      "guia_sky": "Antes de cerrar la carcasa superior, revisa las conexiones del teclado y el touchpad. Alinea y fija la cubierta."
+    },
+    {
+      "id": "lid",
+      "titulo": "Pantalla",
+      "guia": "Une la pantalla a la base por las bisagras y conecta el cable plano.",
+      "clip": null,
+      "estado": "texto_especifico_sin_grabacion",
+      "texto_audible": null,
+      "guia_sky": "Alinea las bisagras, fija la pantalla y revisa la conexión del cable de video antes de encender el equipo."
+    },
+    {
+      "id": "final",
+      "titulo": "Revisión y encendido",
+      "guia": "Comprueba las conexiones, fijaciones y refrigeración. ¡Ensamblaje completo!",
+      "clip": 9,
+      "estado": "clip_tematico; detalle_tecnico_en_panel",
+      "texto_audible": "¡Excelente trabajo! Lo hiciste muy bien. Sigamos aprendiendo juntos."
+    }
+  ],
+  "clips_no_asignados": [
+    1,
+    2,
+    3,
+    4,
+    7,
+    8
+  ]
+}

@@ -1,51 +1,121 @@
-GUION DE SKY — textos para grabar con tu voz (ElevenLabs u otra)
-=====================================================================
-Cómo usarlo: graba cada texto, guarda el MP3 con el nombre indicado dentro de esta carpeta (audio/sky/)
-y registra la ruta en la tabla AUDIOS al inicio de js/sky.js, por ejemplo:  psu: "audio/sky/psu.mp3",
-Los pasos que no tengan grabación los dice la voz en español del navegador.
+GUION VIGENTE DE SKY — grabar con la misma voz autorizada
 
-Ya incluidos (voz original de Sky):
-  bienvenida.mp3 -> "¡Hola! Soy Sky, tu pequeña asistente de ensamblaje de computadoras de la UNDC."
-  final.mp3      -> "¡Excelente trabajo! Lo hiciste muy bien. Sigamos aprendiendo juntos."
+Los textos específicos sin grabación aparecen temporalmente en pantalla. No se usa TTS del navegador ni se modifica el texto de los subtítulos de un audio existente.
 
-Pasos (Sky dice: nombre del paso + indicación):
+=== PC ===
+psu · Fuente de alimentación
+Guía del panel: Coloca la fuente en la parte inferior del case con el ventilador hacia la rejilla. Alinea sus 4 agujeros con el chasis y fíjala con 4 tornillos.
+Guía breve de Sky: Coloca la fuente en la parte inferior del gabinete, con el ventilador hacia la rejilla, y fija sus cuatro tornillos.
+Audio actual: PENDIENTE
 
-psu.mp3
-  Fuente de alimentación. Coloca la fuente en la parte inferior del case con el ventilador hacia la rejilla. Alinea sus 4 agujeros con el chasis y fíjala con 4 tornillos.
+mobo · Placa madre
+Guía del panel: Instala primero los separadores del case, baja la placa alineando sus agujeros con ellos y atorníllala. Comprueba que el panel de puertos encaje en la abertura trasera.
+Guía breve de Sky: Coloca la placa madre sobre los separadores del gabinete, alinea sus agujeros y fíjala con los tornillos.
+Audio actual: linea-06.mp3 — ¡Muy bien! Ahora vamos a instalar la placa madre en el gabinete.
 
-mobo.mp3
-  Placa madre. Instala primero los separadores del case, baja la placa alineando sus agujeros con ellos y atorníllala. Comprueba que el panel de puertos encaje en la abertura trasera.
+cpu · Procesador
+Guía del panel: Abre la palanca del zócalo, alinea el triángulo dorado del procesador con la marca y colócalo sin presionar. Cierra la placa de carga y asegura la palanca.
+Guía breve de Sky: Alinea el triángulo del procesador con la marca del zócalo. Colócalo sin presionar y cierra la palanca.
+Audio actual: PENDIENTE
 
-cpu.mp3
-  Procesador. Abre la palanca del zócalo, alinea el triángulo dorado del procesador con la marca y colócalo sin presionar. Cierra la placa de carga y asegura la palanca.
+aio · Refrigeración líquida RGB
+Guía del panel: Aplica pasta térmica sobre el procesador, coloca la bomba y ajusta sus 4 tornillos en cruz. Fija el radiador de 240 mm con sus 2 ventiladores RGB al frente del case y conecta sus cables.
+Guía breve de Sky: Coloca la bomba sobre el procesador, fija el radiador y conecta sus ventiladores. Sigue las indicaciones de pasta térmica del panel.
+Audio actual: linea-05.mp3 — Continuemos con la refrigeración. Un procesador necesita disipar el calor para funcionar correctamente.
 
-aio.mp3
-  Refrigeración líquida RGB. Aplica pasta térmica sobre el procesador, coloca la bomba y ajusta sus 4 tornillos en cruz. Fija el radiador de 240 mm con sus 2 ventiladores RGB al frente del case y conecta sus cables.
+ram · Memoria RAM RGB (×4)
+Guía del panel: Abre las pestañas de las ranuras, alinea la muesca de cada módulo DDR5 y presiona por ambos extremos hasta que encaje. Repite con los 4 módulos.
+Guía breve de Sky: Abre las pestañas, alinea la muesca de la RAM y presiona ambos extremos hasta encajar. Instala los cuatro módulos.
+Audio actual: PENDIENTE
 
-ram.mp3
-  Memoria RAM RGB (×4). Abre las pestañas de las ranuras, alinea la muesca de cada módulo DDR5 y presiona por ambos extremos hasta que encaje. Repite con los 4 módulos.
+ssd · Unidad SSD M.2
+Guía del panel: Retira el disipador de la ranura M.2, inserta el SSD inclinado, presiónalo hasta dejarlo plano y fíjalo con su tornillo. Vuelve a colocar el disipador.
+Guía breve de Sky: Inserta el SSD M.2 inclinado, bájalo hasta su soporte y fíjalo con el tornillo. Vuelve a colocar el disipador.
+Audio actual: PENDIENTE
 
-ssd.mp3
-  Unidad SSD M.2. Retira el disipador de la ranura M.2, inserta el SSD inclinado, presiónalo hasta dejarlo plano y fíjalo con su tornillo. Vuelve a colocar el disipador.
+gpu · Tarjeta de video RGB
+Guía del panel: Retira las tapas traseras del case, alinea la tarjeta con la ranura PCIe x16 y presiónala hasta que la traba haga clic. Fíjala al case y conecta su cable de alimentación de 16 pines.
+Guía breve de Sky: Inserta la tarjeta gráfica en la ranura PCIe x16, fíjala al gabinete y conecta su cable de alimentación.
+Audio actual: PENDIENTE
 
-gpu.mp3
-  Tarjeta de video RGB. Retira las tapas traseras del case, alinea la tarjeta con la ranura PCIe x16 y presiónala hasta que la traba haga clic. Fíjala al case y conecta su cable de alimentación de 16 pines.
+glass · Panel de cristal
+Guía del panel: Apoya el panel de vidrio en las guías, deslízalo hasta cerrarlo y asegúralo con los tornillos traseros. Colócalo al final para que no estorbe durante el montaje.
+Guía breve de Sky: Coloca el panel de vidrio en sus guías, cierra el gabinete y asegura el panel.
+Audio actual: PENDIENTE
 
-glass.mp3
-  Panel de cristal. Apoya el panel de vidrio en las guías, deslízalo hasta cerrarlo y asegúralo con los tornillos traseros. Colócalo al final para que no estorbe durante el montaje.
+kb · Teclado RGB
+Guía del panel: Conecta el cable USB que sale de la parte posterior del teclado a un puerto USB del panel superior/frontal del case. La ruta del cable se muestra sobre la mesa y sube hasta el puerto.
+Guía breve de Sky: Conecta el cable USB del teclado a un puerto del gabinete. Sigue la ruta del cable que muestra el modelo.
+Audio actual: PENDIENTE
 
-kb.mp3
-  Teclado RGB. Conecta el cable USB que sale de la parte posterior del teclado a un puerto USB del panel superior/frontal del case. La ruta del cable se muestra sobre la mesa y sube hasta el puerto.
+mouse · Mouse RGB
+Guía del panel: Conecta el cable USB que sale de la parte posterior del mouse a otro puerto USB del panel superior/frontal del case. La ruta del cable se muestra sobre la mesa y sube hasta el puerto.
+Guía breve de Sky: Conecta el cable USB del mouse a otro puerto del gabinete.
+Audio actual: PENDIENTE
 
-mouse.mp3
-  Mouse RGB. Conecta el cable USB que sale de la parte posterior del mouse a otro puerto USB del panel superior/frontal del case. La ruta del cable se muestra sobre la mesa y sube hasta el puerto.
+mon · Monitor
+Guía del panel: Conecta el cable DisplayPort o HDMI a la tarjeta de video (no a la placa madre), conecta el cable de alimentación del monitor y enciéndelo.
+Guía breve de Sky: Conecta el monitor a la tarjeta gráfica mediante HDMI o DisplayPort y conecta su alimentación.
+Audio actual: PENDIENTE
 
-mon.mp3
-  Monitor. Conecta el cable DisplayPort o HDMI a la tarjeta de video (no a la placa madre), conecta el cable de alimentación del monitor y enciéndelo.
+spk · Parlantes
+Guía del panel: Coloca los satélites a ambos lados del monitor; deja el derecho a la derecha de la lámpara. Conecta el sistema de sonido a la computadora y a la corriente.
+Guía breve de Sky: Coloca los parlantes a ambos lados del monitor y conecta el sistema de audio y su alimentación.
+Audio actual: PENDIENTE
 
-spk.mp3
-  Parlantes. Coloca los satélites a ambos lados del monitor; deja el derecho a la derecha de la lámpara. Conecta el sistema de sonido a la computadora y a la corriente.
+final · Encender el equipo
+Guía del panel: ¡Ensamblaje completo! Conecta la fuente y el monitor a la corriente y enciende el equipo.
+Guía breve de Sky: ¡Ensamblaje completo! Conecta la fuente y el monitor a la corriente y enciende el equipo.
+Audio actual: linea-09.mp3 — ¡Excelente trabajo! Lo hiciste muy bien. Sigamos aprendiendo juntos.
 
-end.mp3
-  Encender el equipo. <b>¡Ensamblaje completo!</b> Conecta la fuente y el monitor a la corriente y enciende el equipo.
+=== LAPTOP ===
+base · Chasis inferior
+Guía del panel: Es la base de la laptop. Aquí se alojan todos los componentes internos.
+Guía breve de Sky: Reconoce el chasis inferior: sus soportes, aberturas y puntos de fijación sostienen el conjunto.
+Audio actual: PENDIENTE
+
+mobo · Placa base
+Guía del panel: Alinea la placa base con los soportes y los puertos del chasis; fíjala en sus puntos de montaje.
+Guía breve de Sky: Alinea la placa base con los soportes y los puertos del chasis; fíjala en sus puntos de montaje.
+Audio actual: PENDIENTE
+
+cpu · Identificar el procesador
+Guía del panel: Identifica el procesador soldado a la placa. En esta laptop educativa no se extrae ni se inserta en un zócalo.
+Guía breve de Sky: Identifica el procesador BGA sobre la placa. Está soldado: en este modelo no se extrae ni se instala en un zócalo.
+Audio actual: PENDIENTE
+
+ram · Memoria RAM
+Guía del panel: Alinea la muesca del SO-DIMM, introdúcelo inclinado y bájalo hasta que los retenedores lo sujeten. Repite con el segundo módulo.
+Guía breve de Sky: Alinea la muesca del SO-DIMM, introdúcelo inclinado y bájalo hasta que los retenedores lo sujeten. Repite con el segundo módulo.
+Audio actual: PENDIENTE
+
+ssd · SSD M.2
+Guía del panel: Inserta la unidad en su ranura M.2 y asegúrala con el tornillo.
+Guía breve de Sky: Inserta el SSD M.2 en su conector, bájalo hasta el soporte y asegúralo con el tornillo.
+Audio actual: PENDIENTE
+
+cool · Enfriamiento
+Guía del panel: Instala el sistema térmico sobre la placa para disipar el calor de los componentes.
+Guía breve de Sky: Coloca las placas de contacto sobre CPU y GPU y fija el conjunto de heatpipes y ventiladores.
+Audio actual: linea-05.mp3 — Continuemos con la refrigeración. Un procesador necesita disipar el calor para funcionar correctamente.
+
+bat · Batería
+Guía del panel: Coloca la batería en la parte delantera del chasis y conecta su cable.
+Guía breve de Sky: Fija la batería en su alojamiento y revisa su conector. Es una representación educativa; sigue el manual de tu equipo para conectarla.
+Audio actual: PENDIENTE
+
+deck · Teclado y carcasa superior
+Guía del panel: Antes de cerrar la carcasa superior, revisa las conexiones del teclado y el touchpad. Alinea y fija la cubierta.
+Guía breve de Sky: Antes de cerrar la carcasa superior, revisa las conexiones del teclado y el touchpad. Alinea y fija la cubierta.
+Audio actual: PENDIENTE
+
+lid · Pantalla
+Guía del panel: Une la pantalla a la base por las bisagras y conecta el cable plano.
+Guía breve de Sky: Alinea las bisagras, fija la pantalla y revisa la conexión del cable de video antes de encender el equipo.
+Audio actual: PENDIENTE
+
+final · Revisión y encendido
+Guía del panel: Comprueba las conexiones, fijaciones y refrigeración. ¡Ensamblaje completo!
+Guía breve de Sky: Comprueba las conexiones, fijaciones y refrigeración. ¡Ensamblaje completo!
+Audio actual: linea-09.mp3 — ¡Excelente trabajo! Lo hiciste muy bien. Sigamos aprendiendo juntos.
 
