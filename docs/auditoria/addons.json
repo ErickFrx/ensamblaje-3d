@@ -1,0 +1,46 @@
+{
+  "three.min.js": {
+    "sha256": "f34446bf875b5fb0dcd93819ffe1d9e182d46634ee855f5d904c6c4ac7cdbc95",
+    "bytes": 607784
+  },
+  "OrbitControls.js": {
+    "sha256": "458eabb4153ef74fc8f9f5faed63d8ee229c5487c916a782bcb3c2e62e706553",
+    "bytes": 29929
+  },
+  "GLTFLoader.js": {
+    "sha256": "b2edda923572c73e6b30b139756d182c87e2c34d022845c6e067a9a0a9544e01",
+    "bytes": 103311
+  },
+  "GLTFExporter.js": {
+    "sha256": "7ba9cf5888ff8c11768ff805d50081c383a91ae4dbf487750065bbbeccd45077",
+    "bytes": 64131
+  },
+  "EffectComposer.js": {
+    "sha256": "8878a5fa2370546d91edbabaceeef70fe3eacd9f65e38b1047b07f139af3f67c",
+    "bytes": 6832
+  },
+  "RenderPass.js": {
+    "sha256": "3afcaca7787fe83bcbd431c57e8879fd84a23ea3452c9d3e9762833ebd834a90",
+    "bytes": 1869
+  },
+  "ShaderPass.js": {
+    "sha256": "030ea99c2df345aae0781304843313da03f11920d904d81e40e7ece603b35672",
+    "bytes": 1612
+  },
+  "MaskPass.js": {
+    "sha256": "7a26bac552d27354deeeca373e7fcdf620c4e1f248457e531a5a963a70f49d90",
+    "bytes": 2328
+  },
+  "CopyShader.js": {
+    "sha256": "b101797241008f78bca34ea92508db8a9ec3b1ec71bd602deeb30c3ca611dbdd",
+    "bytes": 631
+  },
+  "LuminosityHighPassShader.js": {
+    "sha256": "56431a2af1ba72c961e83de8445a4feec097139621e13d892b15ec9981460d77",
+    "bytes": 1281
+  },
+  "UnrealBloomPass.js": {
+    "sha256": "b11dfa8730af6055792ef7e2b14036362b4ef7a940a220fa1540c3c19ffaf9ed",
+    "bytes": 13502
+  }
+}
