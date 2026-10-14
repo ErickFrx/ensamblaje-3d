@@ -1,8 +1,12 @@
 function iniciarCicloAnimacion() {
   let ultimoFrame = 0;
 
-  (function animar(tiempo) {
-    requestAnimationFrame(animar);
+  let frame=0;
+  function schedule(){cancelAnimationFrame(frame);frame=0;if(window.SIM_ACTIVE&&!document.hidden)frame=requestAnimationFrame(animar)}
+  window.addEventListener('sim:visibility',schedule);document.addEventListener('visibilitychange',schedule);
+  function animar(tiempo) {
+    frame=0;if(!window.SIM_ACTIVE||document.hidden)return;
+    frame=requestAnimationFrame(animar);
     if (gal && gexp < 0.25 && hovK) limpiarHover();
 
     // Limita el salto temporal para que las interpolaciones sigan siendo estables al volver a la pestaña.
@@ -62,7 +66,7 @@ function iniciarCicloAnimacion() {
       ctl.update();
     }
 
-    if (piezaActivaHelper) piezaActivaHelper.update();
     comp.render();
-  })(0);
+  }
+  schedule();
 }

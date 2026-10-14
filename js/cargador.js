@@ -11,10 +11,15 @@
     return u;
   };
   function cargarModeloGlb(id) {
-    const u = bytes(GLB[id]),
-      jl = new DataView(u.buffer).getUint32(12, true),
+    const u = bytes(GLB[id]);
+    const header=new DataView(u.buffer);
+    if(u.length<28||header.getUint32(0,true)!==0x46546c67||header.getUint32(4,true)!==2||header.getUint32(8,true)!==u.length||header.getUint32(16,true)!==0x4e4f534a)throw new Error('GLB inválido: '+id);
+    const jl = new DataView(u.buffer).getUint32(12, true),
       J = JSON.parse(new TextDecoder().decode(u.subarray(20, 20 + jl))),
       bo = 28 + jl;
+    if(bo>u.length||header.getUint32(24+jl,true)!==0x004e4942||J.extensionsRequired?.length)throw new Error('Formato GLB no admitido: '+id);
+    if(!J.nodes?.length||J.nodes.some(n=>n.mesh==null||n.children?.length)||J.meshes.some(m=>m.primitives.length!==1))throw new Error('Se requieren mallas planas preprocesadas: '+id);
+    for(const a of J.accessors){const v=J.bufferViews[a.bufferView];if(a.sparse||!v||v.buffer!==0||bo+(v.byteOffset||0)+v.byteLength>u.length)throw new Error('Accessor no admitido: '+id)}
     const tx = [],
       tex = (i) => {
         if (tx[i]) return tx[i];
@@ -25,13 +30,14 @@
         const img = new Image(),
           T = new THREE.Texture(img);
         img.onload = () => {
-          T.needsUpdate = true;
+          T.needsUpdate = true;URL.revokeObjectURL(img.src);
         };
         const st = bo + (bv.byteOffset || 0);
         img.src = URL.createObjectURL(
           new Blob([u.subarray(st, st + bv.byteLength)], { type: im.mimeType }),
         );
-        const s = J.samplers[t.sampler || 0] || {};
+        img.onerror=()=>{URL.revokeObjectURL(img.src);console.error('No se pudo decodificar una textura de '+id)};
+        const s = J.samplers?.[t.sampler || 0] || {};
         T.flipY = false;
         T.wrapS =
           s.wrapS === 33071 ? THREE.ClampToEdgeWrapping : THREE.RepeatWrapping;
@@ -75,6 +81,7 @@
         view = (k, T, c) => {
           const a = A[k],
             bv = J.bufferViews[a.bufferView];
+          if((bv.byteStride&&bv.byteStride!==c*T.BYTES_PER_ELEMENT)||a.componentType!==(T===Uint32Array?5125:5126)||a.type!==({1:'SCALAR',2:'VEC2',3:'VEC3'}[c])||(a.byteOffset||0)+a.count*c*T.BYTES_PER_ELEMENT>bv.byteLength)throw new Error('Tipo de atributo no admitido: '+id);
           return new BufferAttr(
             new T(
               u.buffer,
@@ -91,6 +98,10 @@
       g.setIndex(view(pr.indices, Uint32Array, 1));
       g.computeBoundingBox();
       const m = new THREE.Mesh(g, mats[pr.material]);
+      if(n.matrix)m.applyMatrix4(new THREE.Matrix4().fromArray(n.matrix));
+      else {if(n.translation)m.position.fromArray(n.translation);if(n.rotation)m.quaternion.fromArray(n.rotation);if(n.scale)m.scale.fromArray(n.scale)}
+      // Bake transforms: assembly layering uses geometry bounds in common coordinates.
+      m.updateMatrix();g.applyMatrix4(m.matrix);m.position.set(0,0,0);m.quaternion.identity();m.scale.set(1,1,1);g.computeBoundingBox();
       m.name = n.name;
       return m;
     });

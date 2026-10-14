@@ -5,6 +5,7 @@
   const archivos = [
     "js/three.min.js",
     "js/OrbitControls.js",
+    "js/GLTFExporter.js",
     "js/CopyShader.js",
     "js/LuminosityHighPassShader.js",
     "js/EffectComposer.js",
@@ -15,6 +16,7 @@
     "js/luces.js",
     "js/animaciones.js",
     "images/facultad-data.js",
+    "js/pantalla-compartida.js",
     "js/componentes.js",
     "js/app.js",
     "js/laboratorio.js",
@@ -33,6 +35,7 @@
     "js/cargador.js",
     "js/mejoras.js",
     "js/sky.js",
+    "js/descargas-glb.js",
   ];
   let archivosCargados = 0,
     errorCarga = false,
@@ -103,7 +106,7 @@
       pantallaCarga.classList.add("listo");
       setTimeout(() => {
         pantallaCarga.remove();
-        if (window.mostrarAyuda) mostrarAyuda();
+        window.dispatchEvent(new Event("sim:loaded"));
       }, 400);
     }, 200);
   }

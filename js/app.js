@@ -13,6 +13,14 @@ const ctl = new THREE.OrbitControls(cam, cv);
 ctl.target.copy(centroCamaraInicio);
 ctl.enableDamping = true;
 ctl.autoRotateSpeed = 1.2;
+let giroPausado=false;
+const botonGiro=document.getElementById('giro-auto');
+function actualizarGiroAutomatico(on){
+  ctl.autoRotate=Boolean(on)&&!giroPausado;
+  botonGiro.textContent=ctl.autoRotate?'Pausar giro':'Activar giro';
+  botonGiro.setAttribute('aria-pressed',String(ctl.autoRotate));
+}
+botonGiro.onclick=()=>{giroPausado=ctl.autoRotate;actualizarGiroAutomatico(!ctl.autoRotate)};
 function ajustarCamaraInicio() {
   const fovVertical = THREE.MathUtils.degToRad(cam.fov);
   const fovHorizontal =
@@ -1066,84 +1074,7 @@ D.add(
     4.2,
   ),
 );
-const sc = document.createElement("canvas");
-sc.width = 1280;
-sc.height = 720;
-const x = sc.getContext("2d");
-const gr = x.createLinearGradient(0, 0, 1280, 720);
-gr.addColorStop(0, "#05122b");
-gr.addColorStop(0.5, "#2b0b5e");
-gr.addColorStop(1, "#00a6c8");
-x.fillStyle = gr;
-x.fillRect(0, 0, 1280, 720);
-x.fillStyle = "rgba(255,255,255,.08)";
-for (let i = 0; i < 7; i++) {
-  x.beginPath();
-  x.arc(200 + i * 180, 500 - i * 40, 90 + i * 14, 0, 7);
-  x.fill();
-}
-x.fillStyle = "#fff";
-x.textAlign = "center";
-x.font = "bold 54px Segoe UI";
-x.fillText("UNIVERSIDAD NACIONAL DE CAÑETE", 640, 320);
-x.font = "28px Segoe UI";
-x.fillStyle = "#8ff";
-x.fillText("Simulador Virtual de Ensamblaje  ·  Equipo 02", 640, 375);
-x.fillStyle = "rgba(8,12,24,.85)";
-x.fillRect(0, 672, 1280, 48);
-x.fillStyle = "#fff";
-x.font = "20px Segoe UI";
-x.textAlign = "left";
-x.fillText("●  UNDC   |   Windows", 20, 704);
-const scrM = new THREE.MeshBasicMaterial({
-  map: new THREE.CanvasTexture(sc),
-  color: 0x000000,
-});
-const imagenFacultad = new Image();
-imagenFacultad.onload = () => {
-  const escala = Math.max(
-      sc.width / imagenFacultad.naturalWidth,
-      sc.height / imagenFacultad.naturalHeight,
-    ),
-    ancho = sc.width / escala,
-    alto = sc.height / escala;
-  x.drawImage(
-    imagenFacultad,
-    (imagenFacultad.naturalWidth - ancho) / 2,
-    (imagenFacultad.naturalHeight - alto) / 2,
-    ancho,
-    alto,
-    0,
-    0,
-    sc.width,
-    sc.height,
-  );
-  const sombra = x.createLinearGradient(0, 0, 0, sc.height);
-  sombra.addColorStop(0, "rgba(5, 7, 13, 0.2)");
-  sombra.addColorStop(1, "rgba(5, 7, 13, 0.58)");
-  x.fillStyle = sombra;
-  x.fillRect(0, 0, sc.width, sc.height);
-  x.fillStyle = "#fff";
-  x.textAlign = "center";
-  x.font = "bold 48px Segoe UI";
-  x.fillText("UNIVERSIDAD NACIONAL DE CAÑETE", 640, 320);
-  x.font = "26px Segoe UI";
-  x.fillStyle = "#f2f3f6";
-  x.fillText("Simulador Virtual de Ensamblaje · Equipo 02", 640, 375);
-  x.fillStyle = "rgba(8, 12, 24, 0.82)";
-  x.fillRect(0, 672, 1280, 48);
-  x.fillStyle = "#fff";
-  x.font = "20px Segoe UI";
-  x.textAlign = "left";
-  x.fillText("●  UNDC   |   Windows", 20, 704);
-  scrM.map.needsUpdate = true;
-};
-imagenFacultad.onerror = () => {
-  console.error(
-    "No se pudo decodificar la imagen de fondo embebida del monitor.",
-  );
-};
-imagenFacultad.src = window.FACULTAD_IMAGE_DATA;
+const scrM = new THREE.MeshBasicMaterial({map:crearPantallaUNDC(THREE),color:0x000000});
 {
   const scr = new THREE.Mesh(new THREE.PlaneGeometry(10.6, 5.9), scrM);
   scr.position.z = 0.14;
@@ -1180,26 +1111,12 @@ let tw = [],
   fPrev = "";
 let piezaActivaHelper = null;
 function enfocarPiezaActiva(id) {
-  if (piezaActivaHelper) {
-    S.remove(piezaActivaHelper);
-    piezaActivaHelper.geometry.dispose();
-    piezaActivaHelper.material.dispose();
-    piezaActivaHelper = null;
-  }
   const indicador = document.getElementById("pieza-activa");
   if (!id || !P[id]) {
     indicador.style.display = "none";
     indicador.textContent = "";
     return;
   }
-  const pieza = P[id];
-  piezaActivaHelper = new THREE.BoxHelper(pieza, rgbColor);
-  piezaActivaHelper.renderOrder = 10;
-  piezaActivaHelper.material.depthTest = false;
-  piezaActivaHelper.material.transparent = true;
-  piezaActivaHelper.material.opacity = 0.95;
-  piezaActivaHelper.update();
-  S.add(piezaActivaHelper);
   indicador.innerHTML = `<strong>Componente en foco</strong> · ${nom(id)}`;
   indicador.style.display = "block";
 }
@@ -1273,11 +1190,14 @@ const add = (dur, fn, delay = 0, tag) => {
   tw.push(o);
   return o;
 };
+let skyStepTimer;
+function notifySky(p){clearTimeout(skyStepTimer);skyStepTimer=setTimeout(()=>window.dispatchEvent(new CustomEvent("sim:step",{detail:{mode:"pc",id:p.p[0],end:!!p.end,text:p.t.replace(/<[^>]*>/g," ")}})),80)}
 function paso(inst, forzarAuto) {
   if (cur >= PASOS.length - 1) return;
   ocultarInfoComponente();
   if (man) completarManual();
   const p = PASOS[++cur];
+  notifySky(p);
   enfocarPiezaActiva(p.p[0] || null);
   const manual = !inst && !forzarAuto && modoManual && p.p.length > 0;
   const ca = cam.position.clone(),
@@ -1314,7 +1234,7 @@ function paso(inst, forzarAuto) {
   }
   if (p.end) {
     endOn = 1;
-    ctl.autoRotate = true;
+    actualizarGiroAutomatico(true);
   }
   if (p.p.length && !manual) respuestaMontaje();
   actualizarLucesTorre();
@@ -1368,6 +1288,7 @@ function actualizarLucesTorre() {
   });
 }
 function reset() {
+  clearTimeout(skyStepTimer);window.dispatchEvent(new Event("sim:reset"));
   ocultarInfoComponente();
   cerrarManual();
   tw = [];
@@ -1376,7 +1297,7 @@ function reset() {
   endOn = 0;
   btnNext.disabled = false;
   actualizarLucesTorre();
-  ctl.autoRotate = false;
+  actualizarGiroAutomatico(false);
   Object.values(P).forEach((o) => {
     o.visible = false;
     o.quaternion.identity();
@@ -1673,6 +1594,7 @@ const coloresEje = [
     );
     flecha.traverse((objeto) => {
       objeto.renderOrder = 100;
+      objeto.raycast=()=>{};
       if (objeto.material) objeto.material.depthTest = false;
     });
     guiaEjes.add(flecha);
@@ -2202,6 +2124,7 @@ function encajar(forzado) {
     if (m.p.end) {
       endOn = 1;
     }
+    window.dispatchEvent(new Event("sim:installed"));
     info.innerHTML = `<b>${m.p.n}</b><br>${m.p.t}<div style="margin-top:8px;color:#5f8">✔ ¡Pieza colocada correctamente! Pulsa «Siguiente» para continuar.</div>`;
     man = null;
     actualizarModo();
@@ -2251,6 +2174,14 @@ function rayo(e) {
   RC.setFromCamera(NDC, cam);
   return RC.ray;
 }
+// Pick only visible component surfaces, excluding its instructional hands and lines.
+function interseccionPieza(e,id){
+  const piece=P[id];if(!piece||!piece.visible)return null;
+  piece.updateMatrixWorld(true);rayo(e);
+  const meshes=[];
+  function visit(o){if(!o.visible||o.userData.hologramaManos)return;if(o.isMesh)meshes.push(o);for(const child of o.children)visit(child)}
+  visit(piece);return RC.intersectObjects(meshes,false)[0]||null;
+}
 const pivW = (id) => ST[id].par.localToWorld(ST[id].pc.clone());
 window.addEventListener(
   "pointerdown",
@@ -2267,9 +2198,9 @@ window.addEventListener(
     const id = man.act,
       o = P[id];
     o.updateMatrixWorld(true);
-    const box = new THREE.Box3().setFromObject(o).expandByScalar(0.35),
-      hit = rayo(e).intersectBox(box, V3());
-    if (!hit) return;
+    const selection=interseccionPieza(e,id);
+    if(!selection)return;
+    const hit=selection.point.clone();
     const dir = cam.getWorldDirection(V3());
     drag = {
       id,
@@ -2293,9 +2224,7 @@ window.addEventListener(
 window.addEventListener("pointermove", (e) => {
   if (!drag) {
     if (man && man.act && !gal && e.target === cv && !man.snap) {
-      const o = P[man.act],
-        box = new THREE.Box3().setFromObject(o).expandByScalar(0.35);
-      cv.style.cursor = rayo(e).intersectBox(box, V3()) ? "grab" : "";
+      cv.style.cursor = interseccionPieza(e,man.act) ? "grab" : "";
     }
     return;
   }
@@ -2629,7 +2558,7 @@ const gp = document.createElement("div");
 gp.id = "panel";
 gp.style.display = "none";
 gp.innerHTML =
-  '<div class="panel-header"><h1>GALERÍA DE PIEZAS</h1><button id="gallery-toggle" type="button" aria-expanded="true" aria-controls="gallery-bar gl" aria-label="Contraer galería de piezas" title="Contraer galería">⌃</button></div><div id="gallery-bar"><button id="gv">◀ Volver</button><button id="gr">Girar ⏯</button><button id="ge">Explotar</button></div><div id="gl"></div>';
+  '<div class="panel-header"><h1>GALERÍA DE PIEZAS</h1><button id="gallery-toggle" type="button" aria-expanded="true" aria-controls="gallery-bar gl" aria-label="Contraer galería de piezas" title="Contraer galería">⌃</button></div><div id="gallery-bar"><button id="gv">◀ Volver</button><button id="gr">Girar ⏯</button><button id="ge">Explotar</button><button id="gdownload" type="button">Descargar GLB</button></div><div id="gdownload-status" role="status" aria-live="polite"></div><div id="gl"></div>';
 document.body.appendChild(gp);
 const gl = gp.querySelector("#gl"),
   nom = (id) => PASOS.find((q) => q.p[0] === id).n;
@@ -2673,8 +2602,14 @@ Object.keys(FICHA).forEach((id) => {
   gl.appendChild(d);
 });
 function showPart(id) {
+  const download=gp.querySelector('#gdownload');download.dataset.id=id;
+  download.title='Descargar '+nom(id)+' (.glb)';
+  gp.querySelector('#gdownload-status').textContent='';
   limpiarHover();
-  if (gobj) GS.remove(gobj);
+  if (gobj) {
+    const owned=new Set();gobj.traverse(o=>{if(o.isMesh&&o.userData.cl)for(const m of [].concat(o.material))owned.add(m)});
+    owned.forEach(m=>m.dispose());GS.remove(gobj);
+  }
   gspin = [];
   gexp = gexpT = 0;
   const src = P[id],
@@ -2761,7 +2696,7 @@ window.refrescarPiezaGaleria = (id) => {
 function galeria(on) {
   ocultarInfoComponente();
   limpiarHover();
-  gal = on;
+  gal = on;window.SIM_GALLERY=on;
   if (on) {
     if (window.SKY && window.SKY.suspender) window.SKY.suspender();
   } else if (window.SKY && window.SKY.reanudar) {
@@ -2789,6 +2724,15 @@ function galeria(on) {
   }
 }
 gp.querySelector("#gv").onclick = () => galeria(false);
+gp.querySelector('#gdownload').onclick=async()=>{
+  const button=gp.querySelector('#gdownload'),status=gp.querySelector('#gdownload-status'),id=button.dataset.id;
+  if(!id||button.disabled)return;button.disabled=true;button.textContent='Preparando…';status.textContent='';
+  try{const data=await window.exportarPiezaGLB(id);const url=URL.createObjectURL(new Blob([data],{type:'model/gltf-binary'}));
+    const a=document.createElement('a');a.href=url;a.download='PC_'+id+'.glb';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);
+    status.textContent='Descarga preparada: '+nom(id)+'.';
+  }catch(error){console.error('Exportación GLB:',error);status.textContent='No se pudo descargar la pieza. '+error.message;}
+  finally{button.disabled=false;button.textContent='Descargar GLB';}
+};
 gp.querySelector("#gr").onclick = () => (gctl.autoRotate = !gctl.autoRotate);
 gp.querySelector("#ge").onclick = () => (gexpT = gexpT ? 0 : 1);
 gp.querySelector("#gallery-toggle").onclick = (e) => {
@@ -2926,3 +2870,9 @@ addEventListener("resize", resize);
 resize();
 iniciarCicloAnimacion();
 reset();
+
+window.addEventListener("sim:visibility",e=>{if(!e.detail)stopAuto()});
+window.addEventListener("sim:quality",e=>{R.setPixelRatio(e.detail?1:Math.min(devicePixelRatio,2));comp.passes[1].enabled=!e.detail;R.setSize(innerWidth,innerHeight,false);comp.setSize(innerWidth,innerHeight)});
+window.dispatchEvent(new Event("sim:ready"));
+
+document.addEventListener('visibilitychange',()=>{if(document.hidden)stopAuto()});
