@@ -3,8 +3,8 @@ const PASOS = window.COMPONENTES.PASOS;
 const cv = document.getElementById("c"),
   R = crearRendererSimulador(cv, Math.min(devicePixelRatio, innerWidth < 700 ? 1.5 : 2));
 const S = new THREE.Scene();
-S.background = new THREE.Color(0xe4e7ec);
-S.fog = new THREE.Fog(0xe4e7ec, 35, 80);
+S.background = new THREE.Color(0x04060b);
+S.fog = new THREE.Fog(0x04060b, 35, 80);
 const cam = new THREE.PerspectiveCamera(42, 1, 0.1, 200);
 const centroCamaraInicio = new THREE.Vector3(-9, 4.6, 0);
 const direccionCamaraInicio = new THREE.Vector3(7, 3, 21).normalize();
@@ -1470,7 +1470,11 @@ function aplicarColorRGB(color) {
   panelRGB.material.color.copy(rgbColor);
   haloRGB.material.color.copy(rgbColor);
   if (piezaActivaHelper) piezaActivaHelper.material.color.copy(rgbColor);
-
+  document.documentElement.style.setProperty("--accent", color);
+  document.documentElement.style.setProperty(
+    "--accent-light",
+    rgbColor.clone().lerp(new THREE.Color(0xffffff), 0.32).getStyle(),
+  );
 }
 const controlColorRGB = document.getElementById("rgb-color");
 controlColorRGB.addEventListener("input", (evento) => {
@@ -2413,7 +2417,6 @@ window.actualizarMovimientoManual = (dt) => {
   }
 };
 addEventListener("keydown", (e) => {
-  if (e.target.closest?.("button, input, select, textarea, summary, dialog")) return;
   if (!man || !man.act || gal || man.snap) return;
   const k = e.key.toLowerCase();
   const direction = directionKeys[k];
@@ -2512,7 +2515,7 @@ const CAPAS = window.COMPONENTES.CAPAS;
 const PRODUCTOS = window.COMPONENTES.PRODUCTOS;
 const AVISO_MODELO = window.COMPONENTES.AVISO_MODELO;
 const GS = new THREE.Scene();
-GS.background = new THREE.Color(0xe4e7ec);
+GS.background = new THREE.Color(0x05070d);
 GS.environment = S.environment;
 configurarIluminacionGaleria(GS);
 GS.add(
@@ -2551,7 +2554,7 @@ let gal = false,
   gexpT = 0,
   gwire = false;
 const gp = document.createElement("div");
-gp.id = "gallery-panel";
+gp.id = "panel";
 gp.style.display = "none";
 gp.innerHTML =
   '<div class="panel-header"><h1>GALERÍA DE PIEZAS</h1><button id="gallery-toggle" type="button" aria-expanded="true" aria-controls="gallery-bar gl" aria-label="Contraer galería de piezas" title="Contraer galería">⌃</button></div><div id="gallery-bar"><button id="gv">◀ Volver</button><button id="gr">Girar ⏯</button><button id="ge">Explotar</button><button id="gdownload" type="button">Descargar GLB</button></div><div id="gdownload-status" role="status" aria-live="polite"></div><div id="gl"></div>';
@@ -2871,5 +2874,3 @@ window.addEventListener("sim:quality",e=>ajustarCalidadRender(R,comp,innerWidth,
 window.dispatchEvent(new Event("sim:ready"));
 
 document.addEventListener('visibilitychange',()=>{if(document.hidden)stopAuto()});
-
-window.SIM_UI = {getState: () => ({index: cur, steps: PASOS.map(p => ({name:p.n,text:p.t})), gallery:gal, manual:modoManual}), jump: i => {stopAuto();goTo(i)}};

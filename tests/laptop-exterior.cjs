@@ -10,7 +10,7 @@ const root=path.resolve(__dirname,'..');
 
  const p=await browser.newPage({viewport:{width:1366,height:768}}),errors=[];p.on('pageerror',e=>errors.push(e.message));p.on('response',r=>{if(r.status()>=400)errors.push(r.status()+' '+r.url())});
  try{
- await p.goto(process.env.SKY_FILE_MODE?'file://'+path.join(root,'index.html')+'#laptop':url+'/#laptop');await p.frameLocator('#laptop-view').locator('#modelo-laptop-status').waitFor({state:'attached'});const f=p.frames().find(f=>f.url().includes('laptop.html'));await f.waitForFunction(()=>window.LAPTOP_EXTERIOR_CARGADO===true,{},{timeout:60000});
+ await p.goto(process.env.SKY_FILE_MODE?'file://'+path.join(root,'index.html')+'#laptop':url+'/#laptop');await p.frameLocator('#laptop-view').locator('#modelo-laptop-status').waitFor();const f=p.frames().find(f=>f.url().includes('laptop.html'));await f.waitForFunction(()=>window.LAPTOP_EXTERIOR_CARGADO===true,{},{timeout:60000});
  const stats=await f.evaluate(()=>{const r={};for(const id of ['base','deck','lid']){const bb=new THREE.Box3().setFromObject(P[id]);let triangles=0;P[id].traverse(o=>{if(o.isMesh)triangles+=(o.geometry.index?.count||o.geometry.attributes.position.count)/3});r[id]={size:bb.getSize(new THREE.Vector3()).toArray(),min:bb.min.toArray(),max:bb.max.toArray(),triangles}}return r});console.log('EXTERIOR',JSON.stringify(stats));assert(Object.values(stats).every(s=>s.triangles>0&&s.size.every(Number.isFinite)));assert(stats.base.size[0]>15&&stats.base.size[0]<16);
  const ids=['base','mobo','cpu','ram','ssd','cool','bat','deck','lid'];
  for(let n=0;n<10;n++){await f.evaluate(n=>ir(n),n);assert.equal(await f.evaluate(()=>paso),n)}

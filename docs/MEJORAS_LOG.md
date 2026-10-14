@@ -27,3 +27,11 @@
 - Se conservaron fichas, galería, despiece, modo manual, ayuda, quiz, voz, aula, calidad y descargas. Se corrigió el ID duplicado del panel de galería PC.
 - Portada clara con las dos opciones visibles, controles de 44 px y contador compacto en móvil. Se retiró el desplazamiento de cámara de laptop que compensaba el panel lateral anterior.
 - Pruebas: 10 de recursos/componentes, integración de interfaz PC/laptop, color/calidad de render, selección/arrastre y 12 descargas GLB, exterior y diez etapas de laptop. Capturas y contrastes en `interfaz/rojo-calido/`.
+
+## 14 de octubre de 2026 — Corrección: interfaz de página web sobre el ZIP original
+
+- El usuario aclaró el alcance: mejorar únicamente la interfaz de su ZIP, manteniendo el color rojizo y el simulador original.
+- Se retiró la propuesta clara anterior y se restauraron las escenas al estado previo. Se añadieron `interfaz-web.css` y `interfaz-web.js`: cabecera, navegación, panel lateral, ajustes desplegables, pasos con estados, progreso nativo y panel móvil.
+- Se conserva el funcionamiento de botones, fichas, galería, despiece, quiz, audio y luces RGB. No se añaden cambios al motor 3D, modelos o voces.
+- El ZIP entregable modifica tres puntos de carga de interfaz y añade dos archivos. Los otros 103 archivos originales son idénticos; informe en `interfaz/web-rojiza/alcance-zip.json`.
+- Validación: diez pruebas básicas; integración PC/laptop y móvil tanto en repositorio como en ZIP; selección/arrastre y doce descargas GLB. Capturas en `interfaz/web-rojiza/`.

@@ -1,0 +1,16 @@
+{
+  "original": "simulador_3d.zip",
+  "entrega": "simulador_3d_interfaz_web.zip",
+  "originales_modificados": [
+    "ensamblaje3d_con_laptop/ensamblaje3d/laptop.html",
+    "index.html",
+    "js/inicio.js"
+  ],
+  "añadidos": [
+    "css/interfaz-web.css",
+    "js/interfaz-web.js"
+  ],
+  "originales_idénticos": 103,
+  "motores_modelos_audio_sin_cambios": true,
+  "sha256_entrega": "b57336a9eac964583306a363485799a9b3365b231915910e4895d299fe72d54d"
+}

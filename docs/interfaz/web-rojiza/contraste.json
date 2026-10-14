@@ -1,0 +1,26 @@
+[
+  {
+    "texto": "#ffffff",
+    "fondo": "#bc4b57",
+    "contraste": 4.9,
+    "AA_texto_normal": true
+  },
+  {
+    "texto": "#ed939b",
+    "fondo": "#151821",
+    "contraste": 7.81,
+    "AA_texto_normal": true
+  },
+  {
+    "texto": "#aeb5c5",
+    "fondo": "#151821",
+    "contraste": 8.62,
+    "AA_texto_normal": true
+  },
+  {
+    "texto": "#f2f3f7",
+    "fondo": "#151821",
+    "contraste": 15.99,
+    "AA_texto_normal": true
+  }
+]

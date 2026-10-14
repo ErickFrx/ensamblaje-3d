@@ -76,7 +76,7 @@
       const cv = document.getElementById("c"),
         R = crearRendererSimulador(cv, 1);
       const S = new THREE.Scene();
-      S.background = new THREE.Color(0xe4e7ec);
+      S.background = new THREE.Color(0x04060b);
       const cam = new THREE.PerspectiveCamera(42, 1, 0.1, 200);
       cam.position.set(...VISTA.slice(0, 3));
       const ctl = new THREE.OrbitControls(cam, cv);
@@ -86,7 +86,7 @@
       const dl = new THREE.DirectionalLight(0xffffff, 1.1);
       dl.position.set(6, 14, 12);
       S.add(dl);
-      S.fog=new THREE.Fog(0xe4e7ec,35,80);
+      S.fog=new THREE.Fog(0x04060b,35,80);
       {
         const pm = new THREE.PMREMGenerator(R),
           es = new THREE.Scene();
@@ -121,7 +121,7 @@
         ajustarResolucionRender(R, comp, innerWidth, innerHeight);
         cam.aspect = innerWidth / innerHeight;
         cam.fov = innerWidth < 600 ? 82 : 42;
-        if(innerWidth>700&&!document.body.classList.contains("interfaz-clara"))cam.setViewOffset(innerWidth,innerHeight,-Math.min(110,(innerWidth-700)*.18),0,innerWidth,innerHeight);else cam.clearViewOffset();
+        if(innerWidth>700)cam.setViewOffset(innerWidth,innerHeight,-Math.min(110,(innerWidth-700)*.18),0,innerWidth,innerHeight);else cam.clearViewOffset();
         cam.updateProjectionMatrix();
       }
       addEventListener("resize", ajustar);
@@ -306,7 +306,7 @@
       const galleryList = document.getElementById("gallery-list");
       const infoHeading = document.getElementById("info-heading");
       const galleryScene = new THREE.Scene();
-      galleryScene.background = new THREE.Color(0xe4e7ec);
+      galleryScene.background = new THREE.Color(0x05070d);
       galleryScene.environment = S.environment;
       galleryScene.add(new THREE.HemisphereLight(0xaabbee, 0x101018, 1.2));
       const galleryLight = new THREE.DirectionalLight(0xffffff, 1.4);
@@ -561,5 +561,3 @@ cargarLaptopExterior(P,scr).then(()=>{
 FICHA.base.datos[2]='Carcasa adaptada de Gaming Laptop - Computer · Diego G. · CC-BY-4.0';
 FICHA.deck.datos.push('Teclado y carcasa superior del modelo aportado de Diego G.');
 FICHA.lid.datos.push('Exterior del modelo aportado; pantalla del simulador UNDC');
-
-window.SIM_UI = {getState: () => ({index:paso, steps:PASOS.map(p => ({name:p.n,text:p.t})), gallery:galeriaActiva, ready:!!window.LAPTOP_READY,controls:Object.fromEntries(['auto','rst','gbtn','voice-toggle'].map(id=>{const b=document.getElementById(id);return [id,{label:b.textContent.trim(),pressed:b.getAttribute('aria-pressed')}]}))}), jump: i => {clearInterval(timer);timer=null;auto.classList.remove('on');ir(i)}};

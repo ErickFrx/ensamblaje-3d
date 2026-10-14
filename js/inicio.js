@@ -37,7 +37,7 @@
     "js/mejoras.js",
     "js/sky.js",
     "js/descargas-glb.js",
-    "js/interfaz.js",
+    "js/interfaz-web.js",
   ];
   let archivosCargados = 0,
     errorCarga = false,
