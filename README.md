@@ -2,10 +2,15 @@
 
 Proyecto universitario de la Universidad Nacional de Cañete.
 
-[▶ Abrir simulador](https://erickfrx.github.io/ensamblaje-3d/)
+## 🤖 Sky, la asistente del simulador
 
-Para ejecutarlo sin Internet, abre una terminal en esta carpeta y ejecuta `python iniciar.py` (o `python3 iniciar.py`). Deja la terminal abierta mientras utilizas el simulador.
+Sky es el robot de la UNDC que explica cada paso con voz (en vez del cuadro de información).
 
-El renderizado usa Three.js r147 y recursos locales. PC y laptop comparten `js/render-base.js`: composición lineal, bloom opcional y salida ACES/sRGB. El modo ligero mantiene la corrección de color y reduce la resolución; la exposición se configura en `comp.outputPass.uniforms.toneMappingExposure.value`. No requiere paquetes ni compilación para ejecutar la aplicación.
+- Se carga con `js/sky.js` (desde `js/inicio.js`). No modifica tu lógica: escucha los cambios del texto de cada paso.
+- Voz: grabaciones originales de Sky (bienvenida y final, en `audio/sky/`) y la voz en español del navegador para el resto de pasos.
+- Para usar tu propia voz en otros pasos: mira `audio/sky/GUION.txt` y la tabla `AUDIOS` al inicio de `js/sky.js`.
+- Botones de Sky: ▶/■ escuchar o detener · 🔊 voz · Aa texto siempre visible · 📋 ficha técnica completa.
 
-Pruebas de desarrollo: `node --test tests/*.test.cjs`. Con Playwright y Chromium instalados, ejecuta `SKY_CHROMIUM=/ruta/a/chromium node tests/renderizado.cjs` para verificar color, calidad y resolución en PC/laptop. Playwright solo es necesario para las pruebas. Consulta [la auditoría](docs/AUDITORIA.md) y [el registro de mejoras](docs/MEJORAS_LOG.md) para resultados y limitaciones.
+## 🚀 Publicar en Netlify
+
+Arrastra esta carpeta completa (con `index.html` en la raíz) a https://app.netlify.com/drop. No necesita compilar nada.

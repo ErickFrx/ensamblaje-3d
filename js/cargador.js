@@ -11,42 +11,34 @@
     return u;
   };
   function cargarModeloGlb(id) {
-    const u = bytes(GLB[id]);
-    const header=new DataView(u.buffer);
-    if(u.length<28||header.getUint32(0,true)!==0x46546c67||header.getUint32(4,true)!==2||header.getUint32(8,true)!==u.length||header.getUint32(16,true)!==0x4e4f534a)throw new Error('GLB inválido: '+id);
-    const jl = new DataView(u.buffer).getUint32(12, true),
+    const u = bytes(GLB[id]),
+      jl = new DataView(u.buffer).getUint32(12, true),
       J = JSON.parse(new TextDecoder().decode(u.subarray(20, 20 + jl))),
       bo = 28 + jl;
-    if(bo>u.length||header.getUint32(24+jl,true)!==0x004e4942||J.extensionsRequired?.length)throw new Error('Formato GLB no admitido: '+id);
-    if(!J.nodes?.length||J.nodes.some(n=>n.mesh==null||n.children?.length)||J.meshes.some(m=>m.primitives.length!==1))throw new Error('Se requieren mallas planas preprocesadas: '+id);
-    for(const a of J.accessors){const v=J.bufferViews[a.bufferView];if(a.sparse||!v||v.buffer!==0||bo+(v.byteOffset||0)+v.byteLength>u.length)throw new Error('Accessor no admitido: '+id)}
     const tx = [],
-      tex = (i, encoding = THREE.LinearEncoding) => {
-        const key = i + ':' + encoding;
-        if (tx[key]) return tx[key];
+      tex = (i) => {
+        if (tx[i]) return tx[i];
         const t = J.textures[i],
           im = J.images[t.source],
           bv = J.bufferViews[im.bufferView],
           o = bo - 28 + 28;
         const img = new Image(),
           T = new THREE.Texture(img);
-        T.encoding = encoding;
         img.onload = () => {
-          T.needsUpdate = true;URL.revokeObjectURL(img.src);
+          T.needsUpdate = true;
         };
         const st = bo + (bv.byteOffset || 0);
         img.src = URL.createObjectURL(
           new Blob([u.subarray(st, st + bv.byteLength)], { type: im.mimeType }),
         );
-        img.onerror=()=>{URL.revokeObjectURL(img.src);console.error('No se pudo decodificar una textura de '+id)};
-        const s = J.samplers?.[t.sampler || 0] || {};
+        const s = J.samplers[t.sampler || 0] || {};
         T.flipY = false;
         T.wrapS =
           s.wrapS === 33071 ? THREE.ClampToEdgeWrapping : THREE.RepeatWrapping;
         T.wrapT =
           s.wrapT === 33071 ? THREE.ClampToEdgeWrapping : THREE.RepeatWrapping;
         T.anisotropy = 4;
-        return (tx[key] = T);
+        return (tx[i] = T);
       };
     const mats = J.materials.map((m) => {
       const pb = m.pbrMetallicRoughness || {},
@@ -58,7 +50,7 @@
           roughness: pb.roughnessFactor == null ? 1 : pb.roughnessFactor,
           side: m.doubleSided ? THREE.DoubleSide : THREE.FrontSide,
         };
-      if (pb.baseColorTexture) o.map = tex(pb.baseColorTexture.index, THREE.sRGBEncoding);
+      if (pb.baseColorTexture) o.map = tex(pb.baseColorTexture.index);
       if (pb.metallicRoughnessTexture)
         o.metalnessMap = o.roughnessMap = tex(
           pb.metallicRoughnessTexture.index,
@@ -67,7 +59,7 @@
       const ef = m.emissiveFactor || (m.emissiveTexture ? [1, 1, 1] : null);
       if (ef && ef.some((c) => c > 0)) {
         o.emissive = new THREE.Color().fromArray(ef);
-        if (m.emissiveTexture) o.emissiveMap = tex(m.emissiveTexture.index, THREE.sRGBEncoding);
+        if (m.emissiveTexture) o.emissiveMap = tex(m.emissiveTexture.index);
         o.emissiveIntensity = Math.min((m.extras && m.extras.es) || 1, 1.6);
       }
       if (m.alphaMode === "MASK")
@@ -83,7 +75,6 @@
         view = (k, T, c) => {
           const a = A[k],
             bv = J.bufferViews[a.bufferView];
-          if((bv.byteStride&&bv.byteStride!==c*T.BYTES_PER_ELEMENT)||a.componentType!==(T===Uint32Array?5125:5126)||a.type!==({1:'SCALAR',2:'VEC2',3:'VEC3'}[c])||(a.byteOffset||0)+a.count*c*T.BYTES_PER_ELEMENT>bv.byteLength)throw new Error('Tipo de atributo no admitido: '+id);
           return new BufferAttr(
             new T(
               u.buffer,
@@ -100,10 +91,6 @@
       g.setIndex(view(pr.indices, Uint32Array, 1));
       g.computeBoundingBox();
       const m = new THREE.Mesh(g, mats[pr.material]);
-      if(n.matrix)m.applyMatrix4(new THREE.Matrix4().fromArray(n.matrix));
-      else {if(n.translation)m.position.fromArray(n.translation);if(n.rotation)m.quaternion.fromArray(n.rotation);if(n.scale)m.scale.fromArray(n.scale)}
-      // Bake transforms: assembly layering uses geometry bounds in common coordinates.
-      m.updateMatrix();g.applyMatrix4(m.matrix);m.position.set(0,0,0);m.quaternion.identity();m.scale.set(1,1,1);g.computeBoundingBox();
       m.name = n.name;
       return m;
     });
@@ -236,7 +223,7 @@
     ctx.lineWidth = 3;
     ctx.strokeRect(5, 5, 502, 502);
     const reflectionMap = new THREE.CanvasTexture(reflectionCanvas);
-    reflectionMap.encoding = THREE.sRGBEncoding;
+    reflectionMap.colorSpace = THREE.SRGBColorSpace;
     const surface = new THREE.Mesh(
       new THREE.PlaneGeometry(width, height),
       new THREE.MeshBasicMaterial({

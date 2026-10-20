@@ -295,34 +295,20 @@
     woodContext.stroke();
   }
   const woodTexture = new THREE.CanvasTexture(woodCanvas);
-  woodTexture.encoding = THREE.sRGBEncoding;
+  woodTexture.colorSpace = THREE.SRGBColorSpace;
   woodTexture.anisotropy = Math.min(4, R.capabilities.getMaxAnisotropy());
   const mainTableTop = new THREE.Mesh(
-    document.body.classList.contains("laptop-mode")?new THREE.BoxGeometry(24,.4,12):new THREE.PlaneGeometry(34,12),
+    new THREE.PlaneGeometry(34, 12),
     new THREE.MeshStandardMaterial({
       map: woodTexture,
       roughness: 0.84,
       metalness: 0.02,
     }),
   );
-  const isLaptop=document.body.classList.contains('laptop-mode');
-  if(!isLaptop)mainTableTop.rotation.x=-Math.PI/2;
-  mainTableTop.position.set(0,isLaptop?-.217:-.017,0);
-  mainTableTop.name='Mesa principal · tablero';
+  mainTableTop.rotation.x = -Math.PI / 2;
+  mainTableTop.position.set(0, -0.017, 0);
   mainTableTop.userData.decorativoLaboratorio = true;
-  const tableGroup=isLaptop?new THREE.Group():root;
-  if(isLaptop){tableGroup.name='Mesa principal de laptop';scene.add(tableGroup)}
-  tableGroup.add(mainTableTop);
-  if(isLaptop){
-    const legs=new THREE.Group();legs.name='Mesa principal · patas y estructura';tableGroup.add(legs);
-    const legHeight=4.473;
-    for(const x of [-10.5,10.5])for(const z of [-4.9,4.9]){
-      box(legs,.3,legHeight,.3,colors.metal,x,(-.417+floorY)/2,z);
-      box(legs,.52,.10,.52,colors.black,x,floorY+.05,z);
-    }
-    for(const z of [-4.9,4.9])box(legs,21.2,.22,.22,colors.metal,0,-.65,z);
-    for(const x of [-10.5,10.5])box(legs,.22,.22,9.8,colors.metal,x,-.65,0);
-  }
+  root.add(mainTableTop);
 
   scene.background = new THREE.Color(0x9e896c);
   scene.fog = new THREE.Fog(0x9e896c, 58, 140);
@@ -330,14 +316,8 @@
   windowLight.position.set(32, 13, 8);
   root.add(windowLight);
 
-  window.setLaboratorioVisible = (visible, notify=true) => {
-    visible=Boolean(visible);window.SIM_AULA=visible;
+  window.setLaboratorioVisible = (visible) => {
     root.visible = visible;
-    if(isLaptop){
-      const material=mainTableTop.material,nextMap=visible?woodTexture:null;
-      if(material.map!==nextMap){material.map=nextMap;material.needsUpdate=true}
-      material.color.setHex(visible?0xffffff:0x343c49);
-    }
     scene.background = visible
       ? new THREE.Color(0x9e896c)
       : backgroundOriginal;
@@ -345,13 +325,7 @@
     const button = document.getElementById("laboratorio-toggle");
     button.setAttribute("aria-pressed", String(visible));
     button.textContent = visible ? "Aula 3D: SÍ" : "Aula 3D: NO";
-    if(notify){
-      window.dispatchEvent(new CustomEvent('sim:aula:changed',{detail:visible}));
-      if(window.parent!==window)window.parent.postMessage({type:'sim:aula:changed',visible},'*');
-    }
   };
-  window.setLaboratorioVisible(window.SIM_AULA===true,false);
-  window.addEventListener('sim:aula',e=>window.setLaboratorioVisible(e.detail,false));
   document
     .getElementById("laboratorio-toggle")
     .addEventListener("click", () => {
